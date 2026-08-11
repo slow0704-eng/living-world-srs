@@ -1,0 +1,71 @@
+================================================================================
+ 판타지 웹 RPG - 살아있는 세계(Living World) SRS v0.2
+ [10] 행동 결정 엔진
+ 관련 : [2] 원칙 P4/P6 / [3] 아키텍처 / [5] 통합 엔티티 / [15] LOD
+================================================================================
+
+10.1 3계층 구조
+    Layer 3  장기 목표(Goal)    : 집 구매, 복수, 승급, 이주      [일~수십일]
+    Layer 2  유틸리티 선택      : 매 틱 후보 행동 점수화 -> 실행 [틱 단위]
+    Layer 1  직업별 기본 일과   : 폴백 (스케줄)                  [상시]
+
+  [R-10.1] 점수 = (욕구 긴급도 x 가중치) + (목표 기여도) + (성격 보정)
+                  + (기억 기반 보정) + (파벌 압력)
+           모든 후보 점수는 디버그 API로 노출되어야 한다. (원칙 P4)
+
+  [R-10.2] 원칙 P6에 따라 '연출용 행동'은 금지한다.
+           모든 행동은 위 점수 계산의 결과로만 발생해야 한다.
+
+  [R-10.3] 동물(Creature)도 같은 엔진을 쓴다.
+           늑대의 후보 행동 = [사냥, 휴식, 물마시기, 도주, 번식]
+           인간의 후보 행동 = [식사, 수면, 노동, 거래, 대화, 도주, 신고, 음주]
+           -> 코드는 하나, 데이터만 다르다. (원칙 R-5.1)
+
+ <코드 2> 틱 루프 의사코드
+ --------------------------------------------------------------------------
+ async function worldTick(tick) {
+   advanceClock(tick);
+
+   // 1) 에너지/욕구 감쇠, 수면부채 누적, Thought 만료
+   decayNeedsAndEnergy();
+   accrueSleepDebt();
+   expireThoughts();
+
+   // 2) 생태계 (12장) - 식물 성장, 포식, 번식, 아사
+   stepEcology();
+
+   // 3) 지각 : 이벤트 -> 반경 내 엔티티의 기억에 삽입
+   for (const evt of eventQueue) {
+     for (const e of spatialIndex.query(evt.position, evt.radius)) {
+       if (canPerceive(e, evt)) e.memory.push(makeMemory(evt, "WITNESSED"));
+       applyImmediateEmotion(e, evt);          // 6.5 즉각 심리 반응
+     }
+   }
+
+   // 4) 관계 추론 (8.3) - 비용이 크므로 N틱마다 batch
+   if (tick % 12 === 0) recomputeInferredRelations();
+
+   // 5) 대화에 의한 기억 전파
+   for (const pair of findConversingPairs()) gossip(pair.a, pair.b);
+
+   // 6) 행동 결정 (LOD 적용)
+   for (const e of activeEntities(tick)) {
+     const candidates = generateActions(e);
+     e.currentAction = argmax(candidates, a => score(e, a));
+   }
+
+   // 7) 실행 및 이동
+   executeActions();
+   advanceTravelPlans();
+
+   // 8) 경제 정산
+   runProduction(); runConsumption(); updatePrices(); stepCaravans();
+
+   // 9) 크로니클 기록 + 델타 전송
+   writeChronicle(collectNotableEvents());
+   broadcastDeltas();
+   persistIfNeeded(tick);
+ }
+ --------------------------------------------------------------------------
+
+================================================================================
