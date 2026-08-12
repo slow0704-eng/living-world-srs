@@ -74,9 +74,10 @@ export function phaseEnvironment(w){
       if((day+k)%K!==0||!tm.on[k]) continue;
       const o=k*N+i, v=t2d[o];
       if(v<=0) continue;
-      let food=0; const dl=tm.diet[k];
-      for(let m=0;m<dl.length;m++) food+=plantB[dl[m]*N+i];
-      const cap=Math.max(food*tm.share[k]*8/tm.mass[k],0.2);
+      let food=0; const dl=tm.diet[k], ml=tm.mul[k];
+      for(let m=0;m<dl.length;m++) food+=plantB[dl[m]*N+i]*ml[m];
+      // [I-4]와 같은 방식: 가식 먹이 x 종 몫 x 지속채식률 / 개체당 연간 섭취량
+      const cap=Math.max(food*tm.share[k]*ECO.sustainableOfftake/tm.intake[k],0.2);
       const nv=v+v*tm.rate[k]*(1-v/cap);
       t2d[o]=nv<0.001?0:nv;
     }

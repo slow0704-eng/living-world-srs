@@ -74,7 +74,15 @@ export function buildSpeciesMeta(w){
          share:Float64Array.from(T2,id=>w.species[id].share),
          mass:Float64Array.from(T2,id=>Math.max(w.species[id].massKg,0.1)),
          rate:Float64Array.from(T2,id=>TUNE.t2GrowthPerYr/365*TUNE.t2UpdateEvery),
-         diet:T2.map(id=>w.species[id].diet.map(d=>w.plantIdx.get(d)).filter(v=>v!==undefined)) };
+         // 개체당 연간 섭취량(t). 부양력을 [I-4]와 같은 방식으로 계산하기 위함이다.
+         intake:Float64Array.from(T2,id=>Math.max(w.species[id].massKg,0.1)*ECO.dailyIntakeFrac*365/1000),
+         diet:T2.map(id=>w.species[id].diet.map(d=>w.plantIdx.get(d)).filter(v=>v!==undefined)),
+         // 먹이 종별 가식 배율. 목본은 잎·어린가지만 먹을 수 있다.
+         // 이걸 빠뜨리면 목본(식물 총량의 90%)이 통째로 먹이가 되어
+         // T2 부양력이 10배 부풀고 개체수가 유도값의 12배까지 간다.
+         mul:T2.map(id=>w.species[id].diet
+               .filter(d=>w.plantIdx.get(d)!==undefined)
+               .map(d=>w.species[d].woody?TUNE.woodyBrowseFrac:1)) };
 }
 
 export function genCoastline(w,noise){
