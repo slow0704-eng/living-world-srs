@@ -342,7 +342,11 @@ const TUNE = {
   fertBase:0.62, fertNoiseAmp:0.30, fertWaterBonus:0.16,
   soilCapMm:130, etBaseMm:0.55, etPerDegC:0.09,
   wiltMm:12, fieldSpanMm:58, seasonalWaterMinSoilMm:34,
-  grassShareOfStanding:0.10, woodyGrowthPerYr:0.30, woodySuppression:0.85, tempSigma:320,
+  grassShareOfStanding:0.10, woodyGrowthPerYr:0.30, tempSigma:320,
+  /* 목본이 초지 부양력을 깎는 강도. 0.85로 두면 수관 50%에서 초지 용량이
+     반토막 나고, 방목이 그걸 연료 하한 아래로 끌어내려 화재가 영구히 죽는다.
+     실제 사바나는 수관 50%에서도 상당한 초지를 유지한다. */
+  woodySuppression:0.55,
   fireSeasonStart:0.35, ignitionsPerKm2Yr:0.010,
   /* 확산 확률을 상수로 두면 퍼콜레이션 절벽에 걸린다.
      0.22에서 84%가 타고 0.18에서 1%가 탄다 — 그 사이에 17~33%가 없다.
@@ -356,7 +360,7 @@ const TUNE = {
      연쇄해 섬 전체를 태운다. 실제 사바나 화재는 며칠이면 소진된다.
      불이 번질 수 있는 날 수를 제한하는 것이 탄 면적을 정하는 실질 손잡이다. */
   fireMaxAgeDays:999,
-  fireDrynessMin:0.40, fireFuelMinTonPerHa:0.75, fireFuelRefTonPerHa:1.45,
+  fireDrynessMin:0.40, fireFuelMinTonPerHa:0.75, fireFuelRefTonPerHa:1.45,   // 확정: 화재 19%/년 · 목본 32%
   fireBurnDays:2,
   fireGrassSurvive:0.11, fireWoodySurvive:0.80, fireAshFert:0.028, fireBigEventFrac:0.03,
   herdSeedSize:45, herdSplitAt:92, herdMergeBelow:30, herdMinSize:4,
@@ -369,7 +373,9 @@ const TUNE = {
   utilFeed:1.0, utilThirst:4.4, utilFear:1.5, utilCrowd:0.00004, utilNoise:0.16,
   t2GrowthPerYr:2.6, t2UpdateEvery:5,      // T2 종별 갱신을 5일 주기로 엇갈리게 돌린다
   predMoveKmDay:{apex:0.72, small:0.48},
-  predKillSurplus:1.8, predTakePerHerd:0.02,
+  predKillSurplus:1.8,        // 처리시간 한계 (홀링 II형의 포화 상한)
+  predAttackRate:0.0065,      // 탐색 효율. 국소 먹이 500kg에서 절반 포화
+  predTakePerHerd:0.02,
   predAltPreyShare:{apex:0.45, small:1.0},
   predEnergyRate:0.03, predSatietyBreakEven:0.85,
   predBreedP:0.0016, predBreedEnergy:0.72, predDeathEnergy:0.05,
@@ -1093,19 +1099,30 @@ function hunt(w,arr,isApex){
 
     let got=0;
     if(isApex){
-      /* 사냥 할당량은 '마릿수'가 아니라 '생물량'으로 잡는다.
-         특정 종의 체중을 기준으로 마릿수를 정하면, 실제로 잡은 것이
-         더 가벼운 종일 때 섭취량이 모자라 포식자가 서서히 굶는다. */
-      let remKg=need*TUNE.predKillSurplus;
+      /* 홀링 II형 기능반응.
+         먹이가 흔하면 처리시간에 막혀 포화하고(= 최대 할당량),
+         드물면 조우 자체가 안 되어 굶는다. 포화 구간만 구현하면
+         먹이가 줄어도 포식자가 태연해서 수적 연동이 생기지 않는다.
+           섭취 = maxKg · (a·P) / (maxKg + a·P)      P = 국소 먹이 생물량 */
+      const maxKg=need*TUNE.predKillSurplus;
       const cx=g.xOf(ci), cy=g.yOf(ci);
-      for(let ddy=-1;ddy<=1&&remKg>0;ddy++)for(let ddx=-1;ddx<=1&&remKg>0;ddx++){
+      const near=[];
+      let preyKg=0;
+      for(let ddy=-1;ddy<=1;ddy++)for(let ddx=-1;ddx<=1;ddx++){
         if(!g.inside(cx+ddx,cy+ddy)) continue;
         const lst=w.herdAt.get(g.idx(cx+ddx,cy+ddy)); if(!lst) continue;
         for(const h of lst){
-          if(remKg<=0) break;
-          // 선호 먹이가 아니면 효율이 떨어질 뿐, 아예 못 잡는 것은 아니다.
           const pref=sp.diet.includes(h.sp)?1:TUNE.predOffDietEff;
-          const mk=species[h.sp].massKg;
+          const kg=h.n*species[h.sp].massKg*pref;
+          if(kg<=0) continue;
+          near.push([h,pref,species[h.sp].massKg]); preyKg+=kg;
+        }
+      }
+      if(preyKg>0){
+        const aP=TUNE.predAttackRate*preyKg;
+        let remKg=maxKg*aP/(maxKg+aP);          // 조우 제한 ~ 처리 제한 사이
+        for(const [h,pref,mk] of near){
+          if(remKg<=0) break;
           const t=Math.min(h.n*TUNE.predTakePerHerd*pref, remKg/mk);
           if(t<=0) continue;
           h.n-=t; remKg-=t*mk; w.acc.dYr+=t; w.acc.killYr+=t; got+=t*mk;

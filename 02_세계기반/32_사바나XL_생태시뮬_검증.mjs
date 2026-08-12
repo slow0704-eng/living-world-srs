@@ -64,13 +64,14 @@ function fireStats(w, years) {
 /* ── 시나리오 ──────────────────────────────────────────────────────── */
 function coreRun(tier, climate, years, seed = 20260812) {
   const w = createWorld(seed, tier, climate);
+  const initialT3 = collectStats(w).n3;      // 종별 체중 분포 때문에 유도값과 다르다
   const series = [];
   for (let y = 0; y < years; y++) {
     run(w, 365);
     const s = collectStats(w);
     series.push({ y, ...s, burnPct: w.last.burnFrac * 100, fires: w.last.fires });
   }
-  return { w, series };
+  return { w, series, initialT3 };
 }
 
 console.log(`\n섬 생태 시뮬레이터 검증  ·  ${new Date().toISOString().slice(0, 10)}\n`);
@@ -297,7 +298,7 @@ console.log(`XL x 사바나 · ${years}년\n`);
 console.log(`  유도 부양력 [I-4] : T2 ${N(cap.T2)} · T3 ${N(cap.T3)} · T4 ${N(cap.T4)} · T5 ${N(cap.T5)}\n`);
 
 const t0 = Date.now();
-const { w, series } = coreRun('XL', 'SAVANNA', years);
+const { w, series, initialT3 } = coreRun('XL', 'SAVANNA', years);
 const ms = Date.now() - t0;
 
 console.log('  연차     T3      T5   초본천t  목본%  화재%  발화  에너지  수원밀집');
@@ -336,9 +337,11 @@ check('목본을 화재가 억제', mean(tail.map(s => s.woodyFrac)) < 0.5,
   `평균 임관 ${(mean(tail.map(s => s.woodyFrac)) * 100).toFixed(0)}%`);
 
 console.log(`\n[V-7] T-17 보존 법칙`);
-const leak = Math.abs(w.totals.births - w.totals.deaths - (series[series.length - 1].n3 - cap.T3));
-check('T3 수지 오차 1% 미만', leak / Math.max(cap.T3, 1) < 0.01,
-  `출생 ${N(w.totals.births)} − 사망 ${N(w.totals.deaths)} vs 증감 · 오차 ${N(leak)}`);
+/* 기준은 등급 유도값이 아니라 '실제 초기 개체수'다.
+   종마다 체중이 다르면 같은 먹이 예산에서 나오는 마릿수가 달라진다. */
+const leak = Math.abs(w.totals.births - w.totals.deaths - (series[series.length - 1].n3 - initialT3));
+check('T3 수지 오차 1% 미만', leak / Math.max(initialT3, 1) < 0.01,
+  `초기 ${N(initialT3)} · 출생 ${N(w.totals.births)} − 사망 ${N(w.totals.deaths)} · 오차 ${N(leak)}`);
 
 console.log(`\n${fails ? `[31m${fails}개 항목 실패[0m` : '[32m전 항목 통과[0m'}\n`);
 process.exit(fails ? 1 : 0);
