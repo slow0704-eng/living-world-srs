@@ -229,7 +229,7 @@ tbody tr[aria-selected="true"]{background:var(--accent-soft)}
 
   <section class="card">
     <header><h2>개체 이력 · 크로니클</h2><span class="lab" id="histMeta">–</span>
-      <div class="sp"><button id="btnCsv">CSV 내려받기</button></div>
+      <div class="sp"><button id="btnJson">결과 저장 (JSON)</button><button id="btnCsv">CSV</button></div>
     </header>
     <div class="tiles" id="tiles"></div>
     <div class="body">
@@ -258,21 +258,17 @@ tbody tr[aria-selected="true"]{background:var(--accent-soft)}
 <script>
 "use strict";
 /* ═══════════════════════════════════════════════════════════════════════════
-   섬 생태 시뮬레이터 — 종(species)과 개체(individual)
-   29_(I-*) · 30_(C-*) · 31_(S-*) · 33_(M-*)
-
-   이 판에서 새로 구현한 것
-     · [I-6.4] 종-면적 곡선으로 종 수를 정하고 [C-5.3] 비율로 등급에 배분
-     · [C-5.2] 식이폭 >= 2 강제 — 대체재는 코드가 아니라 종 데이터에서 나온다
-     · [I-6.1] 최소존속개체군을 등급이 아니라 '종마다' 판정
-     · [I-9.3][I-9.4] 인스턴스 예산 안에서 상위 등급부터 개체를 개별 추적.
-       추적 개체는 나이 · 성별 · 동선 · 생애 사건을 갖고 죽어도 명부에 남는다.
-
-   구조 : 1 사양상수 2 튜닝상수 3 유도 4 저수준 5 종 6 세계생성
-          7 하루 8 통계/이력 9 표현(DOM은 여기서만)
+   이 파일은 빌드 산출물이다. 직접 편집하지 말 것.
+   소스는 sim/ 와 ui/ 에 있고, `node 빌드.mjs` 가 여기로 합친다.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── 1. 사양 상수 ─────────────────────────────────────────────────────── */
+/* ══ sim/01_사양상수.js ══════════════════════════════════════════════ */
+/* 섬 생태 시뮬레이터 — 사양 상수 (문서에서 그대로 옮긴 데이터)
+   소스는 이 모듈이고, 32_사바나XL_생태시뮬.html 은 `node 빌드.mjs` 산출물이다. */
+
+/* 30_ <표 C-1> · 29_ <표 I-1>. [C-5.1] 이름은 표시용이며 로직이 참조하지 않는다.
+   여기를 고치면 문서도 같이 고쳐야 한다. */
+
 const CLIMATE_PROFILES = {
   SAVANNA:{ name:'사바나',
     tempMeanC:24, tempAnnualRangeC:6,  tempOptC:25,
@@ -334,7 +330,12 @@ const NAME_POOL = {
     T5:['재규어','표범'] },
 };
 
-/* ── 2. 튜닝 상수 ─────────────────────────────────────────────────────── */
+/* ══ sim/02_튜닝상수.js ══════════════════════════════════════════════ */
+/* 섬 생태 시뮬레이터 — 튜닝 상수 (구현이 정한 값. 문서에 근거가 없다)
+   소스는 이 모듈이고, 32_사바나XL_생태시뮬.html 은 `node 빌드.mjs` 산출물이다. */
+
+/* 밸런스를 만질 곳은 오직 여기다. 각 값의 근거는 31_ [S-8] 에 있다. */
+
 const TUNE = {
   coastLow:0.85, coastAmp:0.30, boxFactor:2.4,
   massifSigmaCells:13.5, orographicLiftRefM:230, moistureRecoverPerSea:0.07,
@@ -403,25 +404,10 @@ const TUNE = {
   deadRegistryMax:400,       // 사망 명부 상한. 넘치면 오래된 것부터 버린다
 };
 
-/* ── 3. 유도 [I-4] ────────────────────────────────────────────────────── */
-function deriveCapacity(tierKey, climateKey){
-  const T=ISLAND_TIERS[tierKey], C=CLIMATE_PROFILES[climateKey];
-  const F  = C.nppTonPerKm2Yr * C.browseAvailability * ECO.sustainableOfftake;
-  const iy = kg => kg * ECO.dailyIntakeFrac * 365 / 1000;
-  const eff= T.areaKm2 * T.habitableFrac;
-  const m3 = C.bodyMassT3Kg * (T.dwarf ? ECO.dwarfFactor : 1);
-  const d2 = F*C.splitT2/iy(ECO.bodyMassT2Kg), d3 = F*C.splitT3/iy(m3);
-  const pred=(d2*ECO.bodyMassT2Kg + d3*m3)*ECO.predatorBiomassFrac;
-  return { effKm2:eff, bodyMassT3Kg:m3,
-    forageT2TonYr:F*C.splitT2*eff, forageT3TonYr:F*C.splitT3*eff,
-    predBiomassKg:pred*eff,
-    T2:Math.round(d2*eff), T3:Math.round(d3*eff),
-    T4:Math.round(pred*ECO.splitT4/ECO.bodyMassT4Kg*eff),
-    T5:Math.round(pred*ECO.splitT5/ECO.bodyMassT5Kg*eff) };
-}
-const viability = n => n>=ECO.mvpLong ? '자립' : n>=ECO.mvpShort ? '준자립' : n>0 ? '위기' : '절멸';
+/* ══ sim/03_유틸.js ══════════════════════════════════════════════ */
+/* 섬 생태 시뮬레이터 — 저수준 유틸 (난수 · 노이즈 · 격자)
+   소스는 이 모듈이고, 32_사바나XL_생태시뮬.html 은 `node 빌드.mjs` 산출물이다. */
 
-/* ── 4. 저수준 ────────────────────────────────────────────────────────── */
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 const lerp=(a,b,t)=>a+(b-a)*t;
 const mulberry32=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);
@@ -456,7 +442,33 @@ function rankShares(n,ratio){
   return s.map(v=>v/tot);
 }
 
-/* ── 5. 종 구성 [C-5] · [I-6.4] ───────────────────────────────────────── */
+/* ══ sim/04_유도.js ══════════════════════════════════════════════ */
+/* 섬 생태 시뮬레이터 — [I-4] 면적과 기후만으로 부양 개체수를 낸다
+   소스는 이 모듈이고, 32_사바나XL_생태시뮬.html 은 `node 빌드.mjs` 산출물이다. */
+
+
+function deriveCapacity(tierKey, climateKey){
+  const T=ISLAND_TIERS[tierKey], C=CLIMATE_PROFILES[climateKey];
+  const F  = C.nppTonPerKm2Yr * C.browseAvailability * ECO.sustainableOfftake;
+  const iy = kg => kg * ECO.dailyIntakeFrac * 365 / 1000;
+  const eff= T.areaKm2 * T.habitableFrac;
+  const m3 = C.bodyMassT3Kg * (T.dwarf ? ECO.dwarfFactor : 1);
+  const d2 = F*C.splitT2/iy(ECO.bodyMassT2Kg), d3 = F*C.splitT3/iy(m3);
+  const pred=(d2*ECO.bodyMassT2Kg + d3*m3)*ECO.predatorBiomassFrac;
+  return { effKm2:eff, bodyMassT3Kg:m3,
+    forageT2TonYr:F*C.splitT2*eff, forageT3TonYr:F*C.splitT3*eff,
+    predBiomassKg:pred*eff,
+    T2:Math.round(d2*eff), T3:Math.round(d3*eff),
+    T4:Math.round(pred*ECO.splitT4/ECO.bodyMassT4Kg*eff),
+    T5:Math.round(pred*ECO.splitT5/ECO.bodyMassT5Kg*eff) };
+}
+const viability = n => n>=ECO.mvpLong ? '자립' : n>=ECO.mvpShort ? '준자립' : n>0 ? '위기' : '절멸';
+
+/* ══ sim/05_종.js ══════════════════════════════════════════════ */
+/* 섬 생태 시뮬레이터 — [C-5] · [I-6.4] 종 로스터 구성
+   소스는 이 모듈이고, 32_사바나XL_생태시뮬.html 은 `node 빌드.mjs` 산출물이다. */
+
+
 function buildRoster(tierKey, climateKey, cap, rand){
   const T=ISLAND_TIERS[tierKey], C=CLIMATE_PROFILES[climateKey], pool=NAME_POOL[climateKey];
   const total=Math.round(ECO.richnessBase*Math.pow(T.areaKm2/1000,ECO.richnessExp)*C.richnessFactor);
@@ -554,7 +566,128 @@ function buildRoster(tierKey, climateKey, cap, rand){
   return {species, byTier, simPlants, totalPlanned:total};
 }
 
-/* ── 6. 세계 생성 [S-3] ───────────────────────────────────────────────── */
+/* ══ sim/06_개체.js ══════════════════════════════════════════════ */
+/* 섬 생태 시뮬레이터 — [I-9.3][I-9.4] 개체 추적 — 나이 · 동선 · 생애 사건
+   소스는 이 모듈이고, 32_사바나XL_생태시뮬.html 은 `node 빌드.mjs` 산출물이다. */
+
+
+/* 개체 : 추적 대상만 만든다 [I-9.3][I-9.4] */
+function newInd(w,spId,x,y){
+  const sp=w.species[spId];
+  const ind={ uid:w.uid++, sp:spId, name:`${sp.name} #${w.uid-1}`,
+    sex: w.rng()<0.5?'M':'F', bornDay:w.year*365+w.day, deathDay:null, cause:null,
+    x,y, e:0.7, hyd:1, herd:null, kills:0, offspring:0,
+    track:[[w.year*365+w.day,x,y]], ev:[] };
+  addEv(w,ind,'birth','태어남');
+  w.inds.push(ind);
+  return ind;
+}
+function addEv(w,ind,kind,text){
+  ind.ev.push([w.year*365+w.day,kind,text]);
+  if(ind.ev.length>TUNE.eventMax) ind.ev.splice(0,ind.ev.length-TUNE.eventMax);
+}
+function killInd(w,ind,cause){
+  ind.deathDay=w.year*365+w.day; ind.cause=cause;
+  addEv(w,ind,'death',cause);
+  w.dead.push(ind);
+  if(w.dead.length>TUNE.deadRegistryMax) w.dead.shift();
+}
+const indAge=(w,ind)=>((ind.deathDay??(w.year*365+w.day))-ind.bornDay)/365;
+
+/* ══ sim/09_통계이력.js ══════════════════════════════════════════════ */
+/* 섬 생태 시뮬레이터 — 통계 · 표본 · 연도 마감 · 크로니클
+   소스는 이 모듈이고, 32_사바나XL_생태시뮬.html 은 `node 빌드.mjs` 산출물이다. */
+
+
+/* 화면 갱신 플래그. 모듈 경계를 넘어 대입할 수 없으므로 설정 함수를 함께 낸다. */
+let chronDirty = true;
+const setChronDirty = v => { chronDirty = v; };
+
+function refreshSpeciesCounts(w){
+  const N=w.g.N;
+  for(const sp of w.species) if(sp.kind==='ANIMAL'&&!sp.aggregate) sp.n=0;
+  for(const h of w.herds) w.species[h.sp].n+=h.n;
+  for(const p of w.p4) w.species[p.sp].n++;
+  for(const p of w.p5) w.species[p.sp].n++;
+  for(const id of w.byTier.T2){
+    const sp=w.species[id]; if(sp.status==='ABSENT') continue;
+    const off=w.t2Idx.get(id)*N; let s=0;
+    for(let i=0;i<N;i++) s+=w.t2d[off+i];
+    sp.n=s;
+  }
+  for(const sp of w.species){
+    if(sp.kind!=='ANIMAL'||sp.aggregate||sp.status==='ABSENT') continue;
+    if(sp.n<0.5&&sp.extinctYear==null){
+      sp.extinctYear=w.year; w.totals.extinct++;
+      logChron(w,'loss',`${sp.name} 절멸 (${sp.trophic}) — ${w.year}년차`);
+    }
+  }
+}
+const tierCount=(w,t)=>{let n=0; for(const id of w.byTier[t]) n+=w.species[id].n||0; return n;};
+const aliveSpecies=(w,t)=>w.byTier[t].filter(id=>w.species[id].status!=='ABSENT'&&w.species[id].n>=0.5).length;
+
+function collectStats(w){
+  const n2=tierCount(w,'T2'), n3=tierCount(w,'T3'), n4=w.p4.length, n5=w.p5.length;
+  let near=0;
+  for(const h of w.herds){
+    const ci=w.g.idx(clamp(h.x|0,0,w.g.W-1),clamp(h.y|0,0,w.g.H-1));
+    if(w.land[ci]&&w.wdist[ci]<=TUNE.drinkRadiusCells) near+=h.n;
+  }
+  const dIsl=n3/w.landCount, dNear=near/Math.max(w.nearCells,1);
+  return { n2,n3,n4,n5, year:w.year, day:w.day, wet:w.env.wet, tempC:w.env.tempC,
+    rainMm:w.env.rainMm, soilMm:w.env.soilMm, grassT:w.env.grassT, woodyFrac:w.env.woodyFrac,
+    burning:w.env.burning, waterCells:w.waterCells, herds:w.herds.length,
+    herdAvg:w.herds.length?n3/w.herds.length:0,
+    energy:w.herds.length?w.herds.reduce((s,h)=>s+h.e,0)/w.herds.length:0,
+    pio:dIsl>0?clamp(dNear/dIsl,0,99):1,
+    specAlive:['T2','T3','T4','T5'].reduce((s,t)=>s+aliveSpecies(w,t),0),
+    specTotal:w.species.filter(s=>s.kind==='ANIMAL'&&!s.aggregate&&s.status!=='ABSENT').length,
+    inds:w.inds.length, last:w.last, totals:w.totals, cap:w.cap };
+}
+function recordSample(w){
+  const t=w.year+w.day/365;
+  w.samples.push({t, T2:tierCount(w,'T2'), T3:tierCount(w,'T3'), T4:w.p4.length, T5:w.p5.length,
+    grass:w.env.grassT, s2:aliveSpecies(w,'T2'), s3:aliveSpecies(w,'T3'),
+    s4:aliveSpecies(w,'T4'), s5:aliveSpecies(w,'T5')});
+  if(w.samples.length>600){ w.samples=w.samples.filter((_,i)=>i%2===0); w.sampleEvery*=2; }
+  const last=w.samples[w.samples.length-1];
+  for(const k of ['T2','T3','T4','T5']){
+    const v=last[k], p=w.peaks[k];
+    if(!p) w.peaks[k]={max:v,maxT:w.year,min:v,minT:w.year};
+    else { if(v>p.max){p.max=v;p.maxT=w.year;} if(v<p.min){p.min=v;p.minT=w.year;} }
+  }
+}
+function closeYear(w){
+  const a=w.acc;
+  w.last={births:a.bYr,deaths:a.dYr,kills:a.killYr,burnFrac:a.burnedYr/w.landCount,fires:a.fireCount};
+  w.totals.births+=a.bYr; w.totals.deaths+=a.dYr; w.totals.kills+=a.killYr;
+  w.totals.burned+=a.burnedYr; w.totals.fires+=a.fireCount;
+  w.years.push({year:w.year, T2:Math.round(tierCount(w,'T2')), T3:Math.round(tierCount(w,'T3')),
+    T4:w.p4.length, T5:w.p5.length, grassKt:w.env.grassT/1000, woodyPct:w.env.woodyFrac*100,
+    burnPct:w.last.burnFrac*100, fires:a.fireCount, species:collectStats(w).specAlive,
+    births:Math.round(a.bYr), deaths:Math.round(a.dYr)});
+  if(w.last.burnFrac>=TUNE.fireBigEventFrac)
+    logChron(w,'fire',`${(w.last.burnFrac*100).toFixed(0)}% 소실 · 발화 ${a.fireCount}건`);
+  w.day=0; w.year++;
+  w.acc={bYr:0,dYr:0,killYr:0,burnedYr:0,fireCount:0};
+}
+function watchEvents(w){
+  const f=w.flags;
+  const chk=(k,cond,kind,msg)=>{ if(cond&&!f[k]){f[k]=true; logChron(w,kind,msg);} else if(!cond&&f[k]) f[k]=false; };
+  chk('woody', w.env.woodyFrac>0.70,'loss','목본 임관 70% 돌파 — 초지가 관목림으로 천이 중');
+  chk('t3low', tierCount(w,'T3')<w.cap.T3*0.25,'loss','T3 개체군 부양력의 25% 미만');
+}
+function logChron(w,kind,msg){
+  w.chron.push({y:w.year,d:w.day,kind,msg});
+  if(w.chron.length>300) w.chron.shift();
+  chronDirty=true;
+}
+
+/* ══ sim/07_세계생성.js ══════════════════════════════════════════════ */
+/* 섬 생태 시뮬레이터 — [S-3] 결정론적 세계 생성
+   소스는 이 모듈이고, 32_사바나XL_생태시뮬.html 은 `node 빌드.mjs` 산출물이다. */
+
+
 function createWorld(seed, tierKey='XL', climateKey='SAVANNA'){
   const T=ISLAND_TIERS[tierKey], C=CLIMATE_PROFILES[climateKey];
   const cap=deriveCapacity(tierKey,climateKey);
@@ -752,6 +885,16 @@ function buildDietMeta(w){
   }
 }
 
+/* 종별 식물 바이오매스를 기능군 합계로 접는다. 화재와 표현이 이 값을 쓴다. */
+function syncPools(w){
+  const {g,land,plantB,species,simPlants,grass,woody}=w, N=g.N;
+  grass.fill(0); woody.fill(0);
+  simPlants.forEach((id,k)=>{
+    const dst=species[id].woody?woody:grass, off=k*N;
+    for(let i=0;i<N;i++) if(land[i]) dst[i]+=plantB[off+i];
+  });
+}
+
 function computeWaterDist(w){
   const {g,land,water,wdist,soil}=w, q=[];
   wdist.fill(999); w.nearCells=0;
@@ -770,29 +913,6 @@ function computeWaterDist(w){
   }
   for(let i=0;i<g.N;i++) if(land[i]&&wdist[i]<=TUNE.drinkRadiusCells) w.nearCells++;
 }
-
-/* 개체 : 추적 대상만 만든다 [I-9.3][I-9.4] */
-function newInd(w,spId,x,y){
-  const sp=w.species[spId];
-  const ind={ uid:w.uid++, sp:spId, name:`${sp.name} #${w.uid-1}`,
-    sex: w.rng()<0.5?'M':'F', bornDay:w.year*365+w.day, deathDay:null, cause:null,
-    x,y, e:0.7, hyd:1, herd:null, kills:0, offspring:0,
-    track:[[w.year*365+w.day,x,y]], ev:[] };
-  addEv(w,ind,'birth','태어남');
-  w.inds.push(ind);
-  return ind;
-}
-function addEv(w,ind,kind,text){
-  ind.ev.push([w.year*365+w.day,kind,text]);
-  if(ind.ev.length>TUNE.eventMax) ind.ev.splice(0,ind.ev.length-TUNE.eventMax);
-}
-function killInd(w,ind,cause){
-  ind.deathDay=w.year*365+w.day; ind.cause=cause;
-  addEv(w,ind,'death',cause);
-  w.dead.push(ind);
-  if(w.dead.length>TUNE.deadRegistryMax) w.dead.shift();
-}
-const indAge=(w,ind)=>((ind.deathDay??(w.year*365+w.day))-ind.bornDay)/365;
 
 function seedFauna(w,rand){
   const {g,land,gcap,species,byTier}=w, idx=[], wgt=[]; let tot=0;
@@ -827,7 +947,11 @@ function seedFauna(w,rand){
     }
 }
 
-/* ── 7. 하루 [S-4] ────────────────────────────────────────────────────── */
+/* ══ sim/08_하루.js ══════════════════════════════════════════════ */
+/* 섬 생태 시뮬레이터 — [S-4] 하루 파이프라인 — 배열 순서가 곧 인과다
+   소스는 이 모듈이고, 32_사바나XL_생태시뮬.html 은 `node 빌드.mjs` 산출물이다. */
+
+
 const DAY_PHASES=[
   ['환경',phaseEnvironment], ['화재',phaseFire], ['대형 초식',phaseHerds],
   ['무리 병합',phaseMergeHerds], ['포식',phasePredation], ['기록',phaseBookkeeping],
@@ -840,15 +964,6 @@ function seasonOf(w){
   const shape=wet?Math.sin(w.day/w.wetDays*Math.PI)**1.4:0;
   const rainMm=w.C.rainAnnualMm/(w.wetDays*0.61)*shape*(w.dry?0.6:1);
   return {wet,tempC,rainMm,dryProgress:wet?0:(w.day-w.wetDays)/Math.max(365-w.wetDays,1)};
-}
-/* 종별 식물 바이오매스를 기능군 합계로 접는다. 화재와 표현이 이 값을 쓴다. */
-function syncPools(w){
-  const {g,land,plantB,species,simPlants,grass,woody}=w, N=g.N;
-  grass.fill(0); woody.fill(0);
-  simPlants.forEach((id,k)=>{
-    const dst=species[id].woody?woody:grass, off=k*N;
-    for(let i=0;i<N;i++) if(land[i]) dst[i]+=plantB[off+i];
-  });
 }
 
 function phaseEnvironment(w){
@@ -1209,94 +1324,11 @@ function phaseBookkeeping(w){
   watchEvents(w);
 }
 
-/* ── 8. 통계와 이력 ───────────────────────────────────────────────────── */
-function refreshSpeciesCounts(w){
-  const N=w.g.N;
-  for(const sp of w.species) if(sp.kind==='ANIMAL'&&!sp.aggregate) sp.n=0;
-  for(const h of w.herds) w.species[h.sp].n+=h.n;
-  for(const p of w.p4) w.species[p.sp].n++;
-  for(const p of w.p5) w.species[p.sp].n++;
-  for(const id of w.byTier.T2){
-    const sp=w.species[id]; if(sp.status==='ABSENT') continue;
-    const off=w.t2Idx.get(id)*N; let s=0;
-    for(let i=0;i<N;i++) s+=w.t2d[off+i];
-    sp.n=s;
-  }
-  for(const sp of w.species){
-    if(sp.kind!=='ANIMAL'||sp.aggregate||sp.status==='ABSENT') continue;
-    if(sp.n<0.5&&sp.extinctYear==null){
-      sp.extinctYear=w.year; w.totals.extinct++;
-      logChron(w,'loss',`${sp.name} 절멸 (${sp.trophic}) — ${w.year}년차`);
-    }
-  }
-}
-const tierCount=(w,t)=>{let n=0; for(const id of w.byTier[t]) n+=w.species[id].n||0; return n;};
-const aliveSpecies=(w,t)=>w.byTier[t].filter(id=>w.species[id].status!=='ABSENT'&&w.species[id].n>=0.5).length;
+/* ══ ui/표현.js ══════════════════════════════════════════════ */
+/* 섬 생태 시뮬레이터 — 표현 계층 — DOM은 여기서만 만진다
+   소스는 이 모듈이고, 32_사바나XL_생태시뮬.html 은 `node 빌드.mjs` 산출물이다. */
 
-function collectStats(w){
-  const n2=tierCount(w,'T2'), n3=tierCount(w,'T3'), n4=w.p4.length, n5=w.p5.length;
-  let near=0;
-  for(const h of w.herds){
-    const ci=w.g.idx(clamp(h.x|0,0,w.g.W-1),clamp(h.y|0,0,w.g.H-1));
-    if(w.land[ci]&&w.wdist[ci]<=TUNE.drinkRadiusCells) near+=h.n;
-  }
-  const dIsl=n3/w.landCount, dNear=near/Math.max(w.nearCells,1);
-  return { n2,n3,n4,n5, year:w.year, day:w.day, wet:w.env.wet, tempC:w.env.tempC,
-    rainMm:w.env.rainMm, soilMm:w.env.soilMm, grassT:w.env.grassT, woodyFrac:w.env.woodyFrac,
-    burning:w.env.burning, waterCells:w.waterCells, herds:w.herds.length,
-    herdAvg:w.herds.length?n3/w.herds.length:0,
-    energy:w.herds.length?w.herds.reduce((s,h)=>s+h.e,0)/w.herds.length:0,
-    pio:dIsl>0?clamp(dNear/dIsl,0,99):1,
-    specAlive:['T2','T3','T4','T5'].reduce((s,t)=>s+aliveSpecies(w,t),0),
-    specTotal:w.species.filter(s=>s.kind==='ANIMAL'&&!s.aggregate&&s.status!=='ABSENT').length,
-    inds:w.inds.length, last:w.last, totals:w.totals, cap:w.cap };
-}
-function recordSample(w){
-  const t=w.year+w.day/365;
-  w.samples.push({t, T2:tierCount(w,'T2'), T3:tierCount(w,'T3'), T4:w.p4.length, T5:w.p5.length,
-    grass:w.env.grassT, s2:aliveSpecies(w,'T2'), s3:aliveSpecies(w,'T3'),
-    s4:aliveSpecies(w,'T4'), s5:aliveSpecies(w,'T5')});
-  if(w.samples.length>600){ w.samples=w.samples.filter((_,i)=>i%2===0); w.sampleEvery*=2; }
-  const last=w.samples[w.samples.length-1];
-  for(const k of ['T2','T3','T4','T5']){
-    const v=last[k], p=w.peaks[k];
-    if(!p) w.peaks[k]={max:v,maxT:w.year,min:v,minT:w.year};
-    else { if(v>p.max){p.max=v;p.maxT=w.year;} if(v<p.min){p.min=v;p.minT=w.year;} }
-  }
-}
-function closeYear(w){
-  const a=w.acc;
-  w.last={births:a.bYr,deaths:a.dYr,kills:a.killYr,burnFrac:a.burnedYr/w.landCount,fires:a.fireCount};
-  w.totals.births+=a.bYr; w.totals.deaths+=a.dYr; w.totals.kills+=a.killYr;
-  w.totals.burned+=a.burnedYr; w.totals.fires+=a.fireCount;
-  w.years.push({year:w.year, T2:Math.round(tierCount(w,'T2')), T3:Math.round(tierCount(w,'T3')),
-    T4:w.p4.length, T5:w.p5.length, grassKt:w.env.grassT/1000, woodyPct:w.env.woodyFrac*100,
-    burnPct:w.last.burnFrac*100, fires:a.fireCount, species:collectStats(w).specAlive,
-    births:Math.round(a.bYr), deaths:Math.round(a.dYr)});
-  if(w.last.burnFrac>=TUNE.fireBigEventFrac)
-    logChron(w,'fire',`${(w.last.burnFrac*100).toFixed(0)}% 소실 · 발화 ${a.fireCount}건`);
-  w.day=0; w.year++;
-  w.acc={bYr:0,dYr:0,killYr:0,burnedYr:0,fireCount:0};
-}
-function watchEvents(w){
-  const f=w.flags;
-  const chk=(k,cond,kind,msg)=>{ if(cond&&!f[k]){f[k]=true; logChron(w,kind,msg);} else if(!cond&&f[k]) f[k]=false; };
-  chk('woody', w.env.woodyFrac>0.70,'loss','목본 임관 70% 돌파 — 초지가 관목림으로 천이 중');
-  chk('t3low', tierCount(w,'T3')<w.cap.T3*0.25,'loss','T3 개체군 부양력의 25% 미만');
-}
-function logChron(w,kind,msg){
-  w.chron.push({y:w.year,d:w.day,kind,msg});
-  if(w.chron.length>300) w.chron.shift();
-  if(typeof document!=='undefined') chronDirty=true;
-}
 
-globalThis.SIM={createWorld,stepDay,collectStats,deriveCapacity,buildRoster,
-  refreshSpeciesCounts,tierCount,aliveSpecies,indAge,
-  CLIMATE_PROFILES,ISLAND_TIERS,ECO,TUNE,NAME_POOL};
-
-/* ═══ 9. 표현 ═══════════════════════════════════════════════════════════ */
-let chronDirty=true;
-if(typeof document!=='undefined') boot();
 
 function boot(){
 const $=id=>document.getElementById(id);
@@ -1616,7 +1648,7 @@ function frame(){
   const st=readout();
   if($('mapCard').dataset.open==='true') paintMap();
   if(frameN%12===0){ drawPop(); drawSpecChart(); drawBars(); drawTiles(st); drawSpec(); drawInd(); drawLife(); }
-  if(chronDirty){drawChron();chronDirty=false;}
+  if(chronDirty){drawChron();setChronDirty(false);}
   frameN++; requestAnimationFrame(frame);
 }
 $('btnPlay').onclick=e=>{playing=!playing;e.target.textContent=playing?'일시정지':'재생';e.target.setAttribute('aria-pressed',playing);};
@@ -1646,6 +1678,31 @@ toggle($('iPred'),'noPred','대형·소형 육식 전멸 — 초식 상한 해�
 toggle($('iRain'),'dry','강수 −40% 적용 — 건기 연장','강수 정상 복귀');
 $('iImmig').onclick=()=>{W.noImmig=!W.noImmig;$('iImmig').setAttribute('aria-pressed',!W.noImmig);
   logChron(W,'act',W.noImmig?'표류 유입 차단 — 절멸은 영구다':'표류 유입 허용 — [R-12.5] 복구 경로 개방');};
+/* 헤드리스 --run 과 같은 형식으로 내보낸다.
+   내려받아 _결과/ 에 넣으면 그대로 읽고 해석할 수 있다. */
+$('btnJson').onclick=()=>{
+  const stamp=new Date().toISOString().slice(0,16).replace(/[:T]/g,'').replace(/-/g,'');
+  const species=W.species.filter(s=>s.kind==='ANIMAL'&&!s.aggregate).map(s=>({
+    name:s.name, trophic:s.trophic, massKg:+s.massKg.toFixed(1),
+    diet:s.diet.map(d=>W.species[d].name), droughtTol:+s.droughtTol.toFixed(2),
+    lifespanYr:+s.lifespanYr.toFixed(1), seedN:s.seedN, finalN:Math.round(s.n),
+    status:s.status, extinctYear:s.extinctYear }));
+  const inds=W.inds.concat(W.dead).slice(-300).map(i=>({
+    name:i.name, sp:W.species[i.sp].name, trophic:W.species[i.sp].trophic,
+    sex:i.sex, bornYear:+(i.bornDay/365).toFixed(1),
+    deathYear:i.deathDay==null?null:+(i.deathDay/365).toFixed(1), cause:i.cause,
+    kills:i.kills, offspring:i.offspring,
+    events:i.ev.map(e=>[+(e[0]/365).toFixed(1),e[1],e[2]]) }));
+  const json={ meta:{ stamp, source:'browser', seed:W.seed, tier:W.tierKey, climate:W.climateKey,
+      landCells:W.landCount, years:W.year, derived:W.cap, tune:TUNE },
+    years:W.years, species, individuals:inds,
+    chronicle:W.chron.map(e=>({year:e.y,day:e.d,kind:e.kind,msg:e.msg})), totals:W.totals };
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(json,null,1)],{type:'application/json'}));
+  a.download=`${stamp}_${W.tierKey}_${W.climateKey}_${W.year}년.json`; a.click();
+  URL.revokeObjectURL(a.href);
+  logChron(W,'act',`결과 내보내기 · ${W.year}년 · _결과/ 에 넣으면 읽을 수 있습니다`);
+};
 $('btnCsv').onclick=()=>{
   const cols=['year','T2','T3','T4','T5','species','grassKt','woodyPct','burnPct','fires','births','deaths'];
   const csv=[cols.join(',')].concat(W.years.map(r=>cols.map(c=>
@@ -1666,4 +1723,8 @@ addEventListener('resize',fitMap);
 newWorld(20260812,'XL','SAVANNA');
 frame();
 }
+
+
+/* 헤드리스 검증은 모듈을 직접 import 한다. 브라우저에서만 화면을 띄운다. */
+if (typeof document !== 'undefined') boot();
 </script>

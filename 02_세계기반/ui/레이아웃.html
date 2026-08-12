@@ -1,0 +1,105 @@
+<nav>
+  <div class="strip">
+    <div class="brand"><b>섬 생태 시뮬레이터</b><span id="brandSub">–</span></div>
+    <div class="grp" id="gaugesA"></div>
+    <div class="grp" style="margin-left:auto">
+      <div class="seg" role="group" aria-label="속도">
+        <button id="btnPlay" aria-pressed="true">일시정지</button>
+        <button data-spd="0.5">느림</button><button data-spd="2" aria-pressed="true">보통</button>
+        <button data-spd="6">빠름</button><button data-spd="15">최고</button>
+      </div>
+      <select id="selTier" aria-label="규모 티어"></select>
+      <select id="selClimate" aria-label="기후대"></select>
+      <button id="btnReset">재생성</button>
+    </div>
+  </div>
+  <div class="strip">
+    <div class="grp" id="gaugesPop"></div>
+    <div class="grp" id="gaugesB"></div>
+    <div class="grp" style="gap:8px">
+      <span class="lab" style="align-self:center">V-5 검증</span>
+      <span class="chip" id="cPio"><span class="dot"></span>수원 밀집 <b>–</b></span>
+      <span class="chip" id="cFire"><span class="dot"></span>연간 화재 <b>–</b></span>
+      <span class="chip" id="cSpec"><span class="dot"></span>생존 종 <b>–</b></span>
+    </div>
+    <div class="grp" style="margin-left:auto">
+      <div class="gauge"><div class="lab">커서</div><div class="val txt" id="vCursor">지도를 펼치세요</div></div>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <section class="card" id="mapCard" data-open="false">
+    <header><h2>탑뷰 지도</h2><span class="lab" id="mapMeta">–</span>
+      <div class="sp">
+        <div class="seg" role="group" aria-label="레이어" id="layerSeg"></div>
+        <button id="btnMap" aria-expanded="false">펼치기</button>
+      </div>
+    </header>
+    <div class="body">
+      <canvas id="map" width="900" height="900"></canvas>
+      <div class="ov" id="interv">
+        <div class="lab" style="margin-bottom:2px">개입 · 표 C-2 검증</div>
+        <button id="iFire" aria-pressed="false">화재 전면 진압</button>
+        <button id="iPred" aria-pressed="false">대형 육식 전멸</button>
+        <button id="iRain" aria-pressed="false">강수 −40%</button>
+        <button id="iImmig" aria-pressed="false">표류 유입 허용</button>
+        <p>절멸은 기본적으로 영구입니다.</p>
+      </div>
+      <div class="ov" id="legend"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <header><h2>종 목록</h2><span class="lab" id="specMeta">–</span>
+      <div class="sp">
+        <div class="seg" role="group" aria-label="등급 필터" id="specFilter"></div>
+      </div>
+    </header>
+    <div class="tw"><table id="tSpec"><thead></thead><tbody></tbody></table></div>
+  </section>
+
+  <section class="card">
+    <header><h2>개체 조회</h2><span class="lab" id="indMeta">–</span>
+      <div class="sp">
+        <input id="indSearch" placeholder="이름 · 종 검색" style="width:150px">
+        <div class="seg" role="group" aria-label="생존 필터" id="indFilter">
+          <button data-live="all" aria-pressed="true">전체</button>
+          <button data-live="alive">생존</button>
+          <button data-live="dead">사망</button>
+        </div>
+      </div>
+    </header>
+    <div class="body split">
+      <div class="tw" style="max-height:340px"><table id="tInd"><thead></thead><tbody></tbody></table></div>
+      <div id="life"><p style="color:var(--ink-3);font-size:11px;margin:0">왼쪽에서 개체를 고르면 생애가 표시됩니다.</p></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <header><h2>개체 이력 · 크로니클</h2><span class="lab" id="histMeta">–</span>
+      <div class="sp"><button id="btnJson">결과 저장 (JSON)</button><button id="btnCsv">CSV</button></div>
+    </header>
+    <div class="tiles" id="tiles"></div>
+    <div class="body">
+      <div class="charts">
+        <div class="chart wide"><h3>개체군 — 유도 부양력 대비</h3>
+          <p class="cap">등급별 개체수를 <span class="num">[I-4]</span> 유도 부양력으로 나눈 값. 100%가 문서의 유도값입니다.</p>
+          <div class="legend" id="legPop"></div>
+          <svg id="chPop" viewBox="0 0 720 190" role="img" aria-label="등급별 개체군 추이"></svg></div>
+        <div class="chart"><h3>생존 종 수</h3>
+          <p class="cap">절멸이 누적되며 다양성이 깎이는 궤적입니다. 종은 되돌아오지 않습니다.</p>
+          <div class="legend" id="legSpec"></div>
+          <svg id="chSpec" viewBox="0 0 350 150" role="img" aria-label="생존 종 수 추이"></svg></div>
+        <div class="chart"><h3>연간 화재 소실 면적</h3>
+          <p class="cap">해마다 불에 탄 육지 비율입니다 <span class="num">[C-4.5]</span>.</p>
+          <svg id="chFire" viewBox="0 0 350 150" role="img" aria-label="연간 화재 소실 면적"></svg></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <header><h2>사건 기록</h2><span class="lab">절멸 · 대형 화재 · 개입 · 주요 개체</span></header>
+    <div class="body"><div id="chron"></div></div>
+  </section>
+</main>

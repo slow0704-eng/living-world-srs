@@ -26,3 +26,5 @@ coverage/
 logs/
 *.log
 npm-debug.log*
+
+# 시뮬 실행 기록 중 대용량 원자료는 추적하지 않는다 (요약 .txt 는 남긴다)
