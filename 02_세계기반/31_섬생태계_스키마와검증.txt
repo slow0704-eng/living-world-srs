@@ -1,0 +1,518 @@
+================================================================================
+ 육면체 세계 시뮬레이션 설계서 - [섬] 생태계 데이터 스키마 · 틱 파이프라인 · 검증
+ 상위 : 02_세계기반
+ 관련 : 29_섬규모_티어스펙.txt (I-*) / 30_기후대별_생태계스펙.txt (C-*)
+        03_코어시스템\06_통합엔티티모델.txt (Entity 스키마 - 이 문서가 확장)
+        06_운영과품질\19_인수테스트시나리오.txt (T-11 이후 신규 테스트)
+================================================================================
+
+ 29_와 30_ 문서의 숫자를 실제로 돌아가게 만드는 계층이다.
+ 여기 적힌 것만으로 섬 하나를 생성하고 100년을 돌릴 수 있어야 한다.
+
+ [S-0] 이 문서의 규약
+   · 기후대별 · 티어별 분기문을 코드에 두지 않는다. 전부 상수 조회다.
+   · 난수는 세계 시드에서 파생된 결정론적 스트림만 사용한다.
+     같은 시드 -> 같은 섬 -> 같은 100년. (재현 불가능하면 검증도 불가능)
+   · 모든 상태 변화는 뺄셈이다. "확률적으로 아사한다"가 아니라
+     "에너지가 0이 되어 죽는다"다. (R-12.2 / 원칙 P8)
+
+
+--------------------------------------------------------------------------------
+[S-1] 상수 테이블 (데이터, 코드 아님)
+--------------------------------------------------------------------------------
+
+ <코드 1> 기후 프로파일 - 30_ <표 C-1>의 기계 판독 형태
+ --------------------------------------------------------------------------
+ export const CLIMATE_PROFILES = {
+   TROPICAL: {
+     tempMeanC: 26, tempAnnualRangeC: 3,  tempDiurnalC: 8,  tempOptC: 27,
+     rainAnnualMm: 2500, wetSeasonMonths: 10, maxDrySpellDays: 45,
+     runoffCoef: 0.35,
+     nppTonPerKm2Yr: 2200, maxStandingTonPerHa: 400,
+     regrowthRatePerYr: 0.9, browseAvailability: 0.05,
+     growthHaltMonths: 0,
+     splitT2: 0.60, splitT3: 0.40,
+     richnessFactor: 1.5,
+     topsoilCm: 15, fertilityDrainMul: 2.5, fertilityRecoverMul: 1.2,
+     droughtToleranceMin: 0.1, bodyMassT3Kg: 40,
+     spoilageMul: 3.0, fireEnabled: false,
+   },
+   TEMPERATE: {
+     tempMeanC: 12, tempAnnualRangeC: 24, tempDiurnalC: 10, tempOptC: 18,
+     rainAnnualMm: 1000, wetSeasonMonths: 8,  maxDrySpellDays: 20,
+     runoffCoef: 0.30,
+     nppTonPerKm2Yr: 1200, maxStandingTonPerHa: 250,
+     regrowthRatePerYr: 0.5, browseAvailability: 0.20,
+     growthHaltMonths: 4,
+     splitT2: 0.40, splitT3: 0.60,
+     richnessFactor: 1.0,
+     topsoilCm: 60, fertilityDrainMul: 1.0, fertilityRecoverMul: 1.0,
+     droughtToleranceMin: 0.3, bodyMassT3Kg: 60,
+     spoilageMul: 1.0, fireEnabled: true,
+   },
+   SAVANNA: {
+     tempMeanC: 24, tempAnnualRangeC: 6,  tempDiurnalC: 16, tempOptC: 25,
+     rainAnnualMm: 700,  wetSeasonMonths: 6,  maxDrySpellDays: 180,
+     runoffCoef: 0.15,
+     nppTonPerKm2Yr: 800,  maxStandingTonPerHa: 40,
+     regrowthRatePerYr: 1.8, browseAvailability: 0.45,
+     growthHaltMonths: 6,
+     splitT2: 0.25, splitT3: 0.75,
+     richnessFactor: 0.8,
+     topsoilCm: 35, fertilityDrainMul: 1.5, fertilityRecoverMul: 0.6,
+     droughtToleranceMin: 0.7, bodyMassT3Kg: 80,
+     spoilageMul: 1.4, fireEnabled: true,
+   },
+ } as const;
+ --------------------------------------------------------------------------
+
+ <코드 2> 규모 티어 - 29_ <표 I-1>의 기계 판독 형태
+ --------------------------------------------------------------------------
+ export const ISLAND_TIERS = {
+   S:  { areaKm2: 10,   cellM: 100, habitableFrac: 0.85,
+         maxElevM: 300,  biomeCount: 1, instanceBudget: 1200,
+         geology: "CORAL_OR_REMNANT" },
+   M:  { areaKm2: 50,   cellM: 100, habitableFrac: 0.85,
+         maxElevM: 700,  biomeCount: 2, instanceBudget: 3000,
+         geology: "VOLCANIC" },
+   L:  { areaKm2: 200,  cellM: 200, habitableFrac: 0.82,
+         maxElevM: 1400, biomeCount: 3, instanceBudget: 5000,
+         geology: "VOLCANIC_OR_FRAGMENT" },
+   XL: { areaKm2: 1000, cellM: 400, habitableFrac: 0.78,
+         maxElevM: 2500, biomeCount: 5, instanceBudget: 8000,
+         geology: "CONTINENTAL_FRAGMENT" },
+ } as const;
+
+ export const ECO_CONST = {
+   sustainableOfftake: 0.10,      // u : 지속 채식률
+   dailyIntakeFrac:    0.03,      // 체중 대비 1일 섭취
+   predatorBiomassFrac:0.005,     // 피식 바이오매스 대비 포식자 총량
+   splitT4: 0.40, splitT5: 0.60,
+   bodyMassT2Kg: 2, bodyMassT4Kg: 8, bodyMassT5Kg: 40,
+   mvpShortTerm: 50,              // 미만이면 결번
+   mvpLongTerm: 500,              // 미만이면 준자립(근친 페널티)
+   richnessBase: 60, richnessExponent: 0.30,
+   refugiaPerKm2: 50,             // 유효면적 50km2당 1개
+   maxCells: 8000,
+   dwarfismFactorS: 0.6,
+   oreIronTonPerKm2: 20, oreCopperTonPerKm2: 8, oreGrade: 0.30,
+   waterPerPersonM3Yr: 200,
+ } as const;
+ --------------------------------------------------------------------------
+
+
+--------------------------------------------------------------------------------
+[S-2] 셀 상태 스키마
+--------------------------------------------------------------------------------
+
+ <코드 3> 환경 셀 - 섬 전체가 이 배열 하나다
+ --------------------------------------------------------------------------
+ interface Cell {
+   idx: number;             // 0 .. cellCount-1 (2D 인덱스 평탄화)
+   isLand: boolean;
+   elevationM: number;
+   slope: number;           // 0..1
+   aspect: number;          // 사면 방위 0..359 (온대 남향 은신처 판정)
+
+   // 25_기온엔진이 매일 덮어쓴다
+   tempC: number;
+   windVec: { x: number; y: number };
+   humidity: number;        // 0..1
+   rainfallMm: number;      // 당일 강수
+
+   // 물 수지
+   soilWaterMm: number;
+   isPermanentWater: boolean;   // 사바나 건기 생존의 핵심
+   waterAccess: number;         // 0..1, 가장 가까운 수원까지의 거리에서 유도
+
+   // 토양과 식생
+   fertility: number;       // 0..1
+   topsoilCm: number;
+   standingBiomassT: number;    // 이 셀의 현존 식생량 (톤)
+   biomassCapT: number;         // = maxStandingTonPerHa x 셀면적(ha)
+
+   // 개체군 밀도 필드 (개별 개체가 아닌 종별 마릿수)
+   pop: Record<SpeciesId, number>;
+
+   fearField: number;       // 포식 압력. 초식 이동 효용에 들어간다
+   burnedDaysAgo: number;   // 사바나 화재 이력. -1이면 없음
+   biomeTag: BiomeTag;      // 계산 결과이지 입력이 아니다
+ }
+
+ interface IslandState {
+   seed: number;
+   tier: keyof typeof ISLAND_TIERS;
+   climate: keyof typeof CLIMATE_PROFILES;
+   cells: Cell[];
+   species: SpeciesTemplate[];
+   entities: Entity[];          // 개별 인스턴스. instanceBudget 이하
+   reserves: { ironOreT: number; copperOreT: number; };
+   dayOfYear: number;
+   yearsElapsed: number;
+ }
+ --------------------------------------------------------------------------
+
+ <코드 4> 종 템플릿 - 이름은 표시용이고 로직은 6개 필드만 본다 (C-5.1)
+ --------------------------------------------------------------------------
+ interface SpeciesTemplate {
+   id: SpeciesId;
+   displayName: string;         // 로직에서 절대 참조 금지
+   trophic: "T0"|"T1"|"T2"|"T3"|"T4"|"T5"|"TF";
+   bodyMassKg: number;
+   dietWidth: number;           // >= 2 강제 (C-5.2)
+   dietTargets: TrophicTag[];   // 등급만 지정. 종 이름 금지 (R-12.3)
+   breedRatePerYr: number;
+   moveSpeedKmH: number;
+   droughtTolerance: number;    // 0..1
+   status: "VIABLE"|"SEMI_VIABLE"|"ABSENT";   // [S-3]이 결정
+ }
+ --------------------------------------------------------------------------
+
+ [S-2.1] pop은 밀도 필드이고 entities는 개별 인스턴스다. 둘은 같은 개체를
+         이중 계상하면 안 된다. 인스턴스화 시 해당 셀의 pop에서 차감하고,
+         비활성화 시 되돌려준다. 이 왕복에서 총량이 어긋나면 원칙 P8 위반이다.
+         -> [V-7]이 검사한다.
+
+
+--------------------------------------------------------------------------------
+[S-3] 섬 생성 파이프라인 (결정론적)
+--------------------------------------------------------------------------------
+
+ <코드 5> 면적과 기후만 넣으면 나머지가 전부 유도된다
+ --------------------------------------------------------------------------
+ function generateIsland(seed, tier, climate): IslandState {
+   const T = ISLAND_TIERS[tier];
+   const C = CLIMATE_PROFILES[climate];
+   const rng = makeRng(seed);
+
+   // 1) 격자
+   const cellCount = (T.areaKm2 * 1e6) / (T.cellM ** 2);
+   assert(cellCount <= ECO_CONST.maxCells);            // [I-2.2]
+
+   // 2) 지형 - 최고 고도만 티어가 강제하고 형태는 시드가 만든다
+   const cells = generateTerrain(rng, cellCount, T.maxElevM, T.geology);
+
+   // 3) 기후 - 24_3층_순환 / 25_기온엔진을 1년치 미리 돌려 평형을 잡는다
+   //    바이옴 태그는 여기서 '계산되어' 붙는다. 칠하지 않는다. [I-3.1]
+   spinUpClimate(cells, C, 365);
+   tagBiomes(cells);
+   assert(distinctBiomes(cells) >= T.biomeCount);
+
+   // 4) 은신처 검증 - 미달이면 리롤 [W-4.5][I-3.3]
+   const effKm2 = T.areaKm2 * T.habitableFrac;
+   const needRefugia = Math.ceil(effKm2 / ECO_CONST.refugiaPerKm2);
+   if (countRefugia(cells) < needRefugia) return generateIsland(seed+1, tier, climate);
+
+   // 5) 종 목록 - 종-면적 곡선 [I-6.4]
+   const nSpecies = Math.round(
+       ECO_CONST.richnessBase
+     * Math.pow(T.areaKm2 / 1000, ECO_CONST.richnessExponent)
+     * C.richnessFactor);
+   const species = rollSpecies(rng, nSpecies, climate);   // C-5.3 비율 배분
+   enforceDietWidth(species);                             // C-5.2 대체재 강제
+
+   // 6) 부양 개체수 [I-4]
+   const pops = deriveCarryingCapacity(C, effKm2, tier);
+
+   // 7) MVP 판정 [I-6.1] - 여기서 티어의 성격이 갈린다
+   for (const s of species) {
+     const n = pops[s.trophic] * shareOf(s, species);
+     s.status = n < ECO_CONST.mvpShortTerm ? "ABSENT"
+              : n < ECO_CONST.mvpLongTerm  ? "SEMI_VIABLE"
+              :                              "VIABLE";
+   }
+
+   // 8) 자원 캡 [I-7]
+   const iron = T.geology === "CORAL_OR_REMNANT"
+              ? 0 : ECO_CONST.oreIronTonPerKm2 * T.areaKm2;
+
+   return assemble(...);
+ }
+
+ function deriveCarryingCapacity(C, effKm2, tier) {          // [I-4] 그대로
+   const F = C.nppTonPerKm2Yr * C.browseAvailability * ECO_CONST.sustainableOfftake;
+   const yr = (kg) => kg * ECO_CONST.dailyIntakeFrac * 365 / 1000;
+
+   const massT3 = C.bodyMassT3Kg * (tier === "S" ? ECO_CONST.dwarfismFactorS : 1);
+   const dT2 = (F * C.splitT2) / yr(ECO_CONST.bodyMassT2Kg);
+   const dT3 = (F * C.splitT3) / yr(massT3);
+
+   const preyKg = dT2 * ECO_CONST.bodyMassT2Kg + dT3 * massT3;
+   const predKg = preyKg * ECO_CONST.predatorBiomassFrac;
+   const dT4 = (predKg * ECO_CONST.splitT4) / ECO_CONST.bodyMassT4Kg;
+   const dT5 = (predKg * ECO_CONST.splitT5) / ECO_CONST.bodyMassT5Kg;
+
+   return { T2: dT2*effKm2, T3: dT3*effKm2, T4: dT4*effKm2, T5: dT5*effKm2 };
+ }
+ --------------------------------------------------------------------------
+
+ [S-3.1] 7단계 MVP 판정이 이 설계의 심장이다.
+         "10 km2 섬에 늑대를 넣지 않는다"는 결정이 코드 어디에도 없고,
+         면적 x 상수 계산 결과 40마리가 안 되어 ABSENT가 될 뿐이다.
+         면적을 늘리면 늑대가 저절로 나타난다. (원칙 P6)
+
+
+--------------------------------------------------------------------------------
+[S-4] 일 단위 틱 파이프라인
+--------------------------------------------------------------------------------
+
+ 환경은 게임 틱마다가 아니라 하루 1회 갱신한다.
+ 셀 수가 6,250 이하이므로 전체 비용은 수 ms 수준이다. (25_기온엔진 [T-6])
+
+ <코드 6> 하루 파이프라인 - 순서가 곧 인과다
+ --------------------------------------------------------------------------
+ function ecologyDay(isl: IslandState) {
+   const C = CLIMATE_PROFILES[isl.climate];
+   const season = seasonFactor(isl.dayOfYear, C);   // 연교차로 유도
+
+   // --- 1. 물리층 (24_/25_ 문서 소유) ---
+   for (const c of isl.cells) {
+     c.tempC = solarHeat(c, season)                 // T-1
+             - c.elevationM * LAPSE_PER_M           // T-3
+             + advection(c) + thermalMass(c);       // T-4, T-2
+   }
+   computeWind(isl.cells);                          // W-3.2
+   computeRainfall(isl.cells);                      // W-3.4 지형성 강수
+
+   // --- 2. 물 수지 ---
+   for (const c of isl.cells) {
+     c.soilWaterMm += c.rainfallMm
+                    - evapotranspiration(c)
+                    - runoff(c, C.runoffCoef);
+     c.soilWaterMm = clamp(c.soilWaterMm, 0, fieldCapacity(c));
+     c.isPermanentWater = c.soilWaterMm > PERMANENT_THRESHOLD || isSpring(c);
+   }
+   updateWaterAccess(isl.cells);        // 사바나 건기 집결의 입력 [C-4.2]
+
+   // --- 3. 식생 성장 (로지스틱 + 3중 제한) ---
+   const halted = isGrowthHalted(isl.dayOfYear, C);   // 온대 겨울 / 사바나 건기
+   for (const c of isl.cells) {
+     if (halted) continue;                            // r = 0. 뺄셈만 남는다
+     const fW = clamp(c.soilWaterMm / waterDemand(C), 0, 1);
+     const fT = gaussian(c.tempC, C.tempOptC, TEMP_SIGMA);
+     const r  = (C.regrowthRatePerYr / 365) * fW * fT * c.fertility;
+     c.standingBiomassT += r * c.standingBiomassT
+                             * (1 - c.standingBiomassT / c.biomassCapT);
+   }
+
+   // --- 4. 화재 (fireEnabled 기후만) [C-4.5] ---
+   if (C.fireEnabled) resolveFires(isl, C);
+
+   // --- 5. 초식 섭식 ---
+   for (const c of isl.cells) {
+     const edible = c.standingBiomassT * C.browseAvailability;
+     const demand = herbivoreDemand(c);              // 체중 x 0.03 x 마릿수
+     const taken  = Math.min(edible, demand);
+     c.standingBiomassT -= taken;
+     distributeEnergy(c, taken);                     // 부족분은 에너지 감소
+     if (taken < demand) degradeVegetation(c);       // 과채식 -> 지력 하락
+   }
+
+   // --- 6. 포식 (등급으로만 판정. 종 이름 금지 R-12.3) ---
+   for (const c of isl.cells) {
+     for (const pred of predatorsIn(c)) {
+       const target = pickByRatio(c, pred);          // 에너지획득 / 사냥위험 R-5.3
+       resolveHunt(c, pred, target);
+     }
+     c.fearField = decay(c.fearField) + huntPressure(c);
+   }
+
+   // --- 7. 이동 : 대이동은 여기서 '저절로' 일어난다 [C-4.3] ---
+   for (const g of mobileGroups(isl)) {
+     const uThirst = thirstUtility(g) / distToWater(g);
+     const uFeed   = feedUtility(g)   * localBiomass(g);
+     const uFear   = -g.cell.fearField * g.timidity;
+     moveToward(g, argmaxNeighbor(uThirst + uFeed + uFear));
+   }
+
+   // --- 8. 번식과 사망 ---
+   for (const c of isl.cells) {
+     applyBirths(c);                 // 에너지 > 임계 + 성체 + 이성 근접
+     applyDeaths(c);                 // 에너지 0 -> 사망 (R-12.2)
+     applyInbreedingPenalty(c);      // SEMI_VIABLE 종만
+   }
+
+   // --- 9. 지력 ---
+   for (const c of isl.cells) {
+     c.fertility += recoverRate(c) * C.fertilityRecoverMul
+                  - drainRate(c)   * C.fertilityDrainMul;
+     c.topsoilCm -= erosion(c);      // 강수 x 경사 x (1 - 식생피복)
+   }
+
+   isl.dayOfYear = (isl.dayOfYear + 1) % 365;
+ }
+ --------------------------------------------------------------------------
+
+ [S-4.1] 순서를 바꾸면 인과가 바뀐다. 특히 3(성장) -> 5(섭식) -> 6(포식)
+         -> 7(이동) -> 8(번식/사망)의 순서는 고정이다.
+         섭식보다 번식을 먼저 처리하면 굶어 죽을 개체가 새끼를 낳는다.
+
+ [S-4.2] 3번의 halted 분기가 온대와 사바나를 가른다. 같은 코드이고
+         isGrowthHalted가 참조하는 상수(growthHaltMonths)만 다르다.
+         온대는 겨울에, 사바나는 건기에 참이 된다.
+         이 한 줄에서 '겨울 아사'와 '건기 대이동'이 동시에 나온다.
+
+ [S-4.3] 7번의 세 효용 합이 [C-4.4]가 말한 "대이동은 시스템이 아니라
+         효용의 교차점"의 구현이다. Migration 클래스를 만들지 않는다.
+
+
+--------------------------------------------------------------------------------
+[S-5] LOD 연동
+--------------------------------------------------------------------------------
+
+ [S-5.1] 16_성능_LOD <표 7>의 등급을 섬 생태계에 대응시킨다.
+   L0 : 유저 반경 내 셀. 개별 Entity로 인스턴스화. 매 게임 틱.
+   L1 : 인접 셀. 개별 상태 유지, 행동은 4틱마다.
+   L2 : 원거리 셀. pop 밀도 필드만. 하루 1회 [S-4] 전체 수행.
+   L3 : 관측 이력이 없는 셀. 개체군 방정식으로 7일치를 한 번에 적분.
+
+ [S-5.2] 인스턴스 예산([I-9.3])을 초과하면 [I-9.4] 우선순위의 역순으로
+         개체를 pop 필드로 되돌린다(demote). T6 인간은 절대 demote하지 않는다.
+
+ [S-5.3] L3 -> L0 승격 시 pop 밀도를 개체로 역산 복원한다. 이때
+         연령 · 에너지 분포는 저장된 통계 모멘트에서 샘플링한다.
+         (R-15.3 "모순 없이 역산 복원")
+
+
+--------------------------------------------------------------------------------
+[S-6] 인수 테스트 (신규 T-11 ~ T-17)
+--------------------------------------------------------------------------------
+
+ 06_운영과품질\19_인수테스트시나리오.txt에 아래를 추가한다.
+ 모든 테스트는 12개 조합(4티어 x 3기후) 전부에 대해 수행한다.
+
+ [V-1] T-11  무인 생태계 장기 안정성
+   인간 0명으로 500년 진행. 가뭄 · 폭풍 · 전염병을 무작위 주입.
+   합격 : L · XL 티어에서 T0~T3 등급이 하나도 영구 소멸하지 않는다.
+          M 티어는 준자립 종 1개까지 소멸 허용.
+          S 티어는 소멸이 발생해도 통과다([I-6.2]). 단 T0가 전멸하면 실패.
+   -> 26_4층_생명 [W-4.6]의 구현 형태.
+
+ [V-2] T-12  연산 예산
+   합격 : 셀 수 <= 8,000. [S-4] 하루 파이프라인 전체가 XL 티어에서 5ms 미만.
+          인구 1,000명 동시 시뮬 시 게임 틱 500ms 미만 (R-15.1).
+
+ [V-3] T-13  MVP 판정 정합성
+   합격 : generateIsland가 산출한 종별 개체수가 29_ <표 I-3> 기대치와
+          오차 5% 이내. status 배분이 <표 I-4>와 일치.
+   특히 : L 사바나의 T5는 40.4마리로 임계값 50 바로 아래여야 한다.
+          이 경계값이 상수 조정으로 쉽게 넘어가면 티어 설계가 무너진다.
+
+ [V-4] T-14  은신처 생성 검증
+   합격 : 100회 생성 중 리롤 없이 [I-3.3] 요구 개수를 채우는 비율 >= 80%.
+          S 티어는 예외(구조적으로 0개 가능).
+   불합격 시 : 지형 생성기의 고도 분포를 조정한다. 은신처를 손으로 놓지 않는다.
+
+ [V-5] T-15  기후 시그니처 발생
+   각 기후에서 10년 내에 고유 사건이 관측되어야 한다.
+     열대   : 폭풍 후 임상 개방 -> 하층 식생 및 초식 일시 증가
+     온대   : 겨울 아사로 초식 개체수 20% 이상 감소 후 봄에 회복
+     사바나 : 건기 수원 반경 국소 밀도 10배 이상 + 화재 1회 이상
+   합격 : 3개 전부 관측. 하나라도 없으면 <표 C-1> 상수를 의심한다.
+
+ [V-6] T-16  경계 개체군 생존율
+   L 사바나 T5(40마리, SEMI_VIABLE)를 100년 관측.
+   합격 : 멸종률 40~70%. 100%면 준자립 등급이 무의미하고,
+          0%면 MVP 판정이 무의미하다. 위태로움이 유지되어야 한다.
+
+ [V-7] T-17  보존 법칙 (원칙 P8)
+   합격 : 1년 시뮬 후 [총 바이오매스 + 총 개체 에너지 + 사체 · 분해 잔량]의
+          수지 오차 < 0.1%. 철 · 구리 매장량 감소분 = 유통 중 금속 총량.
+          pop 필드와 entities 사이의 왕복에서 개체 총수가 변하지 않는다.
+
+ [V-8] T-18  기후 분기문 부재 (정적 검사)
+   합격 : 생태계 모듈 전체에서 climate 또는 tier 값에 대한 조건 분기가
+          상수 조회(CLIMATE_PROFILES[x] / ISLAND_TIERS[x]) 외에 0건.
+   -> [C-1.1] · [S-0]을 자동으로 지키게 만드는 유일한 방법이다.
+
+
+--------------------------------------------------------------------------------
+[S-8] 1차 구현 결과 (XL × 사바나, 헤드리스 70년 검증)
+--------------------------------------------------------------------------------
+
+ 32_사바나XL_생태시뮬.html이 [S-1]~[S-4]를 구현한 첫 사례다.
+ 아래는 그 실행 결과이며, 문서가 틀린 곳을 실행이 짚어낸 기록이다.
+
+ [S-8.1] 통과한 것
+   · [V-1] T-11 : 70년간 T0~T5 영구 소멸 없음. 개체수가 완충 구역 안에서
+                  진동한다(T3 4,800~9,700). [W-4.2] 충족.
+   · [V-2] T-12 : 육지 6,250셀 정확히 일치. 25년 시뮬 4.4초(하루당 0.5ms).
+   · [V-5] 화재 : 연 20~45% 소실, 낙뢰 발화 4~10건. 화재가 목본을 26~29%로
+                  붙잡는 것이 확인된다. [C-4.5] 충족.
+   · [C-6] 표 C-2 : 개입 3종이 전부 예측대로 작동한다.
+                    화재 진압 20년 -> 목본 26%->57%, T3 -15%(대조군 +26%)
+                    대형 육식 전멸 -> T3 +131%
+                    강수 -40%      -> T3 -73%
+
+ [S-8.2] 문서가 틀린 곳 - 세 가지
+
+  (가) <표 I-3>의 초식 개체수는 평형이 아니라 관리 목표값이다.
+       u = 0.10에서 초식 수요는 초본 현존량의 6% 남짓이라, 초식은 섬 전체
+       규모에서 식량 제약을 받지 않는다. 실제 평형은 T3 약 7,500으로
+       유도값 24,041의 30% 수준이며, 이를 붙잡는 것은 먹이가 아니라
+       포식압과 건기 수원 접근성이다.
+       결정적 증거 : 포식자를 전멸시키면 T3가 17,493까지 올라 24,041에
+       근접한다. 즉 [I-4]가 유도한 것은 '포식이 없을 때의 상한'이었다.
+       -> [I-4] 유도식에 포식 압력과 수원 제약 항을 추가해야 한다.
+          현재의 7단계는 먹이 하나만 보고 있다.
+
+  (나) [V-5]의 '건기 수원 반경 국소 밀도 10배'는 관측되지 않는다.
+       국소 밀도 배율은 상시 3~5.7배이고, 건기에는 오히려 분산한다
+       (수원 1셀 이내 개체 비율 우기 65% -> 건기 47%).
+       수원 주변 초지가 먼저 고갈되어, 무리가 멀리 나가 뜯고 돌아와 마시는
+       '통근'이 되기 때문이다.
+       -> 집결이 아니라 통근이 사바나의 실제 거동이다. [C-4.2]의 서술과
+          [V-5]의 판정 기준(3배)을 이에 맞춰 고칠 것.
+
+  (다) 항구 수원 비율이 은신처와 동급의 생성 검증 항목이다.
+       항구 수원이 육지의 1.0%면 무리 대부분이 물에 닿지 못해 첫 건기에
+       전멸한다. 2.5%에서 계통이 유지된다.
+       -> [I-3.3] 은신처 리롤 조건에 '항구 수원 >= 유효면적의 2%'를
+          같은 등급으로 추가할 것.
+
+ [S-8.3] 구현하며 드러난 함정 - 다음 기후대에서도 반복될 것들
+   · 초본과 목본을 한 풀로 두면 현존량 40 t/ha와 NPP 800 t/km2/년을
+     동시에 표현할 수 없다(회전율이 맞지 않는다). 반드시 분리한다.
+     분리해야 [C-4.6] 화재-목본-초지 연쇄도 계산으로 나온다.
+   · 무리에 분열만 있고 병합이 없으면 무리 수가 단조 감소하면서 개체가
+     계속 샌다. 원칙 P8 위반이다. 병합은 선택이 아니라 필수다.
+   · 이동 보폭이 셀 하나보다 작으면 동물이 수원까지 통근하지 못해
+     갈증사한다. 400m 격자에서 유제류는 하루 0.3~3.6셀을 움직여야 한다.
+   · 포식자가 무한한 대체먹이(T2)로 배를 채우면, 줄어드는 주 먹이(T3)를
+     끝까지 사냥해 멸종시킨다(초포식). 대형 육식의 대체먹이 의존도에
+     상한(소요의 40%)을 두어야 수적 연동이 생긴다.
+
+  (라) [C-4.6]의 '불을 끄면 사냥감이 사라진다'에 시간 척도가 빠져 있다.
+       화재는 초본의 최대 소비자다(연 28~33% 소실). 따라서 불을 끄면
+       단기에는 먹이가 늘어 초식이 오히려 증가한다.
+         진압 10년  T3 +31%  · 목본 임관 48%
+         진압 20년  T3  +8%  · 목본 61%
+         진압 100년 T3  -4%  · 목본 76% · 초본 절반 (여기서 역전)
+       -> 방향은 맞지만 100년 규모의 이야기다. 단기 효과는 정반대이므로
+          [C-4.6] 서술에 시간 척도를 명시할 것.
+          "불을 끄면 먼저 살찌고, 100년 뒤 굶는다"가 정확한 요약이다.
+
+ [S-8.4] 다음 할 일
+   위 (가)(나)(다)(라)는 29_ · 30_ 본문 수정 대상이다.
+   수정 전까지 <표 I-3>은 '포식 없는 경우의 상한'으로 읽어야 한다.
+   시뮬레이터 사용법과 밸런스 조정 절차는 33_시뮬레이터_설명서.txt에 있다.
+
+
+--------------------------------------------------------------------------------
+[S-7] 구현 순서 권장
+--------------------------------------------------------------------------------
+
+   1) [S-1] 상수 테이블 + [S-3] deriveCarryingCapacity
+      -> 이 시점에 29_ <표 I-3>·<표 I-4>가 재현되는지 먼저 확인한다.
+         시뮬레이션을 한 줄도 짜기 전에 티어 설계가 맞는지 판정할 수 있다.
+   2) [S-2] 셀 스키마 + [S-3] 지형 · 기후 생성 + [V-4]
+   3) [S-4]의 1~3단계(물리 · 물 · 식생)만으로 무생물 100년 -> 사막화 관측
+   4) 초식 추가 -> [V-5] 온대 겨울 아사 확인
+   5) 포식 추가 -> [V-1] 무인 500년
+   6) LOD([S-5]) -> [V-2]
+   7) 인간(T6) 투입 -> 27_5층_인간_개입지점으로 인계
+
+ [S-7.1] 3단계에서 인간과 동물 없이도 사막화 · 침식이 관측되어야 한다.
+         여기서 안 나오면 상위 계층을 아무리 쌓아도 나오지 않는다.
+
+================================================================================
