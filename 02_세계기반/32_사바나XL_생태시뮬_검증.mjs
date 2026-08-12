@@ -7,6 +7,8 @@
  *   node 32_사바나XL_생태시뮬_검증.mjs --fire      화재 통계만 상세히
  *   node 32_사바나XL_생태시뮬_검증.mjs --interv    표 C-2 개입 대조
  *   node 32_사바나XL_생태시뮬_검증.mjs --mvp       T5 경계 개체군 (150년 필요)
+ *   node 32_사바나XL_생태시뮬_검증.mjs --run --years 300 [--seed N --tier XL --climate SAVANNA]
+ *       -> _결과/ 폴더에 .txt(사람용 요약 + 자동 판독)와 .json(전체 시계열)을 남긴다
  *
  * TUNE 값을 만졌다면 반드시 이 스크립트를 다시 돌릴 것.
  */
@@ -20,6 +22,7 @@ const js = html.slice(html.indexOf('<script>') + 8, html.lastIndexOf('</script>'
 new Function(js)();                       // boot()은 document가 없으면 건너뛴다
 const { createWorld, stepDay, collectStats, deriveCapacity,
         CLIMATE_PROFILES, ISLAND_TIERS, ECO, TUNE } = globalThis.SIM;
+const TUNE_SNAPSHOT = JSON.parse(JSON.stringify(TUNE));
 
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i < 0 ? d : process.argv[i + 1]; };
 const has = k => process.argv.includes(k);
@@ -127,6 +130,115 @@ if (has('--interv')) {
   check('육식 전멸 → 초식 폭증', pred.a.n3 > pred.b.n3 * 1.5, `${N(pred.b.n3)} → ${N(pred.a.n3)}`);
   check('강수 감소 → 개체군 급감', rain.a.n3 < rain.b.n3 * 0.6, `${N(rain.b.n3)} → ${N(rain.a.n3)}`);
   process.exit(fails ? 1 : 0);
+}
+
+/* ── 결과 저장 : _결과/ 폴더에 실행 기록을 남긴다 ──────────────────────
+   시뮬을 돌릴 때마다 남겨 두면 나중에 읽고 해석할 수 있다.
+   .json 은 기계 판독용 전체 시계열, .txt 는 사람이 읽는 요약이다. */
+function saveRun(w, meta) {
+  const dir = path.join(here, '_결과');
+  fs.mkdirSync(dir, { recursive: true });
+  const stamp = meta.stamp;
+  const base = `${stamp}_${w.tierKey}_${w.climateKey}_${w.year}년`;
+
+  const species = w.species.filter(s => s.kind === 'ANIMAL' && !s.aggregate).map(s => ({
+    name: s.name, trophic: s.trophic, massKg: +s.massKg.toFixed(1),
+    diet: s.diet.map(d => w.species[d].name), droughtTol: +s.droughtTol.toFixed(2),
+    lifespanYr: +s.lifespanYr.toFixed(1),
+    seedN: s.seedN, finalN: Math.round(s.n), status: s.status, extinctYear: s.extinctYear,
+  }));
+  const json = {
+    meta: { ...meta, seed: w.seed, tier: w.tierKey, climate: w.climateKey,
+            landCells: w.landCount, years: w.year,
+            derived: w.cap, tune: TUNE_SNAPSHOT },
+    years: w.years, species,
+    chronicle: w.chron.map(e => ({ year: e.y, day: e.d, kind: e.kind, msg: e.msg })),
+    totals: w.totals,
+  };
+  fs.writeFileSync(path.join(dir, base + '.json'), JSON.stringify(json, null, 1), 'utf8');
+
+  // 사람이 읽는 요약
+  const L = [];
+  const push = (...a) => L.push(a.join(''));
+  push('='.repeat(78));
+  push(` 시뮬레이션 실행 기록 · ${stamp}`);
+  push('='.repeat(78));
+  push(`설정   ${w.T.name} ${w.T.areaKm2.toLocaleString('ko-KR')}km² · ${w.C.name}`
+     + ` · 시드 ${w.seed} · ${w.year}년 · 육지 ${N(w.landCount)}셀`);
+  push(`유도   [I-4] T2 ${N(w.cap.T2)} · T3 ${N(w.cap.T3)} · T4 ${N(w.cap.T4)} · T5 ${N(w.cap.T5)}`);
+  push('');
+  push('─ 종 구성 ─────────────────────────────────────────────────────────────');
+  push('  등급 종            체중kg  초기      최종   상태');
+  for (const s of species)
+    push(`  ${pad(s.trophic, 4)} ${s.name.padEnd(12)} ${pad(s.massKg, 6)} ${pad(N(s.seedN), 8)}`
+       + ` ${pad(N(s.finalN), 9)}   ${s.extinctYear != null ? `절멸 ${s.extinctYear}년` : s.status}`);
+  push('');
+  push('─ 연도별 (10년 간격) ──────────────────────────────────────────────────');
+  push('    연차       T2       T3     T4    T5   초본천t 목본%  화재%  발화  종');
+  const step = Math.max(1, Math.round(w.years.length / 30));
+  for (let i = 0; i < w.years.length; i += step) {
+    const r = w.years[i];
+    push(`  ${pad(r.year, 6)} ${pad(N(r.T2), 8)} ${pad(N(r.T3), 8)} ${pad(r.T4, 6)} ${pad(r.T5, 5)}`
+       + ` ${pad(N(r.grassKt), 9)} ${pad(r.woodyPct.toFixed(0), 5)} ${pad(r.burnPct.toFixed(0), 6)}`
+       + ` ${pad(r.fires, 5)} ${pad(r.species, 3)}`);
+  }
+  push('');
+  push('─ 자동 판독 ───────────────────────────────────────────────────────────');
+  for (const line of readRun(w)) push('  ' + line);
+  push('');
+  push('─ 사건 기록 (최근 40) ─────────────────────────────────────────────────');
+  for (const e of w.chron.slice(-40)) push(`  ${pad(e.y, 5)}년 [${e.kind}] ${e.msg}`);
+  push('='.repeat(78));
+  fs.writeFileSync(path.join(dir, base + '.txt'), L.join(String.fromCharCode(10)) + String.fromCharCode(10), 'utf8');
+  return base;
+}
+
+/* 궤적에서 눈에 띄는 것을 자동으로 뽑아 둔다. 해석의 출발점이다. */
+function readRun(w) {
+  const out = [], Y = w.years;
+  if (!Y.length) return ['기록 없음'];
+  const mean = (a, k) => a.reduce((s, r) => s + r[k], 0) / Math.max(a.length, 1);
+  const tail = Y.slice(Math.floor(Y.length * 0.3));
+  const ext = w.species.filter(s => s.extinctYear != null).sort((a, b) => a.extinctYear - b.extinctYear);
+  out.push(`평형(후반 70%) T3 ${N(mean(tail, 'T3'))} · T5 ${mean(tail, 'T5').toFixed(0)}`
+         + ` · 화재 ${mean(tail, 'burnPct').toFixed(1)}%/년 · 목본 임관 ${mean(tail, 'woodyPct').toFixed(0)}%`);
+  const t3 = tail.map(r => r.T3);
+  out.push(`T3 진폭 ${N(Math.min(...t3))}~${N(Math.max(...t3))}`
+         + ` (${(Math.max(...t3) / Math.max(Math.min(...t3), 1)).toFixed(1)}배)`
+         + ` · 유도 대비 ${(mean(tail, 'T3') / w.cap.T3 * 100).toFixed(0)}%`);
+  if (ext.length) out.push(`절멸 ${ext.length}종 : ` + ext.map(s => `${s.name}(${s.trophic}, ${s.extinctYear}년)`).join(' · '));
+  else out.push('절멸 없음');
+  // 체제 전환 : 목본 임관이 20%p 이상 오른 구간
+  const w0 = Y[0].woodyPct, wN = Y[Y.length - 1].woodyPct;
+  if (wN - w0 > 20) out.push(`목본 임관 ${w0.toFixed(0)}% → ${wN.toFixed(0)}% — 초지가 관목림으로 천이 중 [C-4.6]`);
+  const b0 = mean(Y.slice(0, Math.max(5, Y.length * 0.2)), 'burnPct');
+  const bN = mean(tail, 'burnPct');
+  if (b0 > 0 && bN < b0 * 0.5) out.push(`화재 ${b0.toFixed(0)}% → ${bN.toFixed(0)}% — 연료 고갈로 화재 체제가 무너짐`);
+  const t5ext = w.species.find(s => s.trophic === 'T5' && s.extinctYear != null);
+  if (t5ext) {
+    const before = Y.filter(r => r.year < t5ext.extinctYear).slice(-10);
+    const after = Y.filter(r => r.year > t5ext.extinctYear).slice(0, 30);
+    if (before.length && after.length)
+      out.push(`최상위 포식자 상실 후 T3 ${N(mean(before, 'T3'))} → ${N(mean(after, 'T3'))}`
+             + ` (${((mean(after, 'T3') / Math.max(mean(before, 'T3'), 1) - 1) * 100).toFixed(0)}%) — 초식 해방 [표 C-2]`);
+  }
+  return out;
+}
+
+if (has('--run')) {
+  const years = +arg('--years', 100);
+  const seed = +arg('--seed', 20260812);
+  const tier = arg('--tier', 'XL'), climate = arg('--climate', 'SAVANNA');
+  const stamp = arg('--stamp', 'run');
+  console.log(`실행 · ${tier} × ${climate} · 시드 ${seed} · ${years}년`);
+  const t0 = Date.now();
+  const w = createWorld(seed, tier, climate);
+  for (let y = 0; y < years; y++) run(w, 365);
+  const ms = Date.now() - t0;
+  const base = saveRun(w, { stamp, ms, command: process.argv.slice(2).join(' ') });
+  for (const line of readRun(w)) console.log('  ' + line);
+  console.log(`저장 · _결과/${base}.txt · .json   (${(ms / 1000).toFixed(1)}초)`);
+  process.exit(0);
 }
 
 if (has('--mvp')) {

@@ -351,14 +351,14 @@ const TUNE = {
   /* 확산 확률을 상수로 두면 퍼콜레이션 절벽에 걸린다(0.22에서 84%, 0.18에서 1%).
      불을 멈추는 것은 확률이 아니라 연료의 불균질성이므로,
      확산 확률이 연료량에 연속적으로 비례하게 만들어 절벽을 없앤다. */
-  fireSpreadP:0.34, fireWindBias:0.55,
+  fireSpreadP:0.310, fireWindBias:0.55,
   /* 화재 수명. 연료가 97% 셀에서 연속이면 방화선이 없어 불이 건기 내내
      연쇄해 섬 전체를 태운다. 실제 사바나 화재는 며칠이면 소진된다.
      불이 번질 수 있는 날 수를 제한하는 것이 탄 면적을 정하는 실질 손잡이다. */
   fireMaxAgeDays:999,
   fireDrynessMin:0.40, fireFuelMinTonPerHa:0.75, fireFuelRefTonPerHa:1.45,
   fireBurnDays:2,
-  fireGrassSurvive:0.11, fireWoodySurvive:0.625, fireAshFert:0.028, fireBigEventFrac:0.03,
+  fireGrassSurvive:0.11, fireWoodySurvive:0.80, fireAshFert:0.028, fireBigEventFrac:0.03,
   herdSeedSize:45, herdSplitAt:92, herdMergeBelow:30, herdMinSize:4,
   hydrationDays:6, drinkRadiusCells:1, waterGradientCells:60,
   moveGrazeKmDay:0.12, moveThirstKmDay:1.44,
@@ -387,6 +387,9 @@ const TUNE = {
   simGrassMax:1, simWoodyMax:1,   // 셀 단위로 시뮬하는 식물 종 수 (기능군별로 따로 뽑는다.
                               // 전체 몫 순으로 뽑으면 상위가 전부 초본이라 목본이 통째로 빠진다)
   dietWidthMin:2,            // [C-5.2] 대체재 강제
+  woodyBrowseFrac:0.06,      // 목본 중 실제로 뜯어먹을 수 있는 몫(잎·어린가지).
+                             // 이걸 두지 않으면 목본 전체가 먹이가 되어
+                             // 초식이 영원히 배부르고 굶주림이 작동하지 않는다.
   massSpreadLog:0.55,        // 등급 평균 체중 주변의 로그 분산
   lifespanFromMass:{a:11.5, b:0.20},  // 수명(년) = a * 체중^b (알로메트리)
   /* 개체 추적 [I-9.3][I-9.4] */
@@ -483,6 +486,10 @@ function buildRoster(tierKey, climateKey, cap, rand){
         sp.lifespanYr = TUNE.lifespanFromMass.a*Math.pow(sp.massKg,TUNE.lifespanFromMass.b);
         sp.matureYr = sp.lifespanYr*0.22;
         sp.breedMul = Math.pow(sp.massKg/base,-0.25);          // 알로메트리 : 작을수록 빨리 번식
+        // 내건성 배율도 중립화한다(0.7~1.3). 원시값을 그대로 곱하면
+        // 사바나 전 종이 물 없이 30% 더 버텨 건기 수원 병목이 통째로 풀린다.
+        sp.droughtMul = 0.7+0.6*(sp.droughtTol-C.droughtToleranceMin)
+                        /Math.max(1-C.droughtToleranceMin,1e-6);
         sp.moveMul  = Math.pow(sp.massKg/base, 0.20);
       }
       species.push(sp); byTier[tier].push(id);
@@ -584,6 +591,7 @@ function createWorld(seed, tierKey='XL', climateKey='SAVANNA'){
   buildSpeciesMeta(w);
   genCoastline(w,noise); genElevation(w,noise); genRainfall(w);
   genHydrology(w); genSoil(w,noise,rand);
+  buildDietMeta(w);
   computeWaterDist(w); seedFauna(w,mulberry32(seed^0x2545F491));
   syncPools(w); refreshSpeciesCounts(w); recordSample(w);
   const alive=w.species.filter(s=>s.status!=='ABSENT'&&s.kind==='ANIMAL'&&!s.aggregate).length;
@@ -598,7 +606,10 @@ function buildSpeciesMeta(w){
   const P=w.simPlants, T2=w.byTier.T2;
   w.pm={ n:P.length, woody:P.map(id=>w.species[id].woody),
          share:Float64Array.from(P,id=>w.species[id].simShare),
-         drought:Float64Array.from(P,id=>w.species[id].droughtTol) };
+         drought:Float64Array.from(P,id=>{
+           const dmin=w.C.droughtToleranceMin;
+           return 0.7+0.6*(w.species[id].droughtTol-dmin)/Math.max(1-dmin,1e-6);
+         }) };
   w.tm={ n:T2.length, on:T2.map(id=>w.species[id].status!=='ABSENT'),
          share:Float64Array.from(T2,id=>w.species[id].share),
          mass:Float64Array.from(T2,id=>Math.max(w.species[id].massKg,0.1)),
@@ -714,6 +725,27 @@ function genSoil(w,noise,rand){
     }
   });
 }
+/* 초식 종마다 '자기 식이의 셀 용량 합'을 미리 재 둔다.
+   이동 효용의 feed 항을 이 값으로 정규화하지 않으면, 목본을 먹는 종은
+   feed가 6까지 치솟아 갈증 항(최대 4.4)을 압도하고 무리가 물로 가지 않는다. */
+function buildDietMeta(w){
+  const N=w.g.N;
+  for(const sp of w.species){
+    if(!sp.diet||sp.kind!=='ANIMAL'||sp.trophic!=='T2'&&sp.trophic!=='T3') continue;
+    sp._slots=sp.diet.map(d=>w.plantIdx.get(d)).filter(v=>v!==undefined);
+    sp._mul=sp.diet.map(d=>w.species[d].woody?TUNE.woodyBrowseFrac:1)
+                   .filter((_,k)=>w.plantIdx.get(sp.diet[k])!==undefined);
+    let tot=0,n=0;
+    for(let i=0;i<N;i++){
+      if(!w.land[i]) continue;
+      let c=0;
+      for(let k=0;k<sp._slots.length;k++) c+=w.plantCap[sp._slots[k]*N+i]*sp._mul[k];
+      tot+=c; n++;
+    }
+    sp._capRef=Math.max(tot/Math.max(n,1),1e-6);
+  }
+}
+
 function computeWaterDist(w){
   const {g,land,water,wdist,soil}=w, q=[];
   wdist.fill(999); w.nearCells=0;
@@ -842,7 +874,10 @@ function phaseEnvironment(w){
       let capC=plantCap[o];
       if(!pm.woody[k]) capC*=grassMul;
       if(capC>0){
-        const fW=fWraw+(1-fWraw)*pm.drought[k]*0.55;
+        // 내건성은 종을 '가르는' 값이지 모두를 살찌우는 값이 아니다.
+        // 가산 보정을 쓰면 섬 전체 성장이 부풀어 연료와 목본이 함께 폭주한다.
+        // 기후 최저 내건성을 기준으로 0.7~1.3 배율이 되도록 중립화한다(buildSpeciesMeta).
+        const fW=clamp(fWraw*pm.drought[k],0,1);
         if(fW>0.02){
           const b=plantB[o];
           // 목본 성장도 토양수분에 제한된다. 이 fW를 빠뜨리면 목본이 2~3배 빨리
@@ -932,24 +967,29 @@ function phaseHerds(w){
     if(!land[ci]){ h.x=g.W/2; h.y=g.H/2; ci=g.idx(h.x|0,h.y|0); }
 
     const wasDry=h.hyd<TUNE.dehydrationOnset;
-    h.hyd=clamp(h.hyd-1/(TUNE.hydrationDays*(0.7+0.6*sp.droughtTol)),0,1);
+    h.hyd=clamp(h.hyd-1/(TUNE.hydrationDays*sp.droughtMul),0,1);
     if(wdist[ci]<=TUNE.drinkRadiusCells){ h.hyd=1;
       if(wasDry&&h.lead) addEv(w,h.lead,'move','수원에 도달해 물을 마심'); }
 
     // 섭식 : 자기 식이 목록의 식물만 먹는다. 목록이 넓을수록 가뭄에 강하다 [C-5.2]
     const demand=h.n*sp.massKg*ECO.dailyIntakeFrac/1000;
-    let avail=0; const offs=sp.diet.map(p=>w.plantIdx.get(p)*N+ci);
-    for(const o of offs) avail+=plantB[o]*C.browseAvailability;
+    const sl=sp._slots, ml=sp._mul;
+    let avail=0;
+    for(let k=0;k<sl.length;k++) avail+=plantB[sl[k]*N+ci]*ml[k]*C.browseAvailability;
     const taken=Math.min(avail,demand);
-    if(avail>0) for(const o of offs) plantB[o]-=taken*(plantB[o]*C.browseAvailability/avail)/C.browseAvailability;
+    if(avail>0) for(let k=0;k<sl.length;k++){
+      const o=sl[k]*N+ci;
+      plantB[o]-=taken*(plantB[o]*ml[k]/(avail/C.browseAvailability));
+    }
     const sat=demand>0?taken/demand:1; satS+=sat; satN++;
     h.e=clamp(h.e+(sat-TUNE.satietyBreakEven)*TUNE.energyGainRate
               -TUNE.dehydrationPenalty*clamp((TUNE.dehydrationOnset-h.hyd)/TUNE.dehydrationOnset,0,1),0,1);
 
     const [dx,dy]=g.bestDir(h.x|0,h.y|0,j=>{
       if(!land[j]) return -Infinity;
-      let f=0; for(const p of sp.diet) f+=plantB[w.plantIdx.get(p)*N+j];
-      const feed=f/Math.max(gcap[j],1);
+      let f=0;
+      for(let k=0;k<sl.length;k++) f+=plantB[sl[k]*N+j]*ml[k];
+      const feed=clamp(f/sp._capRef,0,1);
       const thirst=(1-h.hyd)*(1-clamp(wdist[j]/TUNE.waterGradientCells,0,1));
       return TUNE.utilFeed*feed+TUNE.utilThirst*thirst-TUNE.utilFear*fear[j]
            -TUNE.utilCrowd*press[j]+rng()*TUNE.utilNoise;
@@ -980,17 +1020,28 @@ function phaseHerds(w){
   }
   w.env.satiety=satN?satS/satN:1;
 }
+/* 같은 셀의 작은 무리는 합친다. 단 같은 종끼리만이다.
+   종별로 묶지 않고 정렬만 하면, 같은 종 짝을 못 만난 무리가 계속 소멸해
+   무리 수가 단조 감소하면서 개체가 새어 나간다 (원칙 P8). */
 function phaseMergeHerds(w){
   let merged=false;
+  const bySp=new Map();
   for(const lst of w.herdAt.values()){
     if(lst.length<2) continue;
-    lst.sort((a,b)=>a.n-b.n);
-    while(lst.length>1&&lst[0].n<TUNE.herdMergeBelow){
-      const a=lst.shift(), b=lst[0];
-      if(a.sp!==b.sp){ break; }                     // 다른 종끼리는 합쳐지지 않는다
-      b.e=(b.e*b.n+a.e*a.n)/(b.n+a.n); b.hyd=Math.max(b.hyd,a.hyd);
-      b.n+=a.n; a.n=0; merged=true;
-      if(a.lead){ addEv(w,a.lead,'move','다른 무리에 흡수됨'); killInd(w,a.lead,'무리 흡수'); }
+    bySp.clear();
+    for(const h of lst){
+      let g=bySp.get(h.sp); if(!g){ g=[]; bySp.set(h.sp,g); }
+      g.push(h);
+    }
+    for(const g of bySp.values()){
+      if(g.length<2) continue;
+      g.sort((a,b)=>a.n-b.n);
+      while(g.length>1&&g[0].n<TUNE.herdMergeBelow){
+        const a=g.shift(), b=g[0];
+        b.e=(b.e*b.n+a.e*a.n)/(b.n+a.n); b.hyd=Math.max(b.hyd,a.hyd);
+        b.n+=a.n; a.n=0; merged=true;
+        if(a.lead){ addEv(w,a.lead,'move','다른 무리에 흡수됨'); killInd(w,a.lead,'무리 흡수'); }
+      }
     }
   }
   if(merged) w.herds=w.herds.filter(h=>h.n>0);
@@ -1042,19 +1093,22 @@ function hunt(w,arr,isApex){
 
     let got=0;
     if(isApex){
-      let rem=need/Math.max(species[sp.diet[0]]?.massKg||w.cap.bodyMassT3Kg,1)*TUNE.predKillSurplus;
+      /* 사냥 할당량은 '마릿수'가 아니라 '생물량'으로 잡는다.
+         특정 종의 체중을 기준으로 마릿수를 정하면, 실제로 잡은 것이
+         더 가벼운 종일 때 섭취량이 모자라 포식자가 서서히 굶는다. */
+      let remKg=need*TUNE.predKillSurplus;
       const cx=g.xOf(ci), cy=g.yOf(ci);
-      for(let ddy=-1;ddy<=1&&rem>0;ddy++)for(let ddx=-1;ddx<=1&&rem>0;ddx++){
+      for(let ddy=-1;ddy<=1&&remKg>0;ddy++)for(let ddx=-1;ddx<=1&&remKg>0;ddx++){
         if(!g.inside(cx+ddx,cy+ddy)) continue;
         const lst=w.herdAt.get(g.idx(cx+ddx,cy+ddy)); if(!lst) continue;
         for(const h of lst){
-          if(rem<=0) break;
+          if(remKg<=0) break;
           // 선호 먹이가 아니면 효율이 떨어질 뿐, 아예 못 잡는 것은 아니다.
-          // 완전 배제하면 포식자가 굶어 죽는다(실제 최상위 포식자는 일반포식자다).
           const pref=sp.diet.includes(h.sp)?1:TUNE.predOffDietEff;
-          const t=Math.min(h.n*TUNE.predTakePerHerd*pref,rem);
-          h.n-=t; rem-=t; w.acc.dYr+=t; w.acc.killYr+=t;
-          got+=t*species[h.sp].massKg;
+          const mk=species[h.sp].massKg;
+          const t=Math.min(h.n*TUNE.predTakePerHerd*pref, remKg/mk);
+          if(t<=0) continue;
+          h.n-=t; remKg-=t*mk; w.acc.dYr+=t; w.acc.killYr+=t; got+=t*mk;
           if(t>0.5&&p.kills++===0) addEv(w,p,'hunt',`첫 사냥 성공 — ${species[h.sp].name}`);
         }
       }
