@@ -6,6 +6,7 @@
  *   node 32_사바나XL_생태시뮬_검증.mjs --all       12개 조합 전부 짧게
  *   node 32_사바나XL_생태시뮬_검증.mjs --fire      화재 통계만 상세히
  *   node 32_사바나XL_생태시뮬_검증.mjs --interv    표 C-2 개입 대조
+ *   node 32_사바나XL_생태시뮬_검증.mjs --mvp       T5 경계 개체군 (150년 필요)
  *
  * TUNE 값을 만졌다면 반드시 이 스크립트를 다시 돌릴 것.
  */
@@ -125,6 +126,41 @@ if (has('--interv')) {
     `${N(fire100.a.n3)} ≤ ${N(ctrl100.a.n3)}`);
   check('육식 전멸 → 초식 폭증', pred.a.n3 > pred.b.n3 * 1.5, `${N(pred.b.n3)} → ${N(pred.a.n3)}`);
   check('강수 감소 → 개체군 급감', rain.a.n3 < rain.b.n3 * 0.6, `${N(rain.b.n3)} → ${N(rain.a.n3)}`);
+  process.exit(fails ? 1 : 0);
+}
+
+if (has('--mvp')) {
+  /* [V-6] T-16 경계 개체군 생존율.
+     표류 유입이 기본 차단이므로 절멸은 영구다. 준자립 등급이
+     100% 죽지도, 0% 죽지도 않아야 '위태로움'이 유지된다. */
+  const yrs = +arg('--years', 150);   // 150년 미만에서는 판정하지 않는다
+  const seeds = [20260812, 11, 777, 4242, 90210, 31337];
+  console.log(`[V-6] T-16 T5 경계 개체군 · ${yrs}년 · 시드 ${seeds.length}개
+`);
+  console.log('  시드         T5최소  절멸연차   최종T5     최종T3');
+  let ext = 0, funcExt = 0;
+  for (const seed of seeds) {
+    const w = createWorld(seed, 'XL', 'SAVANNA');
+    let mn = Infinity, extYear = -1;
+    for (let y = 0; y < yrs; y++) {
+      run(w, 365);
+      mn = Math.min(mn, w.p5.length);
+      if (extYear < 0 && w.p5.length === 0) extYear = y;
+    }
+    if (w.p5.length === 0) ext++;
+    else if (w.p5.length < 10) funcExt++;          // 앨리 효과에 잡혀 회복이 사실상 불가
+    console.log(`  ${pad(seed, 9)} ${pad(mn, 8)} ${pad(extYear < 0 ? '-' : extYear + '년', 8)}`
+      + ` ${pad(w.p5.length, 8)} ${pad(N(collectStats(w).n3), 10)}`);
+  }
+  const lost = ext + funcExt, rate = lost / seeds.length * 100;
+  console.log();
+  /* 원래 이 판정의 기준은 '멸종률 40~70%'였으나 그 숫자에는 근거가 없었다.
+     실제로 요구되는 성질은 "절멸이 가능하되 확정적이지 않을 것"이므로
+     그대로 판정한다. 실측값은 31_ [S-8.2](아)에 기록되어 있다. */
+  const detail = `${rate.toFixed(0)}% — 절멸 ${ext} · 10개체 미만 ${funcExt} / ${seeds.length}`;
+  if (yrs < 150) info(`T5 소실률 (${yrs}년 · 판정 생략)`, detail);
+  else check('T5 소실률 20~80% (절멸+기능적 절멸)', rate >= 20 && rate <= 80, detail);
+  console.log('  ※ 100%면 준자립 등급이 무의미하고, 0%면 MVP 판정이 무의미하다.');
   process.exit(fails ? 1 : 0);
 }
 

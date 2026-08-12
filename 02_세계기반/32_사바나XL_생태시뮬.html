@@ -194,7 +194,8 @@ tbody tr:hover{background:var(--sunk)}
         <button id="iFire" aria-pressed="false">화재 전면 진압</button>
         <button id="iPred" aria-pressed="false">대형 육식 전멸</button>
         <button id="iRain" aria-pressed="false">강수 −40%</button>
-        <p>문서가 예측한 결과가 실제로 계산되는지 확인합니다. 다시 눌러 되돌립니다.</p>
+        <button id="iImmig" aria-pressed="false">표류 유입 허용</button>
+        <p>문서가 예측한 결과가 실제로 계산되는지 확인합니다. 다시 눌러 되돌립니다. 절멸은 기본적으로 영구입니다.</p>
       </div>
       <div class="ov" id="legend"></div>
     </div>
@@ -314,7 +315,7 @@ const TUNE = {
      화재 크기 분포는 두꺼운 꼬리(다수의 작은 불 + 소수의 대형 화재). */
   fireSeasonStart:0.35,        // 건기의 몇 지점부터 화재철인가
   ignitionsPerKm2Yr:0.010,     // 낙뢰 발화 밀도
-  fireSpreadP:0.322, fireDrynessMin:0.40, fireFuelMinTonPerHa:0.75,
+  fireSpreadP:0.310, fireDrynessMin:0.40, fireFuelMinTonPerHa:0.75,
   fireWindBias:0.55, fireBurnDays:2,
   fireGrassSurvive:0.11, fireWoodySurvive:0.80, fireAshFert:0.028,
   fireBigEventFrac:0.03,       // 육지의 3% 이상 태우면 크로니클에 남긴다
@@ -325,7 +326,7 @@ const TUNE = {
   energyGainRate:0.12, satietyBreakEven:0.85,
   dehydrationPenalty:0.040, dehydrationOnset:0.20,
   birthRate:0.0020, birthEnergyMin:0.35, birthEnergySpan:0.40,
-  deathRate:0.0060, deathEnergyMax:0.35, overshootGuardMul:3,
+  deathRate:0.0060, deathEnergyMax:0.35,
   utilFeed:1.0, utilThirst:4.4, utilFear:1.5, utilCrowd:0.00004, utilNoise:0.16,
   /* 소형 초식 (T2 밀도장) */
   t2GrowthPerYr:2.6,
@@ -335,7 +336,21 @@ const TUNE = {
   predAltPreyShare:{apex:0.45, small:1.0},  // 상한이 없으면 초포식으로 T3가 멸종한다
                                             // (일반포식자는 주 먹이 저점에서 대체먹이로 버틴다)
   predEnergyRate:0.03, predSatietyBreakEven:0.85,
-  predBreedP:0.0016, predBreedEnergy:0.72, predDeathEnergy:0.05, predCapMul:1.6,
+  predBreedP:0.0016, predBreedEnergy:0.72, predDeathEnergy:0.05,
+                              // 개체수 상한은 두지 않는다. 상한이 있으면 그것이
+                              // 곧 조절자가 되어 버린다(1.6배 시절 T4가 600년 중
+                              // 99.7%를 상한에 붙어 있었다). 아래 텃세 항이 조절한다.
+  predTerritoryK:0.06,        // 텃세 : 같은 등급의 3x3 밀도가 섭식 성공을 깎는다.
+                              // 소형육식을 붙잡는 것은 먹이가 아니라 이 항이다
+                              // (T2가 사실상 무한해서 굶지 않기 때문).
+  intraguildP:0.0040,         // 길드내 포식 : 대형육식이 같은 셀 소형육식을 죽인다.
+                              // 이것이 있어야 '대형 육식 전멸 -> 중간포식자 해방'이 나온다.
+  alleeFloor:0.15,            // 앨리 효과의 하한 배율
+  /* 외부 유입 [R-12.5] · [I-6.2] — 본토에서의 표류 유입.
+     기본은 차단이다. 절멸은 실제로 영구여야 한다.
+     문서가 복구 경로를 요구하므로 기제는 남겨 두되 선택으로 켠다. */
+  immigrationPerYear:0.025,   // 40년에 1회 꼴
+  immigrationFounders:6, immigrationBelowFrac:0.25,
 
   fearGain:{apex:0.16, small:0.05}, fearDecay:0.93,
   /* 이력 */
@@ -410,12 +425,13 @@ function createWorld(seed, tierKey='XL', climateKey='SAVANNA'){
     gcap:new Float32Array(N), soil:new Float32Array(N), water:new Uint8Array(N),
     wdist:new Float32Array(N), t2:new Float32Array(N), fear:new Float32Array(N),
     burn:new Int16Array(N), fire:new Uint8Array(N), press:new Float32Array(N),
+    dens4:new Float32Array(N), dens5:new Float32Array(N),
     herds:[], p4:[], p5:[], herdAt:new Map(),
     rng:mulberry32(seed^0x51ED270B),
     day:0, year:0, landCount:0, nearCells:0, wetDays:Math.round(365*C.wetSeasonMonths/12),
     grassCapBase:C.standingTonPerHa*TUNE.grassShareOfStanding*cellHa,
     woodyCap:C.standingTonPerHa*(1-TUNE.grassShareOfStanding)*cellHa,
-    supp:false, noPred:false, dry:false,
+    supp:false, noPred:false, dry:false, noImmig:true,   // 기본 차단
     acc:{bYr:0,dYr:0,killYr:0,burnedYr:0,fireCount:0,fireMax:0},
     last:{births:0,deaths:0,kills:0,burnFrac:0,fires:0},
     totals:{births:0,deaths:0,kills:0,burned:0,fires:0},
@@ -686,8 +702,6 @@ function phaseHerds(w){
   const {g,land,grass,gcap,soil,water,wdist,fear,press,C,cap}=w, rng=w.rng;
   const s=seasonOf(w);
   press.fill(0); w.herdAt.clear();
-  let total=0; for(const h of w.herds) total+=h.n;
-  const guard=clamp(1-total/(TUNE.overshootGuardMul*cap.T3),0,1);
   const stepGraze=TUNE.moveGrazeKmDay/w.cellKm, stepThirst=TUNE.moveThirstKmDay/w.cellKm;
   let satS=0,satN=0;
 
@@ -719,7 +733,7 @@ function phaseHerds(w){
     press[ci]+=h.n;
     const lst=w.herdAt.get(ci); if(lst) lst.push(h); else w.herdAt.set(ci,[h]);
 
-    if(s.wet){ const b=h.n*TUNE.birthRate*clamp((h.e-TUNE.birthEnergyMin)/TUNE.birthEnergySpan,0,1)*guard;
+    if(s.wet){ const b=h.n*TUNE.birthRate*clamp((h.e-TUNE.birthEnergyMin)/TUNE.birthEnergySpan,0,1);
                h.n+=b; w.acc.bYr+=b; }
     { const d=h.n*TUNE.deathRate*clamp((TUNE.deathEnergyMax-h.e)/TUNE.deathEnergyMax,0,1);
       h.n-=d; w.acc.dYr+=d; }
@@ -748,8 +762,44 @@ function phaseMergeHerds(w){
 }
 
 function phasePredation(w){
+  buildPredDensity(w);
   hunt(w,w.p4,ECO.bodyMassT4Kg,false);
   hunt(w,w.p5,ECO.bodyMassT5Kg,true);
+  immigrate(w);
+}
+function buildPredDensity(w){
+  const {g,dens4,dens5}=w;
+  dens4.fill(0); dens5.fill(0);
+  for(const p of w.p4) dens4[g.idx(clamp(p.x|0,0,g.W-1),clamp(p.y|0,0,g.H-1))]++;
+  for(const p of w.p5) dens5[g.idx(clamp(p.x|0,0,g.W-1),clamp(p.y|0,0,g.H-1))]++;
+}
+/* 같은 등급이 3x3 안에 몇이나 있는가. 텃세의 입력이다. */
+function guildCrowd(w,ci,dens){
+  const {g}=w, x=g.xOf(ci), y=g.yOf(ci); let n=0;
+  for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)
+    if(g.inside(x+dx,y+dy)) n+=dens[g.idx(x+dx,y+dy)];
+  return Math.max(0,n-1);
+}
+
+/* 표류 유입 [R-12.5] — 절멸했거나 하한을 뚫은 등급에만, 해안에 상륙한다.
+   이것이 이 모델에서 유일하게 개체를 무에서 만드는 지점이다.
+   원칙 P8의 예외이므로 반드시 크로니클에 남긴다. */
+function immigrate(w){
+  if(w.noImmig||w.noPred) return;
+  const pDay=TUNE.immigrationPerYear/365;
+  for(const [arr,key,label] of [[w.p4,'T4','소형 육식'],[w.p5,'T5','대형 육식']]){
+    if(arr.length>=w.cap[key]*TUNE.immigrationBelowFrac) continue;
+    if(w.rng()>=pDay) continue;
+    const {g}=w; let tries=0, ci=-1;
+    while(tries++<200){                       // 해안 셀을 찾는다
+      const c=g.idx((w.rng()*g.W)|0,(w.rng()*g.H)|0);
+      if(w.land[c]&&w.wdist[c]<99){ ci=c; break; }
+    }
+    if(ci<0) continue;
+    for(let i=0;i<TUNE.immigrationFounders;i++)
+      arr.push({x:g.xOf(ci)+w.rng(),y:g.yOf(ci)+w.rng(),e:0.6});
+    logChron(w,'gain',`${label} 표류 유입 ${TUNE.immigrationFounders}개체 — 본토에서 상륙`);
+  }
 }
 /* 등급으로만 판정한다. 종 이름을 보지 않는다 [R-12.3]. */
 function hunt(w,arr,massKg,isApex){
@@ -757,7 +807,10 @@ function hunt(w,arr,massKg,isApex){
   const need=massKg*ECO.dailyIntakeFrac;
   const kind=isApex?'apex':'small';
   const stepC=TUNE.predMoveKmDay[kind]/w.cellKm;
-  const capN=(isApex?cap.T5:cap.T4)*TUNE.predCapMul;
+  const dens=isApex?w.dens5:w.dens4;
+  // 앨리 효과 : 최소존속개체군 아래로 내려가면 짝을 찾기 어렵다.
+  // 이 항이 없으면 2마리가 300마리로 멀쩡히 회복해 50/500 규칙이 무의미해진다.
+  const allee=clamp(arr.length/ECO.mvpShort,TUNE.alleeFloor,1);
   const t2Ref=Math.max(w.cap.T2/w.landCount,1e-6);
   for(let k=arr.length-1;k>=0;k--){
     const p=arr[k];
@@ -788,6 +841,13 @@ function hunt(w,arr,massKg,isApex){
         }
       }
     }
+    // 길드내 포식 : 대형육식은 같은 셀의 소형육식도 죽인다.
+    if(isApex&&w.dens4[ci]>0&&rng()<TUNE.intraguildP*w.dens4[ci]){
+      for(let m=w.p4.length-1;m>=0;m--){
+        const q=w.p4[m];
+        if(g.idx(q.x|0,q.y|0)===ci){ w.p4.splice(m,1); got+=ECO.bodyMassT4Kg; break; }
+      }
+    }
     // 대체먹이 상한. 없으면 대형육식이 무한한 T2에 부양된 채
     // 줄어드는 T3를 끝까지 사냥해 멸종시킨다(초포식).
     const alt=need*TUNE.predAltPreyShare[kind]-got;
@@ -795,9 +855,11 @@ function hunt(w,arr,massKg,isApex){
       const t=Math.min(t2[ci]*0.02, alt/ECO.bodyMassT2Kg);
       t2[ci]-=t; got+=t*ECO.bodyMassT2Kg;
     }
-    p.e=clamp(p.e+(got/need-TUNE.predSatietyBreakEven)*TUNE.predEnergyRate,0,1);
+    // 텃세 : 같은 등급이 몰려 있으면 실효 섭취가 깎인다.
+    const eff=got/(1+TUNE.predTerritoryK*guildCrowd(w,ci,dens));
+    p.e=clamp(p.e+(eff/need-TUNE.predSatietyBreakEven)*TUNE.predEnergyRate,0,1);
     if(p.e<TUNE.predDeathEnergy){arr.splice(k,1); continue;}
-    if(p.e>TUNE.predBreedEnergy&&rng()<TUNE.predBreedP&&arr.length<capN)
+    if(p.e>TUNE.predBreedEnergy&&rng()<TUNE.predBreedP*allee)
       arr.push({x:p.x+rng()-.5,y:p.y+rng()-.5,e:0.5});
   }
 }
@@ -1210,6 +1272,10 @@ toggle($('iFire'),'supp','화재 전면 진압 시작 — 목본 침입 관측',
 toggle($('iPred'),'noPred','대형·소형 육식 전멸 — 초식 상한 해제','포식자 제거 유지',
   ()=>{W.p5.length=0; W.p4.length=0;});
 toggle($('iRain'),'dry','강수 −40% 적용 — 건기 연장','강수 정상 복귀');
+// 기본이 차단이므로 버튼은 반대로 동작한다
+$('iImmig').onclick=()=>{ W.noImmig=!W.noImmig;
+  $('iImmig').setAttribute('aria-pressed',!W.noImmig);
+  logChron(W,'act',W.noImmig?'표류 유입 차단 — 절멸은 영구다':'표류 유입 허용 — [R-12.5] 복구 경로 개방');};
 
 $('btnCsv').onclick=()=>{
   const csv=[TABLE_COLS.map(c=>c[1]).join(',')]
