@@ -24,8 +24,18 @@ export function addEv(w,ind,kind,text){
 /* fate 는 '왜 명부에서 빠졌는가'를 구분한다.
    'death' 는 실제 죽음, 'merge' 는 무리가 흡수되며 대표 자리를 잃은 것이다.
    둘을 섞으면 수명 통계가 무리 병합 주기로 오염된다 (명예의 전당은 이 값으로 거른다). */
+const DEAD_TRACK_KEEP=12;
 export function killInd(w,ind,cause,fate='death'){
   ind.deathDay=w.year*365+w.day; ind.cause=cause; ind.fate=fate;
+  /* 죽은 개체의 동선은 성기게 남긴다. w.inds 는 한 번 만든 개체를 지우지 않으므로
+     (명예의 전당이 판 전체를 훑어야 한다) 90점을 그대로 들고 있으면
+     수만 마리분이 쌓여 장기 실행에서 메모리가 붓는다. 모양만 남기면 된다. */
+  if(ind.track.length>DEAD_TRACK_KEEP){
+    const step=Math.ceil(ind.track.length/DEAD_TRACK_KEEP), thin=[];
+    for(let i=0;i<ind.track.length;i+=step) thin.push(ind.track[i]);
+    thin.push(ind.track[ind.track.length-1]);
+    ind.track=thin;
+  }
   addEv(w,ind,'death',cause);
   w.dead.push(ind);
   if(w.dead.length>TUNE.deadRegistryMax) w.dead.shift();

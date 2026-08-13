@@ -58,13 +58,27 @@ $('layerSeg').innerHTML=Object.entries(LAYERS).map(([k,v],n)=>
    T2 는 밀도장이라 한 점이 몇 마리인지를 정해야 하는데, 고정값으로 두면
    개체군이 백 배씩 오르내리는 동안 점이 사라지거나 셀을 덮어 버린다.
    그래서 지금 밀도에 맞춰 잡고, 그 값을 범례에 그대로 적는다. */
+/* 하루 사이를 프레임으로 나눠 잇는다. 상태 갱신은 여전히 하루 한 번이고
+   (물리 최소 단위 = 1일), 이것은 그 사이를 잇는 그림일 뿐이다.
+   하루에 두 걸음 이상 나가는 속도에서는 보간이 뜻을 잃으므로 끈다. */
+let dayFrac=1;
+const IX=o=>o.px==null?o.x:o.px+(o.x-o.px)*dayFrac;
+const IY=o=>o.py==null?o.y:o.py+(o.y-o.py)*dayFrac;
+/* 확대하면 무리를 구성원 점으로 펼친다. 무리 중심은 진짜 좌표지만
+   그 안의 개별 위치는 시뮬레이션이 아니라 표현이다 — 범례에 그렇게 적는다. */
+const SCATTER_ZOOM=3, SCATTER_BUDGET=6000;
+let scatterNote='';
 const NICE=[1,2,5,10,25,50,100,250,500,1000,2500,5000,10000];
 const niceStep=v=>{let o=NICE[0];for(const n of NICE) if(n<=v) o=n; return o;};
-let t2PerDot=200;
+let t2PerDot=200, scatterShown='';
 function drawLegend(){
   $('legend').innerHTML=`<div class="lg"><span class="ramp"></span><span>초본 0 → 부양력</span></div>`
   +`<div class="lg"><span class="sw" style="background:var(--t2)"></span>T2 점 1개 = ${fmt(t2PerDot)}마리 · 밀도장(개체 아님)</div>`
-  +`<div class="lg"><span class="sw" style="background:var(--t3)"></span>T3 점 1개 = 무리 하나 · 크기 = √개체수</div>`
+  +(scatterShown
+    ?`<div class="lg"><span class="sw" style="background:var(--t3)"></span>T3 구성원 표시 · ${scatterShown}
+       <span style="color:var(--ink-3)">— 무리 안 위치는 표현입니다</span></div>`
+    :`<div class="lg"><span class="sw" style="background:var(--t3)"></span>T3 점 1개 = 무리 하나 · 크기 = √개체수
+       <span style="color:var(--ink-3)">— ${SCATTER_ZOOM}배로 확대하면 구성원이 흩어집니다</span></div>`)
   +`<div class="lg"><span class="sw" style="background:var(--t4)"></span>T4 점 1개 = 개체 하나</div>`
   +`<div class="lg"><span class="sw" style="background:var(--t5)"></span>T5 점 1개 = 개체 하나</div>`
   +`<div class="lg"><span class="sw" style="background:var(--water);border-radius:1px"></span>수원
@@ -120,6 +134,23 @@ function zoomMeta(){
   const mPerPx=W.T.cellM*visCells()/cv.width;
   el.textContent=`${zoom.toFixed(1)}× · 화면폭 ${(visCells()*W.cellKm).toFixed(1)}km · 1px ≈ ${mPerPx.toFixed(0)}m`;
 }
+/* 개체 추적 : 고른 개체를 화면 가운데에 붙잡아 둔다.
+   느린 속도(0.1~0.5일/프레임)와 같이 쓰면 하루하루 움직임이 보인다. */
+let follow=false;
+function setFollow(on){
+  follow=on;
+  const b=$('btnFollow');
+  b.setAttribute('aria-pressed',on); b.textContent=on?'추적 중':'개체 추적';
+}
+function followSel(){
+  const i=findInd(selUid);
+  if(!i||i.deathDay!=null){ setFollow(false); return; }
+  const zoomed=zoom<6;
+  if(zoomed) zoom=6;
+  const v=visCells();
+  vx=IX(i)-v/2; vy=IY(i)-v/2; clampView();
+  if(zoomed) zoomMeta();
+}
 const px=[0,0,0];
 function paintMap(){
   const g=W.g,d=img.data,L=LAYERS[layer];
@@ -159,22 +190,64 @@ function paintMap(){
     }
   }
   ctx.globalAlpha=1; ctx.lineWidth=1; ctx.strokeStyle='rgba(20,24,18,.55)';
+  const rz=Math.min(2.5,Math.sqrt(zoom));
   ctx.fillStyle=cssVar('--t4');
   for(const p of W.p4){ if(!seen(p.x,p.y,1)) continue;
-    ctx.beginPath();ctx.arc(SX(p.x),SY(p.y),2*Math.min(2.5,Math.sqrt(zoom)),0,6.2832);ctx.fill();ctx.stroke();}
+    ctx.beginPath();ctx.arc(SX(IX(p)),SY(IY(p)),2*rz,0,6.2832);ctx.fill();ctx.stroke();}
+  /* T3 : 멀리서는 무리 하나가 점 하나, 가까이서는 구성원 한 마리가 점 하나 */
   ctx.fillStyle=cssVar('--t3');
-  for(const h of W.herds){ if(!seen(h.x,h.y,2)) continue;
-    ctx.beginPath();ctx.arc(SX(h.x),SY(h.y),Math.max(1.8,Math.sqrt(h.n)*0.62)*Math.min(2.5,Math.sqrt(zoom)),0,6.2832);ctx.fill();ctx.stroke();}
+  const near=zoom>=SCATTER_ZOOM?W.herds.filter(h=>seen(h.x,h.y,2)):null;
+  if(near&&near.length){
+    let want=0; for(const h of near) want+=Math.max(1,Math.round(h.n));
+    const per=Math.min(1,SCATTER_BUDGET/Math.max(want,1));   // 예산을 넘으면 솎는다
+    scatterNote=per>=1?'점 1개 = 1마리'
+      :`점 1개 ≈ ${fmt(1/per)}마리 (표시 예산)`;
+    const t=(W.year*365+W.day+dayFrac)*0.06;
+    const rDot=Math.max(1.1,1.5*rz);
+    for(const h of near){
+      const cx=SX(IX(h)), cy=SY(IY(h));
+      const n=Math.max(1,Math.round(h.n)), shown=Math.max(1,Math.round(n*per));
+      /* 무리 반경 : 마릿수가 늘면 넓게 퍼진다. 표현이라 셀 크기에 맞춰 둔다 */
+      const rad=Math.min(1.2,0.16+Math.sqrt(n)*0.035)*s;
+      for(let k=0;k<shown;k++){
+        const a=((k*2654435761)>>>8&1023)/1023*6.2832+t*(0.4+((k*40503)>>>8&15)/40);
+        const rr=rad*Math.sqrt(((k*1597334677)>>>8&255)/255);
+        ctx.beginPath();ctx.arc(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr,rDot,0,6.2832);ctx.fill();
+      }
+    }
+  } else {
+    scatterNote='';
+    for(const h of W.herds){ if(!seen(h.x,h.y,2)) continue;
+      ctx.beginPath();ctx.arc(SX(IX(h)),SY(IY(h)),Math.max(1.8,Math.sqrt(h.n)*0.62)*rz,0,6.2832);ctx.fill();ctx.stroke();}
+  }
   ctx.fillStyle=cssVar('--t5'); ctx.strokeStyle='rgba(255,255,255,.7)';
   for(const p of W.p5){ if(!seen(p.x,p.y,1)) continue;
-    ctx.beginPath();ctx.arc(SX(p.x),SY(p.y),3*Math.min(2.5,Math.sqrt(zoom)),0,6.2832);ctx.fill();ctx.stroke();}
+    ctx.beginPath();ctx.arc(SX(IX(p)),SY(IY(p)),3*rz,0,6.2832);ctx.fill();ctx.stroke();}
   const sel=findInd(selUid);
-  if(sel&&sel.deathDay==null&&sel.track.length>1){
-    ctx.strokeStyle='rgba(255,255,255,.9)'; ctx.lineWidth=1.6; ctx.beginPath();
-    sel.track.forEach((p,i)=>i?ctx.lineTo(SX(p[1]),SY(p[2])):ctx.moveTo(SX(p[1]),SY(p[2])));
-    ctx.stroke();
-    ctx.beginPath(); ctx.arc(SX(sel.x),SY(sel.y),6,0,6.2832); ctx.stroke();
+  if(sel&&sel.deathDay==null){
+    if(sel.track.length>1){
+      ctx.strokeStyle='rgba(255,255,255,.9)'; ctx.lineWidth=1.6; ctx.beginPath();
+      sel.track.forEach((p,i)=>i?ctx.lineTo(SX(p[1]),SY(p[2])):ctx.moveTo(SX(p[1]),SY(p[2])));
+      ctx.stroke();
+    }
+    ctx.strokeStyle='rgba(255,255,255,.9)'; ctx.lineWidth=1.6;
+    ctx.beginPath(); ctx.arc(SX(IX(sel)),SY(IY(sel)),7,0,6.2832); ctx.stroke();
   }
+  if(scatterNote!==scatterShown){ scatterShown=scatterNote; drawLegend(); }
+}
+/* 지도를 눌러 개체를 고른다. 무리를 누르면 그 무리의 대표가 잡힌다. */
+function pickAt(fx,fy){
+  const lim=Math.max(1.5,10/(cv.width/visCells()));   // 화면 10px 안
+  let best=null,bd=lim*lim;
+  const test=(o,ind)=>{ if(!ind) return;
+    const dx=IX(o)-fx, dy=IY(o)-fy, d=dx*dx+dy*dy;
+    if(d<bd){ bd=d; best=ind; } };
+  for(const p of W.p5) test(p,p);
+  for(const p of W.p4) test(p,p);
+  for(const h of W.herds) test(h,h.lead);
+  if(best){ selUid=best.uid; drawInd(); drawLife();
+    $('vCursor').textContent=`선택 · ${best.name}`; }
+  return !!best;
 }
 function fitMap(){
   if($('mapCard').dataset.open!=='true') return;
@@ -275,7 +348,10 @@ const IND_COLS=[
   ['sp','종',(w,i)=>w.species[i.sp].name,'nm',(w,i)=>w.species[i.sp].name],
   ['sex','성',(w,i)=>i.sex==='M'?'수':'암','nm',(w,i)=>i.sex],
   ['age','나이',(w,i)=>indAge(w,i).toFixed(1),'',(w,i)=>indAge(w,i)],
-  ['born','출생',(w,i)=>(i.bornDay/365).toFixed(1),'',(w,i)=>i.bornDay],
+  /* 초기 배치 개체는 나이를 흩뿌리려 bornDay 가 음수다(코호트 동조 방지).
+     그대로 찍으면 "출생 -15.6년"이 되어 버그처럼 읽힌다. */
+  ['born','출생',(w,i)=>i.bornDay<0?`시작전 ${(-i.bornDay/365).toFixed(1)}`
+    :(i.bornDay/365).toFixed(1),'',(w,i)=>i.bornDay],
   ['offspring','자손',(w,i)=>i.offspring||'–','',(w,i)=>i.offspring],
   ['kills','사냥',(w,i)=>i.kills>=1?fmt(i.kills):'–','',(w,i)=>i.kills],
   ['peakHerd','최대무리',(w,i)=>i.peakHerd>=1?fmt(i.peakHerd):'–','',(w,i)=>i.peakHerd],
@@ -337,7 +413,8 @@ function drawLife(){
     <dl class="meta">
       <dt>성별</dt><dd>${i.sex==='M'?'수':'암'}</dd>
       <dt>나이</dt><dd>${age.toFixed(1)}년 / 수명 ${sp.lifespanYr.toFixed(0)}년</dd>
-      <dt>출생</dt><dd>${(i.bornDay/365).toFixed(1)}년차</dd>
+      <dt>출생</dt><dd>${i.bornDay<0?`시작 ${(-i.bornDay/365).toFixed(1)}년 전 (초기 배치)`
+        :`${(i.bornDay/365).toFixed(1)}년차`}</dd>
       ${i.deathDay!=null?`<dt>사망</dt><dd>${(i.deathDay/365).toFixed(1)}년차 · ${i.cause}</dd>`:''}
       <dt>체중</dt><dd>${sp.massKg.toFixed(1)} kg</dd>
       <dt>내건성</dt><dd>${sp.droughtTol.toFixed(2)}</dd>
@@ -393,11 +470,24 @@ function readout(){
   return st;
 }
 const chip=(id,ok,txt)=>{const e=$(id);e.className='chip '+(ok?'ok':'no');e.querySelector('b').textContent=txt;};
+/* 추적 중에는 커서 칸이 그 개체의 지금 상태를 보여 준다 */
+function showSelState(){
+  const i=findInd(selUid); if(!i) return;
+  const h=i.herd&&i.herd.n>0?i.herd:null;
+  $('vCursor').textContent=`${i.name} · ${indAge(W,i).toFixed(1)}년`
+    +` · 에너지 ${i.e.toFixed(2)} · 수분 ${i.hyd.toFixed(2)}`
+    +(h?` · 무리 ${fmt(h.n)}마리`:'')+(i.kills>=1?` · 사냥 ${fmt(i.kills)}마리`:'');
+}
 function frame(){
   if(playing){acc+=speed;let n=0;while(acc>=1&&n<40){stepDay(W);acc--;n++;} if(acc>2)acc=0;}
+  /* 하루에 한 걸음 이하로 갈 때만 보간한다. 그보다 빠르면 프레임마다
+     여러 날이 지나 버려서 이을 것이 없다. */
+  dayFrac=speed<1?clamp(acc,0,1):1;
   const st=readout();
+  if(follow) followSel();
   if($('mapCard').dataset.open==='true') paintMap();
-  if(frameN%12===0){ drawPop(); drawSpecChart(); drawBars(); drawTiles(st); drawSpec(); drawInd(); drawLife(); }
+  if(frameN%12===0){ drawPop(); drawSpecChart(); drawBars(); drawTiles(st); drawSpec(); drawInd(); drawLife();
+    if(follow) showSelState(); }
   if(chronDirty){drawChron();setChronDirty(false);}
   frameN++; requestAnimationFrame(frame);
 }
@@ -480,14 +570,19 @@ function cellAt(ev){
   return [vx+(ev.clientX-r.left)/r.width*v, vy+(ev.clientY-r.top)/r.height*v];
 }
 let drag=null;
-cv.addEventListener('mousedown',ev=>{drag={x:ev.clientX,y:ev.clientY,vx,vy};cv.style.cursor='grabbing';});
-addEventListener('mouseup',()=>{if(drag){drag=null;cv.style.cursor='';}});
+cv.addEventListener('mousedown',ev=>{drag={x:ev.clientX,y:ev.clientY,vx,vy,moved:false};cv.style.cursor='grabbing';});
+addEventListener('mouseup',ev=>{
+  if(drag&&!drag.moved) pickAt(...cellAt(ev));   // 끌지 않고 눌렀으면 선택이다
+  if(drag){drag=null;cv.style.cursor='';}});
 cv.addEventListener('wheel',ev=>{ev.preventDefault();
   const [cx,cy]=cellAt(ev); setZoom(zoom*(ev.deltaY<0?1.25:0.8),cx,cy);},{passive:false});
 cv.addEventListener('dblclick',()=>{zoom=1;vx=vy=0;zoomMeta();});
 cv.addEventListener('mousemove',ev=>{
   const g=W.g;
   if(drag){ const r=cv.getBoundingClientRect(), v=visCells();
+    if(Math.abs(ev.clientX-drag.x)+Math.abs(ev.clientY-drag.y)>3) drag.moved=true;
+    if(!drag.moved) return;
+    setFollow(false);                                  // 손으로 옮기면 추적을 놓는다
     vx=drag.vx-(ev.clientX-drag.x)/r.width*v; vy=drag.vy-(ev.clientY-drag.y)/r.height*v;
     clampView(); return; }
   const [fx,fy]=cellAt(ev), x=Math.floor(fx), y=Math.floor(fy);
@@ -505,7 +600,10 @@ cv.addEventListener('mouseleave',()=>{$('vCursor').textContent='셀 위로 이�
 $('zoomSeg').onclick=e=>{const b=e.target.closest('[data-z]');if(!b)return;
   if(b.dataset.z==='in') setZoom(zoom*1.6);
   else if(b.dataset.z==='out') setZoom(zoom/1.6);
-  else {zoom=1;vx=vy=0;zoomMeta();}};
+  else {setFollow(false);zoom=1;vx=vy=0;zoomMeta();}};
+$('btnFollow').onclick=()=>{
+  if(!findInd(selUid)){ $('vCursor').textContent='먼저 개체를 고르세요 — 지도를 누르거나 표에서 선택'; return; }
+  setFollow(!follow); if(follow){ followSel(); zoomMeta(); }};
 addEventListener('resize',fitMap);
 newWorld(20260812,'XL','SAVANNA');
 frame();

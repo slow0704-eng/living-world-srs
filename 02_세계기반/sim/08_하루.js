@@ -166,6 +166,11 @@ export function phaseHerds(w){
     h.e=clamp(h.e+(sat-TUNE.satietyBreakEven)*TUNE.energyGainRate
               -TUNE.dehydrationPenalty*clamp((TUNE.dehydrationOnset-h.hyd)/TUNE.dehydrationOnset,0,1),0,1);
 
+    /* 하루 시작 위치를 남긴다. 상태는 하루에 한 번만 갱신되므로 화면이
+       그대로 그리면 무리가 툭툭 튄다. 표현 계층이 이 값과 보간해 잇는다.
+       (물리 최소 단위는 여전히 하루다 — 보간은 그림일 뿐이다) */
+    h.px=h.x; h.py=h.y;
+
     const [dx,dy]=g.bestDir(h.x|0,h.y|0,j=>{
       if(!land[j]) return -Infinity;
       let f=0;
@@ -177,6 +182,13 @@ export function phaseHerds(w){
     });
     moveBy(w,h,dx,dy,lerp(stepGraze,stepThirst,1-h.hyd)*sp.moveMul);
     if(h.lead){ h.lead.x=h.x; h.lead.y=h.y; h.lead.e=h.e; h.lead.hyd=h.hyd;
+      h.lead.px=h.px; h.lead.py=h.py;
+      /* 대표도 동선을 남긴다. 예전에는 포식자만 남겨서, 초식 개체를 골라도
+         생애 화면에 동선이 비어 있었다. */
+      if((w.year*365+w.day)%TUNE.trackSampleDays===0){
+        h.lead.track.push([w.year*365+w.day,h.x,h.y]);
+        if(h.lead.track.length>TUNE.trackMaxPoints) h.lead.track.shift();
+      }
       if(h.n>h.lead.peakHerd){                        // 대표가 이끈 최대 무리 — 업적 기록
         const was=h.lead.peakHerd; h.lead.peakHerd=h.n;
         for(const mark of [100,200,400,800])
@@ -280,6 +292,7 @@ export function hunt(w,arr,isApex){
       } else for(const q of sp.diet){ const o=w.t2Idx.get(q); if(o!==undefined) prey+=t2d[o*N+j]/140; }
       return prey*1.9+0.5*(1-clamp(wdist[j]/TUNE.waterGradientCells,0,1))+rng()*0.3;
     });
+    p.px=p.x; p.py=p.y;                       // 화면 보간용 (하루 시작 위치)
     moveBy(w,p,dx,dy,TUNE.predMoveKmDay[kind]/w.cellKm*sp.moveMul);
     fear[ci]=Math.min(1,fear[ci]+TUNE.fearGain[kind]);
     if((w.year*365+w.day)%TUNE.trackSampleDays===0){

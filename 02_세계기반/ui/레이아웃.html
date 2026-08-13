@@ -5,6 +5,7 @@
     <div class="grp" style="margin-left:auto">
       <div class="seg" role="group" aria-label="속도">
         <button id="btnPlay" aria-pressed="true">일시정지</button>
+        <button data-spd="0.1">관찰</button>
         <button data-spd="0.5">느림</button><button data-spd="2" aria-pressed="true">보통</button>
         <button data-spd="6">빠름</button><button data-spd="15">최고</button>
       </div>
@@ -38,6 +39,7 @@
           <button data-z="in" aria-label="확대">＋</button>
           <button data-z="reset">전체</button>
         </div>
+        <button id="btnFollow" aria-pressed="false">개체 추적</button>
         <div class="seg" role="group" aria-label="레이어" id="layerSeg"></div>
         <button id="btnMap" aria-expanded="false">펼치기</button>
       </div>
