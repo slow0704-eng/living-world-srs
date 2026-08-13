@@ -19,8 +19,9 @@ import { fileURLToPath } from 'node:url';
 const here = path.dirname(fileURLToPath(import.meta.url));
 /* 모듈을 직접 가져온다. 예전에는 HTML에서 <script>를 잘라 eval 했는데,
    주석 한 줄만 옮겨도 깨지는 방식이었다. */
-import { createWorld, stepDay, collectStats, deriveCapacity,
+import { createWorld, stepDay, collectStats, deriveCapacity, hallOfFame, indBrief,
          CLIMATE_PROFILES, ISLAND_TIERS, ECO, TUNE } from './sim/index.js';
+import { writeReport } from './판독.mjs';
 const TUNE_SNAPSHOT = JSON.parse(JSON.stringify(TUNE));
 
 const arg = (k, d) => { const i = process.argv.indexOf(k); return i < 0 ? d : process.argv[i + 1]; };
@@ -100,18 +101,24 @@ if (has('--fire')) {
 }
 
 if (has('--interv')) {
-  console.log('표 C-2 개입 대조 · XL x 사바나 · 10년 예열 후 개입\n');
+  const WARM = 10;   // 개입 전 예열 연차. 초기 과도기를 지나야 대조가 성립한다
+  console.log(`표 C-2 개입 대조 · XL x 사바나 · ${WARM}년 예열 후 개입\n`);
   const scen = (label, apply, years) => {
     const w = createWorld(20260812, 'XL', 'SAVANNA'); run(w, WARM * 365);
     const b = collectStats(w), bw = w.env.woodyFrac * 100;
     apply(w); run(w, years * 365);
     const a = collectStats(w), aw = w.env.woodyFrac * 100;
+    /* 개입 기간의 평균도 함께 낸다. T3는 진폭이 커서 마지막 한 해만 보면
+       개입 효과가 아니라 진동의 위상을 재게 된다. */
+    const rows = w.years.slice(-years);
+    const m3 = rows.reduce((s, r) => s + r.T3, 0) / Math.max(rows.length, 1);
     const d = (x, y) => (y - x >= 0 ? '+' : '') + Math.round((y - x) / Math.max(x, 1) * 100) + '%';
     console.log(`  ${label.padEnd(20)} T3 ${pad(N(b.n3), 7)} → ${pad(N(a.n3), 7)} (${pad(d(b.n3, a.n3), 5)})`
-      + `   목본 ${pad(bw.toFixed(0), 2)}→${pad(aw.toFixed(0), 2)}%   T5 ${b.n5}→${a.n5}`);
-    return { b, a };
+      + `   기간평균 ${pad(N(m3), 7)}   목본 ${pad(bw.toFixed(0), 2)}→${pad(aw.toFixed(0), 2)}%   T5 ${b.n5}→${a.n5}`);
+    return { b, a, m3 };
   };
   const ctrl  = scen('무개입 (대조군)', () => {}, 20);
+  const ctrl10 = scen('무개입 (10년)', () => {}, 10);
   const fire  = scen('화재 전면 진압', w => { w.supp = true; }, 20);
   const fire100 = scen('화재 진압 (100년)', w => { w.supp = true; }, 100);
   const ctrl100 = scen('무개입 (100년)', () => {}, 100);
@@ -129,8 +136,13 @@ if (has('--interv')) {
     `${(fire100.a.woodyFrac * 100).toFixed(0)}% vs 대조군 ${(ctrl100.a.woodyFrac * 100).toFixed(0)}%`);
   info('화재 진압 → T3 (100년)',
     `${N(fire100.a.n3)} vs 대조군 ${N(ctrl100.a.n3)} — 역전되지 않는다 (억제계수 0.55)`);
-  check('육식 전멸 → 초식 해방', pred.a.n3 > pred.b.n3 * 1.2, `${N(pred.b.n3)} → ${N(pred.a.n3)}`);
-  check('강수 감소 → 개체군 급감', rain.a.n3 < rain.b.n3 * 0.6, `${N(rain.b.n3)} → ${N(rain.a.n3)}`);
+  /* 개입군의 전후를 비교하면 초기 과도기의 하강이 그대로 섞인다.
+     10년차는 아직 첫 과잉의 정점이라 대조군도 60% 넘게 깎인다.
+     개입의 효과는 같은 시점의 대조군과 견주어야 나온다. */
+  check('육식 전멸 → 초식 해방', pred.m3 > ctrl10.m3 * 1.2,
+    `기간평균 ${N(pred.m3)} vs 대조군 ${N(ctrl10.m3)}`);
+  check('강수 감소 → 개체군 급감', rain.m3 < ctrl10.m3 * 0.6,
+    `기간평균 ${N(rain.m3)} vs 대조군 ${N(ctrl10.m3)}`);
   process.exit(fails ? 1 : 0);
 }
 
@@ -149,49 +161,19 @@ function saveRun(w, meta) {
     lifespanYr: +s.lifespanYr.toFixed(1),
     seedN: s.seedN, finalN: Math.round(s.n), status: s.status, extinctYear: s.extinctYear,
   }));
+  /* 개체 표본은 최근 것만 남긴다. 전부 넣으면 수만 마리라 json 이 감당이 안 된다.
+     대신 판 전체의 기록은 legacy(명예의 전당)가 들고 있다. */
+  const individuals = w.inds.slice(-300).map(i => indBrief(w, i));
   const json = {
     meta: { ...meta, seed: w.seed, tier: w.tierKey, climate: w.climateKey,
             landCells: w.landCount, years: w.year,
             derived: w.cap, tune: TUNE_SNAPSHOT },
-    years: w.years, species,
+    years: w.years, species, legacy: hallOfFame(w), individuals,
     chronicle: w.chron.map(e => ({ year: e.y, day: e.d, kind: e.kind, msg: e.msg })),
     totals: w.totals,
   };
   fs.writeFileSync(path.join(dir, base + '.json'), JSON.stringify(json, null, 1), 'utf8');
-
-  // 사람이 읽는 요약
-  const L = [];
-  const push = (...a) => L.push(a.join(''));
-  push('='.repeat(78));
-  push(` 시뮬레이션 실행 기록 · ${stamp}`);
-  push('='.repeat(78));
-  push(`설정   ${w.T.name} ${w.T.areaKm2.toLocaleString('ko-KR')}km² · ${w.C.name}`
-     + ` · 시드 ${w.seed} · ${w.year}년 · 육지 ${N(w.landCount)}셀`);
-  push(`유도   [I-4] T2 ${N(w.cap.T2)} · T3 ${N(w.cap.T3)} · T4 ${N(w.cap.T4)} · T5 ${N(w.cap.T5)}`);
-  push('');
-  push('─ 종 구성 ─────────────────────────────────────────────────────────────');
-  push('  등급 종            체중kg  초기      최종   상태');
-  for (const s of species)
-    push(`  ${pad(s.trophic, 4)} ${s.name.padEnd(12)} ${pad(s.massKg, 6)} ${pad(N(s.seedN), 8)}`
-       + ` ${pad(N(s.finalN), 9)}   ${s.extinctYear != null ? `절멸 ${s.extinctYear}년` : s.status}`);
-  push('');
-  push('─ 연도별 (10년 간격) ──────────────────────────────────────────────────');
-  push('    연차       T2       T3     T4    T5   초본천t 목본%  화재%  발화  종');
-  const step = Math.max(1, Math.round(w.years.length / 30));
-  for (let i = 0; i < w.years.length; i += step) {
-    const r = w.years[i];
-    push(`  ${pad(r.year, 6)} ${pad(N(r.T2), 8)} ${pad(N(r.T3), 8)} ${pad(r.T4, 6)} ${pad(r.T5, 5)}`
-       + ` ${pad(N(r.grassKt), 9)} ${pad(r.woodyPct.toFixed(0), 5)} ${pad(r.burnPct.toFixed(0), 6)}`
-       + ` ${pad(r.fires, 5)} ${pad(r.species, 3)}`);
-  }
-  push('');
-  push('─ 자동 판독 ───────────────────────────────────────────────────────────');
-  for (const line of readRun(w)) push('  ' + line);
-  push('');
-  push('─ 사건 기록 (최근 40) ─────────────────────────────────────────────────');
-  for (const e of w.chron.slice(-40)) push(`  ${pad(e.y, 5)}년 [${e.kind}] ${e.msg}`);
-  push('='.repeat(78));
-  fs.writeFileSync(path.join(dir, base + '.txt'), L.join(String.fromCharCode(10)) + String.fromCharCode(10), 'utf8');
+  writeReport(json, path.join(dir, base + '.txt'));   // 서식은 판독.mjs 한 곳에만 있다
   return base;
 }
 

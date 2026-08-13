@@ -4,7 +4,7 @@
 import { ECO } from './01_사양상수.js';
 import { TUNE } from './02_튜닝상수.js';
 import { clamp, lerp } from './03_유틸.js';
-import { newInd, addEv, killInd, indAge } from './06_개체.js';
+import { newInd, addEv, killInd, noteKill, indAge } from './06_개체.js';
 import { computeWaterDist } from './07_세계생성.js';
 import { refreshSpeciesCounts, recordSample, closeYear, watchEvents } from './09_통계이력.js';
 import { logChron } from './09_통계이력.js';
@@ -145,10 +145,12 @@ export function phaseHerds(w){
     let ci=g.idx(h.x|0,h.y|0);
     if(!land[ci]){ h.x=g.W/2; h.y=g.H/2; ci=g.idx(h.x|0,h.y|0); }
 
-    const wasDry=h.hyd<TUNE.dehydrationOnset;
+    /* 건기마다 마르고 채우기를 반복하므로, 어지간한 갈증까지 적으면
+       생애 기록이 물 마신 이야기로만 채워진다. 죽기 직전이었을 때만 남긴다. */
+    const wasParched=h.hyd<0.05;
     h.hyd=clamp(h.hyd-1/(TUNE.hydrationDays*sp.droughtMul),0,1);
     if(wdist[ci]<=TUNE.drinkRadiusCells){ h.hyd=1;
-      if(wasDry&&h.lead) addEv(w,h.lead,'move','수원에 도달해 물을 마심'); }
+      if(wasParched&&h.lead) addEv(w,h.lead,'move','말라죽기 직전 수원에 닿음'); }
 
     // 섭식 : 자기 식이 목록의 식물만 먹는다. 목록이 넓을수록 가뭄에 강하다 [C-5.2]
     const demand=h.n*sp.massKg*ECO.dailyIntakeFrac/1000;
@@ -174,7 +176,21 @@ export function phaseHerds(w){
            -TUNE.utilCrowd*press[j]+rng()*TUNE.utilNoise;
     });
     moveBy(w,h,dx,dy,lerp(stepGraze,stepThirst,1-h.hyd)*sp.moveMul);
-    if(h.lead){ h.lead.x=h.x; h.lead.y=h.y; h.lead.e=h.e; h.lead.hyd=h.hyd; }
+    if(h.lead){ h.lead.x=h.x; h.lead.y=h.y; h.lead.e=h.e; h.lead.hyd=h.hyd;
+      if(h.n>h.lead.peakHerd){                        // 대표가 이끈 최대 무리 — 업적 기록
+        const was=h.lead.peakHerd; h.lead.peakHerd=h.n;
+        for(const mark of [100,200,400,800])
+          if(was<mark&&h.n>=mark) addEv(w,h.lead,'move',`무리가 ${mark}마리를 넘김`);
+      } }
+
+    /* 대표도 늙는다. 없으면 무리가 이어지는 동안 대표가 영생해서
+       '최장수'가 종 수명의 두 배로 찍힌다 — 무리의 나이지 개체의 나이가 아니다.
+       무리 자체(h.n)는 그대로이므로 개체군 수지에는 영향이 없다. */
+    if(h.lead&&indAge(w,h.lead)>sp.lifespanYr&&rng()<0.004){
+      killInd(w,h.lead,'노쇠');
+      h.lead=newInd(w,h.sp,h.x,h.y); h.lead.herd=h; h.lead.peakHerd=h.n;
+      addEv(w,h.lead,'move','무리의 대표가 됨');
+    }
 
     press[ci]+=h.n;
     const lst=w.herdAt.get(ci); if(lst) lst.push(h); else w.herdAt.set(ci,[h]);
@@ -219,7 +235,8 @@ export function phaseMergeHerds(w){
         const a=g.shift(), b=g[0];
         b.e=(b.e*b.n+a.e*a.n)/(b.n+a.n); b.hyd=Math.max(b.hyd,a.hyd);
         b.n+=a.n; a.n=0; merged=true;
-        if(a.lead){ addEv(w,a.lead,'move','다른 무리에 흡수됨'); killInd(w,a.lead,'무리 흡수'); }
+        if(a.lead){ addEv(w,a.lead,'move','다른 무리에 흡수됨');
+          killInd(w,a.lead,'무리 흡수','merge'); }   // 죽은 것이 아니라 대표 자리를 잃은 것
       }
     }
   }
@@ -299,7 +316,7 @@ export function hunt(w,arr,isApex){
           const t=Math.min(h.n*TUNE.predTakePerHerd*pref, remKg/mk);
           if(t<=0) continue;
           h.n-=t; remKg-=t*mk; w.acc.dYr+=t; w.acc.killYr+=t; got+=t*mk;
-          if(t>0.5&&p.kills++===0) addEv(w,p,'hunt',`첫 사냥 성공 — ${species[h.sp].name}`);
+          noteKill(w,p,t,species[h.sp].name);
         }
       }
       if(w.dens4[ci]>0&&rng()<TUNE.intraguildP*w.dens4[ci]){    // 길드내 포식
@@ -307,6 +324,8 @@ export function hunt(w,arr,isApex){
           const q=w.p4[m];
           if(g.idx(q.x|0,q.y|0)===ci){
             w.p4.splice(m,1); killInd(w,q,`${sp.name}에게 죽음`);
+            noteKill(w,p,1,species[q.sp].name);
+            addEv(w,p,'hunt',`길드내 포식 — ${q.name}`);
             got+=species[q.sp].massKg; break;
           }
         }
@@ -318,7 +337,9 @@ export function hunt(w,arr,isApex){
         const oi=w.t2Idx.get(q); if(oi===undefined) continue;
         const o=oi*N+ci; if(t2d[o]<=1) continue;
         const t=Math.min(t2d[o]*0.02,(need*TUNE.predAltPreyShare[kind]-got)/species[q].massKg);
-        if(t>0){ t2d[o]-=t; got+=t*species[q].massKg; }
+        /* 소형 육식은 무리를 덮치지 못하고 이 경로로만 먹는다.
+           여기서 세지 않으면 T4 의 사냥 기록이 영영 0 으로 남는다. */
+        if(t>0){ t2d[o]-=t; got+=t*species[q].massKg; noteKill(w,p,t,species[q].name); }
         if(got>=need*TUNE.predAltPreyShare[kind]) break;
       }
     }
