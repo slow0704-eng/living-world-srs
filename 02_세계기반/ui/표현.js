@@ -3,6 +3,7 @@
 
 import { CLIMATE_PROFILES, ISLAND_TIERS, ECO, TUNE, clamp, lerp,
          createWorld, stepDay, collectStats, viability, indAge,
+         hallOfFame, indBrief, buildReport,
          logChron, chronDirty, setChronDirty } from '../sim/index.js';
 
 
@@ -52,11 +53,26 @@ const LAYERS={
 let layer='veg';
 $('layerSeg').innerHTML=Object.entries(LAYERS).map(([k,v],n)=>
   `<button data-layer="${k}"${n===0?' aria-pressed="true"':''}>${v.lab}</button>`).join('');
-$('legend').innerHTML=`<div class="lg"><span class="ramp"></span><span>초본 0 → 부양력</span></div>`
-  +POP.map(t=>`<div class="lg"><span class="sw" style="background:var(${TIER_VAR[t.cap]})"></span>${t.lab}</div>`).join('')
+/* 점이 무엇을 뜻하는지가 등급마다 다르다. 적어 두지 않으면
+   "수십만 마리인데 점은 수백 개"로 읽혀 오해가 생긴다.
+   T2 는 밀도장이라 한 점이 몇 마리인지를 정해야 하는데, 고정값으로 두면
+   개체군이 백 배씩 오르내리는 동안 점이 사라지거나 셀을 덮어 버린다.
+   그래서 지금 밀도에 맞춰 잡고, 그 값을 범례에 그대로 적는다. */
+const NICE=[1,2,5,10,25,50,100,250,500,1000,2500,5000,10000];
+const niceStep=v=>{let o=NICE[0];for(const n of NICE) if(n<=v) o=n; return o;};
+let t2PerDot=200;
+function drawLegend(){
+  $('legend').innerHTML=`<div class="lg"><span class="ramp"></span><span>초본 0 → 부양력</span></div>`
+  +`<div class="lg"><span class="sw" style="background:var(--t2)"></span>T2 점 1개 = ${fmt(t2PerDot)}마리 · 밀도장(개체 아님)</div>`
+  +`<div class="lg"><span class="sw" style="background:var(--t3)"></span>T3 점 1개 = 무리 하나 · 크기 = √개체수</div>`
+  +`<div class="lg"><span class="sw" style="background:var(--t4)"></span>T4 점 1개 = 개체 하나</div>`
+  +`<div class="lg"><span class="sw" style="background:var(--t5)"></span>T5 점 1개 = 개체 하나</div>`
   +`<div class="lg"><span class="sw" style="background:var(--water);border-radius:1px"></span>수원
     <span class="sw" style="background:var(--fire);border-radius:1px;margin-left:6px"></span>화재</div>
+   <div class="lg" style="color:var(--ink-3)">휠 확대 · 끌어 이동 · 더블클릭 초기화</div>
    <div class="lg" style="color:var(--ink-3)">선택 개체는 흰 테두리와 동선으로 표시</div>`;
+}
+drawLegend();
 $('selTier').innerHTML=Object.entries(ISLAND_TIERS).map(([k,v])=>
   `<option value="${k}"${k==='XL'?' selected':''}>${v.name} · ${v.areaKm2.toLocaleString('ko-KR')}km²</option>`).join('');
 $('selClimate').innerHTML=Object.entries(CLIMATE_PROFILES).map(([k,v])=>
@@ -71,7 +87,7 @@ function newWorld(seed,tier,climate){
   off.width=W.g.W; off.height=W.g.H;
   octx=off.getContext('2d'); img=octx.createImageData(W.g.W,W.g.H);
   cv.width=cv.height=Math.min(900,W.g.W*9);
-  chronDirty=true; selUid=null;
+  chronDirty=true; selUid=null; zoom=1; vx=vy=0; zoomMeta();
   $('brandSub').textContent=`${W.T.name} ${W.T.areaKm2.toLocaleString('ko-KR')}km² · ${W.C.name} · 격자 ${W.T.cellM}m`;
   $('mapMeta').textContent=`${W.g.W}×${W.g.H} 셀 · 육지 ${fmt(W.landCount)}`;
   const c=W.cap;
@@ -82,6 +98,27 @@ function newWorld(seed,tier,climate){
     `<button data-st="${t}"${i===0?' aria-pressed="true"':''}>${t==='ALL'?'전체':t}</button>`).join('');
   specTier='ALL'; drawSpec(); drawInd(); drawLife();
   fitMap();
+}
+/* 시야 : 좌상단 셀 좌표(vx,vy)와 배율. 배율 1이면 섬 전체가 들어온다.
+   확대해야 무리 하나하나, 포식자 한 마리가 구분된다. */
+let zoom=1, vx=0, vy=0;
+const visCells=()=>W.g.W/zoom;
+function clampView(){
+  const v=visCells();
+  vx=clamp(vx,0,Math.max(0,W.g.W-v)); vy=clamp(vy,0,Math.max(0,W.g.H-v));
+}
+function setZoom(z,ax,ay){                 // ax,ay : 화면에서 고정할 셀 좌표
+  const v0=visCells(); const z0=zoom;
+  zoom=clamp(z,1,24);
+  if(ax==null){ ax=vx+v0/2; ay=vy+v0/2; }
+  const f=z0/zoom;
+  vx=ax-(ax-vx)*f; vy=ay-(ay-vy)*f;
+  clampView(); zoomMeta();
+}
+function zoomMeta(){
+  const el=$('zoomMeta'); if(!el||!W) return;
+  const mPerPx=W.T.cellM*visCells()/cv.width;
+  el.textContent=`${zoom.toFixed(1)}× · 화면폭 ${(visCells()*W.cellKm).toFixed(1)}km · 1px ≈ ${mPerPx.toFixed(0)}m`;
 }
 const px=[0,0,0];
 function paintMap(){
@@ -97,34 +134,46 @@ function paintMap(){
   }
   octx.putImageData(img,0,0);
   ctx.imageSmoothingEnabled=false;
-  ctx.drawImage(off,0,0,cv.width,cv.height);
-  const s=cv.width/g.W, N=g.N;
+  const v=visCells();
+  ctx.drawImage(off,vx,vy,v,v,0,0,cv.width,cv.height);
+  const s=cv.width/v, N=g.N;                    // 셀 하나가 몇 픽셀인가
+  const SX=x=>(x-vx)*s, SY=y=>(y-vy)*s;
+  const seen=(x,y,pad)=>x>=vx-pad&&x<=vx+v+pad&&y>=vy-pad&&y<=vy+v+pad;
+  /* 확대하면 셀 하나가 넓어지므로 점을 더 뿌려도 뭉치지 않는다.
+     기준은 그대로 1점 = T2_PER_DOT 마리다(범례에 적어 둔 값). */
+  const dotMax=Math.min(8,Math.max(2,Math.round(zoom*2)));
   ctx.fillStyle=cssVar('--t2'); ctx.globalAlpha=.5;
+  const x0=Math.max(0,vx|0), x1=Math.min(g.W-1,Math.ceil(vx+v)), y0=Math.max(0,vy|0), y1=Math.min(g.H-1,Math.ceil(vy+v));
+  const dotPx=Math.max(1.2,Math.min(4,1.6*Math.sqrt(zoom)));
   for(const id of W.byTier.T2){
     if(W.species[id].status==='ABSENT') continue;
     const o=W.t2Idx.get(id)*N;
-    for(let i=0;i<N;i++){
+    for(let yy=y0;yy<=y1;yy++)for(let xx=x0;xx<=x1;xx++){
+      const i=g.idx(xx,yy);
       if(!W.land[i]) continue;
-      const k=Math.min(2,W.t2d[o+i]/200|0);
+      const k=Math.min(dotMax,W.t2d[o+i]/t2PerDot|0);
       for(let m=0;m<k;m++){
         const hx=((i*2654435761+m*40503+id*7919)>>>8&255)/255, hy=((i*1597334677+m*22695+id*104729)>>>8&255)/255;
-        ctx.fillRect((g.xOf(i)+hx)*s,(g.yOf(i)+hy)*s,1.6,1.6);
+        ctx.fillRect(SX(xx+hx),SY(yy+hy),dotPx,dotPx);
       }
     }
   }
   ctx.globalAlpha=1; ctx.lineWidth=1; ctx.strokeStyle='rgba(20,24,18,.55)';
   ctx.fillStyle=cssVar('--t4');
-  for(const p of W.p4){ctx.beginPath();ctx.arc(p.x*s,p.y*s,2,0,6.2832);ctx.fill();ctx.stroke();}
+  for(const p of W.p4){ if(!seen(p.x,p.y,1)) continue;
+    ctx.beginPath();ctx.arc(SX(p.x),SY(p.y),2*Math.min(2.5,Math.sqrt(zoom)),0,6.2832);ctx.fill();ctx.stroke();}
   ctx.fillStyle=cssVar('--t3');
-  for(const h of W.herds){ctx.beginPath();ctx.arc(h.x*s,h.y*s,Math.max(1.8,Math.sqrt(h.n)*0.62),0,6.2832);ctx.fill();ctx.stroke();}
+  for(const h of W.herds){ if(!seen(h.x,h.y,2)) continue;
+    ctx.beginPath();ctx.arc(SX(h.x),SY(h.y),Math.max(1.8,Math.sqrt(h.n)*0.62)*Math.min(2.5,Math.sqrt(zoom)),0,6.2832);ctx.fill();ctx.stroke();}
   ctx.fillStyle=cssVar('--t5'); ctx.strokeStyle='rgba(255,255,255,.7)';
-  for(const p of W.p5){ctx.beginPath();ctx.arc(p.x*s,p.y*s,3,0,6.2832);ctx.fill();ctx.stroke();}
+  for(const p of W.p5){ if(!seen(p.x,p.y,1)) continue;
+    ctx.beginPath();ctx.arc(SX(p.x),SY(p.y),3*Math.min(2.5,Math.sqrt(zoom)),0,6.2832);ctx.fill();ctx.stroke();}
   const sel=findInd(selUid);
   if(sel&&sel.deathDay==null&&sel.track.length>1){
     ctx.strokeStyle='rgba(255,255,255,.9)'; ctx.lineWidth=1.6; ctx.beginPath();
-    sel.track.forEach((p,i)=>i?ctx.lineTo(p[1]*s,p[2]*s):ctx.moveTo(p[1]*s,p[2]*s));
+    sel.track.forEach((p,i)=>i?ctx.lineTo(SX(p[1]),SY(p[2])):ctx.moveTo(SX(p[1]),SY(p[2])));
     ctx.stroke();
-    ctx.beginPath(); ctx.arc(sel.x*s,sel.y*s,6,0,6.2832); ctx.stroke();
+    ctx.beginPath(); ctx.arc(SX(sel.x),SY(sel.y),6,0,6.2832); ctx.stroke();
   }
 }
 function fitMap(){
@@ -216,24 +265,44 @@ function drawSpec(){
   $('tSpec').tBodies[0].innerHTML=rows.map(s=>'<tr>'+SPEC_COLS.map(c=>
     `<td class="${c[3]||''}">${c[2](s)}</td>`).join('')+'</tr>').join('');
 }
-/* 개체 조회 */
-const IND_COLS=[['name','이름',(w,i)=>i.name,'nm'],['sp','종',(w,i)=>w.species[i.sp].trophic,'nm'],
-  ['age','나이',(w,i)=>indAge(w,i).toFixed(1)],
-  ['state','상태',(w,i)=>i.deathDay==null?'<span class="st ok">생존</span>':`<span class="st no">${i.cause}</span>`],
-  ['ev','사건',(w,i)=>i.ev.length]];
+/* 개체 조회 — 표 머리를 누르면 그 열로 정렬한다(다시 누르면 역순).
+   자손 · 사냥 · 최대무리로 줄을 세우면 그것이 곧 레거시 조회다.
+   W.inds 는 죽은 개체도 지우지 않으므로 판 전체가 여기 다 있다. */
+let indSort={k:'age',dir:-1};
+const IND_COLS=[
+  ['name','이름',(w,i)=>i.name,'nm',(w,i)=>i.name],
+  ['trophic','등급',(w,i)=>w.species[i.sp].trophic,'nm',(w,i)=>w.species[i.sp].trophic],
+  ['sp','종',(w,i)=>w.species[i.sp].name,'nm',(w,i)=>w.species[i.sp].name],
+  ['sex','성',(w,i)=>i.sex==='M'?'수':'암','nm',(w,i)=>i.sex],
+  ['age','나이',(w,i)=>indAge(w,i).toFixed(1),'',(w,i)=>indAge(w,i)],
+  ['born','출생',(w,i)=>(i.bornDay/365).toFixed(1),'',(w,i)=>i.bornDay],
+  ['offspring','자손',(w,i)=>i.offspring||'–','',(w,i)=>i.offspring],
+  ['kills','사냥',(w,i)=>i.kills>=1?fmt(i.kills):'–','',(w,i)=>i.kills],
+  ['peakHerd','최대무리',(w,i)=>i.peakHerd>=1?fmt(i.peakHerd):'–','',(w,i)=>i.peakHerd],
+  ['state','상태',(w,i)=>i.deathDay==null?'<span class="st ok">생존</span>'
+    :`<span class="st ${i.fate==='merge'?'warn':'no'}">${i.cause}</span>`,'',
+    (w,i)=>i.deathDay==null?2:i.fate==='merge'?1:0],
+  ['ev','사건',(w,i)=>i.ev.length,'',(w,i)=>i.ev.length]];
 function allInds(){
-  let a=W.inds.filter(i=>i.deathDay==null).concat(W.dead);
+  let a=W.inds;
   if(indLive==='alive') a=a.filter(i=>i.deathDay==null);
-  if(indLive==='dead') a=a.filter(i=>i.deathDay!=null);
+  else if(indLive==='dead') a=a.filter(i=>i.deathDay!=null&&i.fate!=='merge');
   if(indQuery){ const q=indQuery.toLowerCase();
     a=a.filter(i=>i.name.toLowerCase().includes(q)||W.species[i.sp].name.toLowerCase().includes(q)); }
-  return a.sort((x,y)=>(y.ev.length-x.ev.length)||(y.uid-x.uid)).slice(0,300);
+  const col=IND_COLS.find(c=>c[0]===indSort.k)||IND_COLS[4], key=col[4], d=indSort.dir;
+  return a.slice().sort((x,y)=>{
+    const av=key(W,x), bv=key(W,y);
+    return (typeof av==='string'?av.localeCompare(bv):av-bv)*d || (y.uid-x.uid);
+  }).slice(0,300);
 }
-const findInd=uid=>uid==null?null:(W.inds.find(i=>i.uid===uid)||W.dead.find(i=>i.uid===uid));
+const findInd=uid=>uid==null?null:W.inds.find(i=>i.uid===uid);
 function drawInd(){
   const rows=allInds();
-  $('indMeta').textContent=`추적 ${fmt(W.inds.filter(i=>i.deathDay==null).length)} · 사망 명부 ${fmt(W.dead.length)} · 예산 ${fmt(W.T.instBudget)}`;
-  $('tInd').tHead.innerHTML='<tr>'+IND_COLS.map(c=>`<th>${c[1]}</th>`).join('')+'</tr>';
+  const alive=W.inds.reduce((s,i)=>s+(i.deathDay==null?1:0),0);
+  $('indMeta').textContent=`전체 ${fmt(W.inds.length)} · 생존 ${fmt(alive)}`
+    +` · 표시 ${fmt(rows.length)}(상위 300) · 정렬 ${(IND_COLS.find(c=>c[0]===indSort.k)||[])[1]||''}`;
+  $('tInd').tHead.innerHTML='<tr>'+IND_COLS.map(c=>
+    `<th data-k="${c[0]}">${c[1]}${indSort.k===c[0]?(indSort.dir>0?' ▲':' ▼'):''}</th>`).join('')+'</tr>';
   $('tInd').tBodies[0].innerHTML=rows.length?rows.map(i=>
     `<tr data-uid="${i.uid}"${i.uid===selUid?' aria-selected="true"':''}>`
     +IND_COLS.map(c=>`<td class="${c[3]||''}">${c[2](W,i)}</td>`).join('')+'</tr>').join('')
@@ -263,7 +332,8 @@ function drawLife(){
   $('life').innerHTML=`
     <div class="hd"><b>${i.name}</b>
       <span class="chip" style="border-color:var(${TIER_VAR[sp.trophic]});color:var(${TIER_VAR[sp.trophic]})">${sp.trophic} ${sp.name}</span>
-      ${i.deathDay==null?'<span class="chip ok">생존</span>':`<span class="chip no">${i.cause}</span>`}</div>
+      ${i.deathDay==null?'<span class="chip ok">생존</span>'
+        :`<span class="chip ${i.fate==='merge'?'':'no'}">${i.cause}</span>`}</div>
     <dl class="meta">
       <dt>성별</dt><dd>${i.sex==='M'?'수':'암'}</dd>
       <dt>나이</dt><dd>${age.toFixed(1)}년 / 수명 ${sp.lifespanYr.toFixed(0)}년</dd>
@@ -272,7 +342,8 @@ function drawLife(){
       <dt>체중</dt><dd>${sp.massKg.toFixed(1)} kg</dd>
       <dt>내건성</dt><dd>${sp.droughtTol.toFixed(2)}</dd>
       <dt>식이</dt><dd>${sp.diet.map(d=>W.species[d].name).join(' · ')}</dd>
-      ${sp.trophic==='T5'||sp.trophic==='T4'?`<dt>사냥</dt><dd>${i.kills}회</dd>`:''}
+      ${i.kills>=1?`<dt>사냥</dt><dd>${fmt(i.kills)}마리</dd>`:''}
+      ${i.peakHerd>=1?`<dt>최대 무리</dt><dd>${fmt(i.peakHerd)}마리</dd>`:''}
       <dt>자손</dt><dd>${i.offspring}</dd>
     </dl>
     ${trackSvg}
@@ -313,6 +384,9 @@ function readout(){
     $('g-'+t.k).textContent=fmt(st[t.k]);
     $('b-'+t.k).style.width=clamp(st[t.k]/W.cap[t.cap]*50,0,100)+'%';
   }
+  /* 점 하나가 몇 마리인지를 지금 밀도에 맞춘다. 셀 평균이 세 점쯤 되게. */
+  const want=Math.max(1,niceStep(st.n2/Math.max(W.landCount,1)/3));
+  if(want!==t2PerDot){ t2PerDot=want; drawLegend(); }
   chip('cPio',st.pio>=3,st.pio.toFixed(1)+'×');
   chip('cFire',W.last.fires>=1,`${W.last.fires}건 · ${(W.last.burnFrac*100).toFixed(0)}%`);
   chip('cSpec',st.specAlive>=st.specTotal*0.7,`${st.specAlive}/${st.specTotal}`);
@@ -346,6 +420,8 @@ $('indFilter').onclick=e=>{const b=e.target.closest('[data-live]');if(!b)return;
 $('indSearch').oninput=e=>{indQuery=e.target.value.trim();drawInd();};
 $('tInd').tBodies[0].addEventListener('click',e=>{const tr=e.target.closest('[data-uid]');if(!tr)return;
   selUid=+tr.dataset.uid; drawInd(); drawLife();});
+$('tInd').tHead.addEventListener('click',e=>{const th=e.target.closest('[data-k]');if(!th)return;
+  const k=th.dataset.k; indSort=indSort.k===k?{k,dir:-indSort.dir}:{k,dir:-1}; drawInd();});
 function toggle(btn,key,on,off,fx){btn.onclick=()=>{W[key]=!W[key];btn.setAttribute('aria-pressed',W[key]);
   logChron(W,'act',W[key]?on:off);if(W[key]&&fx)fx();};}
 toggle($('iFire'),'supp','화재 전면 진압 시작 — 목본 침입 관측','화재 진압 해제');
@@ -355,29 +431,41 @@ toggle($('iRain'),'dry','강수 −40% 적용 — 건기 연장','강수 정상 
 $('iImmig').onclick=()=>{W.noImmig=!W.noImmig;$('iImmig').setAttribute('aria-pressed',!W.noImmig);
   logChron(W,'act',W.noImmig?'표류 유입 차단 — 절멸은 영구다':'표류 유입 허용 — [R-12.5] 복구 경로 개방');};
 /* 헤드리스 --run 과 같은 형식으로 내보낸다.
-   내려받아 _결과/ 에 넣으면 그대로 읽고 해석할 수 있다. */
-$('btnJson').onclick=()=>{
-  const stamp=new Date().toISOString().slice(0,16).replace(/[:T]/g,'').replace(/-/g,'');
+   돌리는 중에 눌러도 된다 — 그 순간까지의 기록으로 만든다. */
+const stampNow=()=>new Date().toISOString().slice(0,16).replace(/[:T]/g,'').replace(/-/g,'');
+function resultJson(stamp){
   const species=W.species.filter(s=>s.kind==='ANIMAL'&&!s.aggregate).map(s=>({
     name:s.name, trophic:s.trophic, massKg:+s.massKg.toFixed(1),
     diet:s.diet.map(d=>W.species[d].name), droughtTol:+s.droughtTol.toFixed(2),
     lifespanYr:+s.lifespanYr.toFixed(1), seedN:s.seedN, finalN:Math.round(s.n),
     status:s.status, extinctYear:s.extinctYear }));
-  const inds=W.inds.concat(W.dead).slice(-300).map(i=>({
-    name:i.name, sp:W.species[i.sp].name, trophic:W.species[i.sp].trophic,
-    sex:i.sex, bornYear:+(i.bornDay/365).toFixed(1),
-    deathYear:i.deathDay==null?null:+(i.deathDay/365).toFixed(1), cause:i.cause,
-    kills:i.kills, offspring:i.offspring,
-    events:i.ev.map(e=>[+(e[0]/365).toFixed(1),e[1],e[2]]) }));
-  const json={ meta:{ stamp, source:'browser', seed:W.seed, tier:W.tierKey, climate:W.climateKey,
+  /* 개체 표본은 최근 300마리만. 판 전체의 기록은 legacy(명예의 전당)가 들고 있다. */
+  const inds=W.inds.slice(-300).map(i=>indBrief(W,i));
+  return { meta:{ stamp, source:'browser', seed:W.seed, tier:W.tierKey, climate:W.climateKey,
       landCells:W.landCount, years:W.year, derived:W.cap, tune:TUNE },
-    years:W.years, species, individuals:inds,
+    years:W.years, species, legacy:hallOfFame(W), individuals:inds,
     chronicle:W.chron.map(e=>({year:e.y,day:e.d,kind:e.kind,msg:e.msg})), totals:W.totals };
+}
+function download(name,text,mime){
   const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([JSON.stringify(json,null,1)],{type:'application/json'}));
-  a.download=`${stamp}_${W.tierKey}_${W.climateKey}_${W.year}년.json`; a.click();
-  URL.revokeObjectURL(a.href);
+  a.href=URL.createObjectURL(new Blob([text],{type:mime}));
+  a.download=name; a.click(); URL.revokeObjectURL(a.href);
+}
+$('btnJson').onclick=()=>{
+  const stamp=stampNow();
+  download(`${stamp}_${W.tierKey}_${W.climateKey}_${W.year}년.json`,
+    JSON.stringify(resultJson(stamp),null,1),'application/json');
   logChron(W,'act',`결과 내보내기 · ${W.year}년 · _결과/ 에 넣으면 읽을 수 있습니다`);
+};
+/* 보고서는 헤드리스 --run 이 남기는 것과 같은 서식이다(sim/11_분석서.js).
+   첫 해가 끝나기 전에는 연도 표가 비어 있어 읽을 것이 없다. */
+$('btnReport').onclick=()=>{
+  if(!W.years.length){ logChron(W,'act','첫 해가 끝나야 보고서를 만들 수 있습니다'); return; }
+  const stamp=stampNow();
+  download(`${stamp}_${W.tierKey}_${W.climateKey}_${W.year}년.txt`,
+    buildReport(resultJson(stamp)).join(String.fromCharCode(10))+String.fromCharCode(10),
+    'text/plain;charset=utf-8');
+  logChron(W,'act',`보고서 내보내기 · ${W.year}년 · 자동 판독 · 사멸 추적 · 명예의 전당`);
 };
 $('btnCsv').onclick=()=>{
   const cols=['year','T2','T3','T4','T5','species','grassKt','woodyPct','burnPct','fires','births','deaths'];
@@ -386,15 +474,38 @@ $('btnCsv').onclick=()=>{
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv'}));
   a.download=`island_${W.tierKey}_${W.climateKey}_${W.year}y.csv`;a.click();URL.revokeObjectURL(a.href);};
+/* 화면 좌표 → 셀 좌표. 확대·이동을 거치므로 시야를 반영해야 한다. */
+function cellAt(ev){
+  const r=cv.getBoundingClientRect(), v=visCells();
+  return [vx+(ev.clientX-r.left)/r.width*v, vy+(ev.clientY-r.top)/r.height*v];
+}
+let drag=null;
+cv.addEventListener('mousedown',ev=>{drag={x:ev.clientX,y:ev.clientY,vx,vy};cv.style.cursor='grabbing';});
+addEventListener('mouseup',()=>{if(drag){drag=null;cv.style.cursor='';}});
+cv.addEventListener('wheel',ev=>{ev.preventDefault();
+  const [cx,cy]=cellAt(ev); setZoom(zoom*(ev.deltaY<0?1.25:0.8),cx,cy);},{passive:false});
+cv.addEventListener('dblclick',()=>{zoom=1;vx=vy=0;zoomMeta();});
 cv.addEventListener('mousemove',ev=>{
-  const r=cv.getBoundingClientRect(),g=W.g;
-  const x=Math.floor((ev.clientX-r.left)/r.width*g.W),y=Math.floor((ev.clientY-r.top)/r.height*g.H);
+  const g=W.g;
+  if(drag){ const r=cv.getBoundingClientRect(), v=visCells();
+    vx=drag.vx-(ev.clientX-drag.x)/r.width*v; vy=drag.vy-(ev.clientY-drag.y)/r.height*v;
+    clampView(); return; }
+  const [fx,fy]=cellAt(ev), x=Math.floor(fx), y=Math.floor(fy);
   if(!g.inside(x,y))return;
   const i=g.idx(x,y);
-  $('vCursor').textContent=!W.land[i]?'해상'
-    :`${W.elev[i]|0}m · 초본 ${W.grass[i].toFixed(1)}t · 수분 ${W.soil[i].toFixed(0)}mm`
-     +(W.water[i]===2?' · 항구수원':W.water[i]===1?' · 계절수원':'');});
-cv.addEventListener('mouseleave',()=>{$('vCursor').textContent='셀 위로 이동';});
+  if(!W.land[i]){ $('vCursor').textContent='해상'; return; }
+  /* 이 셀에 무엇이 있는지 등급별로 실제 값을 보여 준다 — 점의 기준을 눈으로 확인하는 자리 */
+  let t2=0; for(const id of W.byTier.T2){ const o=W.t2Idx.get(id); if(o!==undefined) t2+=W.t2d[o*W.g.N+i]; }
+  let hn=0,hc=0; for(const h of W.herds) if(W.g.idx(h.x|0,h.y|0)===i){hc++;hn+=h.n;}
+  const pc=W.p4.filter(p=>W.g.idx(p.x|0,p.y|0)===i).length+W.p5.filter(p=>W.g.idx(p.x|0,p.y|0)===i).length;
+  $('vCursor').textContent=`${W.elev[i]|0}m · 초본 ${W.grass[i].toFixed(1)}t · 수분 ${W.soil[i].toFixed(0)}mm`
+     +(W.water[i]===2?' · 항구수원':W.water[i]===1?' · 계절수원':'')
+     +` │ T2 ${fmt(t2)}마리 · 무리 ${hc}(${fmt(hn)}마리) · 육식 ${pc}`;});
+cv.addEventListener('mouseleave',()=>{$('vCursor').textContent='셀 위로 이동';drag=null;});
+$('zoomSeg').onclick=e=>{const b=e.target.closest('[data-z]');if(!b)return;
+  if(b.dataset.z==='in') setZoom(zoom*1.6);
+  else if(b.dataset.z==='out') setZoom(zoom/1.6);
+  else {zoom=1;vx=vy=0;zoomMeta();}};
 addEventListener('resize',fitMap);
 newWorld(20260812,'XL','SAVANNA');
 frame();

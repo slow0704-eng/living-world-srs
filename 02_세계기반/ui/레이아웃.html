@@ -32,6 +32,12 @@
   <section class="card" id="mapCard" data-open="false">
     <header><h2>탑뷰 지도</h2><span class="lab" id="mapMeta">–</span>
       <div class="sp">
+        <span class="lab" id="zoomMeta">1.0×</span>
+        <div class="seg" role="group" aria-label="확대" id="zoomSeg">
+          <button data-z="out" aria-label="축소">−</button>
+          <button data-z="in" aria-label="확대">＋</button>
+          <button data-z="reset">전체</button>
+        </div>
         <div class="seg" role="group" aria-label="레이어" id="layerSeg"></div>
         <button id="btnMap" aria-expanded="false">펼치기</button>
       </div>
@@ -78,7 +84,8 @@
 
   <section class="card">
     <header><h2>개체 이력 · 크로니클</h2><span class="lab" id="histMeta">–</span>
-      <div class="sp"><button id="btnJson">결과 저장 (JSON)</button><button id="btnCsv">CSV</button></div>
+      <div class="sp"><button id="btnReport">보고서 저장 (TXT)</button>
+        <button id="btnJson">결과 저장 (JSON)</button><button id="btnCsv">CSV</button></div>
     </header>
     <div class="tiles" id="tiles"></div>
     <div class="body">
