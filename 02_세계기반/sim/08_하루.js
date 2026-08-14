@@ -11,7 +11,7 @@ import { logChron } from './09_통계이력.js';
 
 export const DAY_PHASES=[
   ['환경',phaseEnvironment], ['화재',phaseFire], ['대형 초식',phaseHerds],
-  ['무리 병합',phaseMergeHerds], ['포식',phasePredation], ['기록',phaseBookkeeping],
+  ['포식',phasePredation], ['기록',phaseBookkeeping],
 ];
 export function stepDay(w){ for(const [,fn] of DAY_PHASES) fn(w); }
 
@@ -133,131 +133,242 @@ export function phaseFire(w){
   }
 }
 
-export function phaseHerds(w){
-  const {g,land,gcap,soil,water,wdist,fear,press,C,species,plantB}=w, rng=w.rng, N=g.N;
-  const s=seasonOf(w);
-  press.fill(0); w.herdAt.clear();
-  const stepGraze=TUNE.moveGrazeKmDay/w.cellKm, stepThirst=TUNE.moveThirstKmDay/w.cellKm;
-  let satS=0,satN=0;
-  for(let hi=w.herds.length-1;hi>=0;hi--){
-    const h=w.herds[hi], sp=species[h.sp];
-    h.x=clamp(h.x,0.5,g.W-1.5); h.y=clamp(h.y,0.5,g.H-1.5);
-    let ci=g.idx(h.x|0,h.y|0);
-    if(!land[ci]){ h.x=g.W/2; h.y=g.H/2; ci=g.idx(h.x|0,h.y|0); }
+/* ── 대형 초식 : 개체 ────────────────────────────────────────────────
+   최소 단위는 개체다. 무리는 객체가 아니라 결과다 — 같은 종끼리 모이려는
+   성향과 과밀을 피하려는 성향이 맞물려 뭉치는 것뿐이다 [S-4.1].
 
-    /* 건기마다 마르고 채우기를 반복하므로, 어지간한 갈증까지 적으면
-       생애 기록이 물 마신 이야기로만 채워진다. 죽기 직전이었을 때만 남긴다. */
-    const wasParched=h.hyd<0.05;
-    h.hyd=clamp(h.hyd-1/(TUNE.hydrationDays*sp.droughtMul),0,1);
-    if(wdist[ci]<=TUNE.drinkRadiusCells){ h.hyd=1;
-      if(wasParched&&h.lead) addEv(w,h.lead,'move','말라죽기 직전 수원에 닿음'); }
-
-    // 섭식 : 자기 식이 목록의 식물만 먹는다. 목록이 넓을수록 가뭄에 강하다 [C-5.2]
-    const demand=h.n*sp.massKg*ECO.dailyIntakeFrac/1000;
-    const sl=sp._slots, ml=sp._mul;
-    let avail=0;
-    for(let k=0;k<sl.length;k++) avail+=plantB[sl[k]*N+ci]*ml[k]*C.browseAvailability;
-    const taken=Math.min(avail,demand);
-    if(avail>0) for(let k=0;k<sl.length;k++){
-      const o=sl[k]*N+ci;
-      plantB[o]-=taken*(plantB[o]*ml[k]/(avail/C.browseAvailability));
-    }
-    const sat=demand>0?taken/demand:1; satS+=sat; satN++;
-    h.e=clamp(h.e+(sat-TUNE.satietyBreakEven)*TUNE.energyGainRate
-              -TUNE.dehydrationPenalty*clamp((TUNE.dehydrationOnset-h.hyd)/TUNE.dehydrationOnset,0,1),0,1);
-
-    /* 하루 시작 위치를 남긴다. 상태는 하루에 한 번만 갱신되므로 화면이
-       그대로 그리면 무리가 툭툭 튄다. 표현 계층이 이 값과 보간해 잇는다.
-       (물리 최소 단위는 여전히 하루다 — 보간은 그림일 뿐이다) */
-    h.px=h.x; h.py=h.y;
-
-    const [dx,dy]=g.bestDir(h.x|0,h.y|0,j=>{
-      if(!land[j]) return -Infinity;
+   개체 수만 마리를 매일 9칸씩 훑게 하면 하루가 감당이 안 되므로 두 가지를 쓴다.
+     1) 셀 효용 필드 : 이동 효용에서 개체와 무관한 부분(먹이 · 공포 · 혼잡 ·
+        동종 밀도)을 종마다 하루 한 번 셀 단위로 미리 깐다.
+     2) 결정 주기    : 방향은 decideEvery 일마다 다시 고르고 그 사이는 관성으로
+        간다. 개체마다 위상을 엇갈려 같은 날 몰리지 않게 한다.
+   덕분에 개체 하나의 하루는 '9칸 조회 + 산술 몇 줄'이 된다. */
+export function buildMoveFields(w){
+  const {g,land,plantB,fear,press,densPrev,util,wpull,wdist,species}=w, N=g.N;
+  const dens=densPrev;                        // 어제의 분포로 오늘을 정한다
+  for(let j=0;j<N;j++)
+    wpull[j]=land[j]?1-clamp(wdist[j]/TUNE.waterGradientCells,0,1):0;
+  for(const id of w.byTier.T3){
+    const sp=species[id]; if(sp.status==='ABSENT') continue;
+    const o=sp._t3*N, sl=sp._slots, ml=sp._mul;
+    for(let j=0;j<N;j++){
+      if(!land[j]){ util[o+j]=-Infinity; continue; }
       let f=0;
-      for(let k=0;k<sl.length;k++) f+=plantB[sl[k]*N+j]*ml[k];
+      for(let m=0;m<sl.length;m++) f+=plantB[sl[m]*N+j]*ml[m];
       const feed=clamp(f/sp._capRef,0,1);
-      const thirst=(1-h.hyd)*(1-clamp(wdist[j]/TUNE.waterGradientCells,0,1));
-      return TUNE.utilFeed*feed+TUNE.utilThirst*thirst-TUNE.utilFear*fear[j]
-           -TUNE.utilCrowd*press[j]+rng()*TUNE.utilNoise;
-    });
-    moveBy(w,h,dx,dy,lerp(stepGraze,stepThirst,1-h.hyd)*sp.moveMul);
-    if(h.lead){ h.lead.x=h.x; h.lead.y=h.y; h.lead.e=h.e; h.lead.hyd=h.hyd;
-      h.lead.px=h.px; h.lead.py=h.py;
-      /* 대표도 동선을 남긴다. 예전에는 포식자만 남겨서, 초식 개체를 골라도
-         생애 화면에 동선이 비어 있었다. */
-      if((w.year*365+w.day)%TUNE.trackSampleDays===0){
-        h.lead.track.push([w.year*365+w.day,h.x,h.y]);
-        if(h.lead.track.length>TUNE.trackMaxPoints) h.lead.track.shift();
-      }
-      if(h.n>h.lead.peakHerd){                        // 대표가 이끈 최대 무리 — 업적 기록
-        const was=h.lead.peakHerd; h.lead.peakHerd=h.n;
-        for(const mark of [100,200,400,800])
-          if(was<mark&&h.n>=mark) addEv(w,h.lead,'move',`무리가 ${mark}마리를 넘김`);
-      } }
-
-    /* 대표도 늙는다. 없으면 무리가 이어지는 동안 대표가 영생해서
-       '최장수'가 종 수명의 두 배로 찍힌다 — 무리의 나이지 개체의 나이가 아니다.
-       무리 자체(h.n)는 그대로이므로 개체군 수지에는 영향이 없다. */
-    if(h.lead&&indAge(w,h.lead)>sp.lifespanYr&&rng()<0.004){
-      killInd(w,h.lead,'노쇠');
-      h.lead=newInd(w,h.sp,h.x,h.y); h.lead.herd=h; h.lead.peakHerd=h.n;
-      addEv(w,h.lead,'move','무리의 대표가 됨');
-    }
-
-    press[ci]+=h.n;
-    const lst=w.herdAt.get(ci); if(lst) lst.push(h); else w.herdAt.set(ci,[h]);
-
-    if(s.wet){ const b=h.n*TUNE.birthRate*sp.breedMul
-                *clamp((h.e-TUNE.birthEnergyMin)/TUNE.birthEnergySpan,0,1);
-      if(b>0){ h.n+=b; w.acc.bYr+=b;
-        if(h.lead&&w.rng()<0.004){ h.lead.offspring++; addEv(w,h.lead,'breed','새끼를 낳음'); } } }
-    { const d=h.n*TUNE.deathRate*clamp((TUNE.deathEnergyMax-h.e)/TUNE.deathEnergyMax,0,1);
-      h.n-=d; w.acc.dYr+=d; }
-    if(h.n<TUNE.herdMinSize){
-      if(h.lead) killInd(w,h.lead,h.hyd<0.05?'갈증':'아사');
-      w.herds.splice(hi,1); continue;
-    }
-    if(h.n>TUNE.herdSplitAt&&w.herds.length<2000){
-      h.n/=2;
-      const nh={x:h.x+rng()-.5,y:h.y+rng()-.5,n:h.n,e:h.e,hyd:h.hyd,sp:h.sp,lead:null};
-      nh.lead=newInd(w,h.sp,nh.x,nh.y); nh.lead.herd=nh;
-      addEv(w,nh.lead,'move','무리가 갈라져 나옴');
-      w.herds.push(nh);
+      const flock=clamp(dens[o+j]/TUNE.flockRef,0,1);      // 어제의 동종 분포
+      util[o+j]=TUNE.utilFeed*feed+TUNE.flockPull*flock
+               -TUNE.utilFear*fear[j]-TUNE.utilCrowd*press[j];
     }
   }
-  w.env.satiety=satN?satS/satN:1;
 }
-/* 같은 셀의 작은 무리는 합친다. 단 같은 종끼리만이다.
-   종별로 묶지 않고 정렬만 하면, 같은 종 짝을 못 만난 무리가 계속 소멸해
-   무리 수가 단조 감소하면서 개체가 새어 나간다 (원칙 P8). */
-export function phaseMergeHerds(w){
-  let merged=false;
-  const bySp=new Map();
-  for(const lst of w.herdAt.values()){
-    if(lst.length<2) continue;
-    bySp.clear();
-    for(const h of lst){
-      let g=bySp.get(h.sp); if(!g){ g=[]; bySp.set(h.sp,g); }
-      g.push(h);
+export function phaseHerds(w){
+  const {g,land,wdist,fear,press,util,wpull,C,species,plantB}=w, rng=w.rng, N=g.N;
+  const s=seasonOf(w);
+  /* 밀도장은 두 벌을 번갈아 쓴다. 오늘 분포를 채우는 동안 어제 분포가
+     그대로 남아 있어야 '어제 그 셀에 몇이 모여 있었나'를 읽을 수 있다. */
+  const tmp=w.densPrev; w.densPrev=w.dens; w.dens=tmp;
+  buildMoveFields(w);                         // 어제 분포로 오늘의 지형 선호를 깐다
+  press.fill(0); w.dens.fill(0);
+  const next=w.aniNext, nextCells=w.nextCells;
+  for(const ci of nextCells) next[ci].length=0;
+  nextCells.length=0;
+
+  const stepGraze=TUNE.moveGrazeKmDay/w.cellKm, stepThirst=TUNE.moveThirstKmDay/w.cellKm;
+  const today=w.year*365+w.day;
+  const roomToBreed=w.ani.length<w.landCount*TUNE.maxAniPerCell;   // [T-12] 연산 예산
+  const nT3=Math.max(1,w.byTier.T3.length);
+  const cnt=w.t3Cnt, sat=w.t3Sat;
+  let satS=0,satN=0,tracked=0,born=0;
+  for(const sp of species) if(sp.trophic==='T3') sp.n=0;
+
+  /* 셀 단위로 돈다. 같은 자리에 있는 개체들은 그 셀의 풀을 나눠 먹는다.
+     개체마다 식물 배열을 따로 읽고 쓰면 수만 번의 무작위 접근이 되어
+     하루가 감당이 안 된다 — 셀에서 한 번 계산해 나누는 편이 빠르고,
+     '먼저 도착한 놈이 다 먹는다'는 순서 편향도 없앤다. */
+  for(const ci of w.aniCells){
+    const lst=w.aniAt[ci];
+    if(!lst.length) continue;
+    for(let k=0;k<nT3;k++){ cnt[k]=0; sat[k]=1; }
+    for(let m=0;m<lst.length;m++){ const a=lst[m]; if(!a.dead) cnt[species[a.sp]._t3]++; }
+    for(let k=0;k<nT3;k++){
+      if(!cnt[k]) continue;
+      const sp=species[w.byTier.T3[k]], sl=sp._slots, ml=sp._mul;
+      let avail=0;
+      for(let m=0;m<sl.length;m++) avail+=plantB[sl[m]*N+ci]*ml[m]*C.browseAvailability;
+      const demand=cnt[k]*sp.massKg*ECO.dailyIntakeFrac/1000;
+      const taken=Math.min(avail,demand);
+      if(avail>0&&taken>0) for(let m=0;m<sl.length;m++){
+        const o=sl[m]*N+ci;
+        plantB[o]-=taken*(plantB[o]*ml[m]/(avail/C.browseAvailability));
+      }
+      sat[k]=demand>0?taken/demand:1;
+      satS+=sat[k]*cnt[k]; satN+=cnt[k];
     }
-    for(const g of bySp.values()){
-      if(g.length<2) continue;
-      g.sort((a,b)=>a.n-b.n);
-      while(g.length>1&&g[0].n<TUNE.herdMergeBelow){
-        const a=g.shift(), b=g[0];
-        b.e=(b.e*b.n+a.e*a.n)/(b.n+a.n); b.hyd=Math.max(b.hyd,a.hyd);
-        b.n+=a.n; a.n=0; merged=true;
-        if(a.lead){ addEv(w,a.lead,'move','다른 무리에 흡수됨');
-          killInd(w,a.lead,'무리 흡수','merge'); }   // 죽은 것이 아니라 대표 자리를 잃은 것
+
+    for(let m=0;m<lst.length;m++){
+      const a=lst[m];
+      if(a.dead) continue;
+      const sp=species[a.sp], slot=sp._t3;
+
+      /* 물 : 건기마다 마르고 채우기를 반복한다. 죽기 직전이었을 때만 기록에 남긴다. */
+      const wasParched=a.hyd<0.05;
+      a.hyd=clamp(a.hyd-1/(TUNE.hydrationDays*sp.droughtMul),0,1);
+      if(wdist[ci]<=TUNE.drinkRadiusCells){ a.hyd=1;
+        if(wasParched&&a.ind) addEv(w,a.ind,'move','말라죽기 직전 수원에 닿음'); }
+
+      a.e=clamp(a.e+(sat[slot]-TUNE.satietyBreakEven)*TUNE.energyGainRate
+                -TUNE.dehydrationPenalty*clamp((TUNE.dehydrationOnset-a.hyd)/TUNE.dehydrationOnset,0,1),0,1);
+
+      /* 하루 시작 위치. 상태는 하루에 한 번만 갱신되므로 화면이 그대로 그리면
+         개체가 툭툭 튄다. 표현 계층이 이 값과 보간해 잇는다. */
+      a.px=a.x; a.py=a.y;
+
+      if(a.hyd<TUNE.thirstSeek){
+        /* 목이 마르면 먹이도 무리도 뒤로 밀린다. 셀에 적힌 물 방향을 따라간다. */
+        a.dx=w.flowX[ci]+(rng()-0.5)*0.4; a.dy=w.flowY[ci]+(rng()-0.5)*0.4;
+      } else if((today+a.phase)%TUNE.decideEvery===0){
+        /* 아홉 칸 중 가장 나은 쪽. 효용의 셀 성분은 이미 util 에 깔려 있고
+           여기서는 자기 갈증만 얹는다. */
+        const uo=slot*N, cx=g.xOf(ci), cy=g.yOf(ci), thirst=TUNE.utilThirst*(1-a.hyd);
+        let bs=-Infinity, bx=0, by=0;
+        for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+          const nx=cx+dx, ny=cy+dy;
+          if(nx<0||ny<0||nx>=g.W||ny>=g.H) continue;
+          const j=g.idx(nx,ny);
+          if(!land[j]) continue;
+          const v=util[uo+j]+thirst*wpull[j]+rng()*TUNE.utilNoise;
+          if(v>bs){ bs=v; bx=dx; by=dy; }
+        }
+        a.dx=bx; a.dy=by;
+      }
+      moveBy(w,a,a.dx,a.dy,lerp(stepGraze,stepThirst,1-a.hyd)*sp.moveMul);
+
+      const ni=g.idx(clamp(a.x|0,0,g.W-1),clamp(a.y|0,0,g.H-1));
+      press[ni]+=1; w.dens[slot*N+ni]+=1;
+      let nl=next[ni];
+      if(!nl) nl=next[ni]=[];
+      if(!nl.length) nextCells.push(ni);
+      nl.push(a);
+      sp.n++;
+
+      if(a.ind){
+        tracked++;
+        const ind=a.ind;
+        ind.x=a.x; ind.y=a.y; ind.px=a.px; ind.py=a.py; ind.e=a.e; ind.hyd=a.hyd;
+        /* '최대 무리'는 어제 그 자리에 함께 있던 동종의 수다.
+           무리라는 객체가 없으니 업적도 모인 결과로 잰다. */
+        const together=w.densPrev[slot*N+ci];
+        if(together>ind.peakHerd){
+          const was=ind.peakHerd; ind.peakHerd=together;
+          for(const mark of [50,100,200,400])
+            if(was<mark&&together>=mark) addEv(w,ind,'move',`${mark}마리 무리 속에 있었음`);
+        }
+        if(today%TUNE.trackSampleDays===0){
+          ind.track.push([today,a.x,a.y]);
+          if(ind.track.length>TUNE.trackMaxPoints) ind.track.shift();
+        }
+      }
+
+      /* 번식 : 우기에 에너지가 남으면. 개체 하나가 낳는 것이므로 확률이다. */
+      if(s.wet&&roomToBreed){
+        const p=TUNE.birthRate*sp.breedMul*clamp((a.e-TUNE.birthEnergyMin)/TUNE.birthEnergySpan,0,1);
+        if(p>0&&rng()<p){
+          const c=newAnimal(w,a.sp,a.x+rng()-.5,a.y+rng()-.5,today);
+          c.e=0.5; w.ani.push(c); born++;
+          const cj=g.idx(clamp(c.x|0,0,g.W-1),clamp(c.y|0,0,g.H-1));
+          let cl=next[cj];
+          if(!cl) cl=next[cj]=[];
+          if(!cl.length) nextCells.push(cj);
+          cl.push(c); sp.n++;
+          if(a.ind){ a.ind.offspring++; if(a.ind.offspring===1) addEv(w,a.ind,'breed','첫 새끼를 남김'); }
+        }
+      }
+      /* 죽음 : 굶주림 · 갈증 · 노쇠. 무리 시절에는 사망률이 마릿수에 곱해지는
+         연속량이었지만, 이제는 이 한 마리가 죽느냐 마느냐다. */
+      const age=(today-a.bornDay)/365;
+      const senes=age>sp.lifespanYr?0.006:age>sp.lifespanYr*0.8?0.0012:0;
+      const dp=TUNE.deathRate*clamp((TUNE.deathEnergyMax-a.e)/TUNE.deathEnergyMax,0,1)+senes;
+      if(dp>0&&rng()<dp){
+        a.dead=true;
+        a.deadBy=null;
+        a.cause=a.e<TUNE.deathEnergyMax*0.5?'아사':a.hyd<0.05?'갈증':'노쇠';
+        w.aniKilled=true;
       }
     }
   }
-  if(merged) w.herds=w.herds.filter(h=>h.n>0);
+  /* 버킷을 맞바꾼다. 오늘 채운 것이 내일의 '어제 자리'가 된다. */
+  w.aniAt=next; w.aniCells=nextCells;
+  w.aniNext=w.aniAt===w.aniA?w.aniB:w.aniA;
+  w.nextCells=w.aniCells===w.cellsA?w.cellsB:w.cellsA;
+  w.acc.bYr+=born;
+  if(w.aniKilled) sweepDead(w);
+  w.env.satiety=satN?satS/satN:1;
+  w.trackedAlive=tracked;
+}
+/* 개체 하나를 만든다. 표본만 이름 · 동선 · 사건을 갖는다 —
+   수만 마리 전부에 붙이면 이름 문자열과 배열만으로 메모리가 무너진다. */
+export function newAnimal(w,spId,x,y,bornDay){
+  const a={ sp:spId, x, y, px:x, py:y, e:0.7, hyd:1,
+            bornDay, dx:0, dy:0, phase:(w.uid*7)%TUNE.decideEvery, ind:null };
+  if(w.trackedAlive<TUNE.trackedAlive&&w.rng()<TUNE.trackedRate) attachInd(w,a);
+  return a;
+}
+/* 추적 대상으로 승격한다. 지도에서 고른 개체도 이 길로 들어온다. */
+export function attachInd(w,a){
+  if(a.ind) return a.ind;
+  const ind=newInd(w,a.sp,a.x,a.y);
+  ind.bornDay=a.bornDay; ind.e=a.e; ind.hyd=a.hyd; ind.animal=a;
+  a.ind=ind; w.trackedAlive++;
+  return ind;
+}
+export function removeAnimal(w,ai,cause){
+  const a=w.ani[ai];
+  if(a.ind){ killInd(w,a.ind,cause); a.ind.animal=null; w.trackedAlive--; }
+  const last=w.ani.length-1;
+  if(ai!==last) w.ani[ai]=w.ani[last];
+  w.ani.pop();
+  w.species[a.sp].n--;
+  w.acc.dYr++;
 }
 export function phasePredation(w){
   buildPredDensity(w);
   hunt(w,w.p4,false); hunt(w,w.p5,true);
+  if(w.aniKilled) sweepDead(w);
   immigrate(w);
+}
+/* 주변 아홉 칸에서 살아 있는 먹이 하나를 집는다. 없으면 null. */
+function pickPrey(w,cx,cy,rng){
+  const g=w.g;
+  for(let tries=0;tries<12;tries++){
+    const x=cx+((rng()*3)|0)-1, y=cy+((rng()*3)|0)-1;
+    if(!g.inside(x,y)) continue;
+    const lst=w.aniAt[g.idx(x,y)];
+    if(!lst||!lst.length) continue;
+    const a=lst[(rng()*lst.length)|0];
+    if(a&&!a.dead) return a;
+  }
+  return null;
+}
+function killPrey(w,a,p,sp,species){
+  a.dead=true; a.deadBy=sp.name; w.aniKilled=true;
+  w.acc.killYr++;
+  noteKill(w,p,1,species[a.sp].name);
+}
+/* 사냥은 개체를 표시만 해 두고 여기서 한 번에 걷어낸다.
+   사냥 도중에 배열에서 빼면 같은 셀 목록(aniAt)의 참조가 어긋난다. */
+export function sweepDead(w){
+  let k=0;
+  for(let i=0;i<w.ani.length;i++){
+    const a=w.ani[i];
+    if(a.dead){
+      if(a.ind){ killInd(w,a.ind,a.deadBy?`${a.deadBy}에게 죽음`:(a.cause||'죽음'));
+        a.ind.animal=null; w.trackedAlive--; }
+      w.species[a.sp].n--; w.acc.dYr++;
+    } else w.ani[k++]=a;
+  }
+  w.ani.length=k;
+  w.aniKilled=false;
 }
 export function buildPredDensity(w){
   const {g,dens4,dens5}=w;
@@ -309,27 +420,37 @@ export function hunt(w,arr,isApex){
            섭취 = maxKg · (a·P) / (maxKg + a·P)      P = 국소 먹이 생물량 */
       const maxKg=need*TUNE.predKillSurplus;
       const cx=g.xOf(ci), cy=g.yOf(ci);
-      const near=[];
+      /* 먹이 생물량은 밀도장에서 읽는다. 주변 셀의 개체를 전부 배열에 모으면
+         셀당 수백 마리 x 포식자 수백 마리가 되어 하루가 통째로 여기서 간다.
+         실제로 잡는 것은 보통 하루 0~1마리이므로, 그때만 개체를 집으면 된다. */
       let preyKg=0;
       for(let ddy=-1;ddy<=1;ddy++)for(let ddx=-1;ddx<=1;ddx++){
         if(!g.inside(cx+ddx,cy+ddy)) continue;
-        const lst=w.herdAt.get(g.idx(cx+ddx,cy+ddy)); if(!lst) continue;
-        for(const h of lst){
-          const pref=sp.diet.includes(h.sp)?1:TUNE.predOffDietEff;
-          const kg=h.n*species[h.sp].massKg*pref;
-          if(kg<=0) continue;
-          near.push([h,pref,species[h.sp].massKg]); preyKg+=kg;
+        const j=g.idx(cx+ddx,cy+ddy);
+        for(const pid of w.byTier.T3){
+          const psp=species[pid]; if(psp.status==='ABSENT') continue;
+          const d=w.dens[psp._t3*N+j];
+          if(d>0) preyKg+=d*psp.massKg*(sp.diet.includes(pid)?1:TUNE.predOffDietEff);
         }
       }
       if(preyKg>0){
         const aP=TUNE.predAttackRate*preyKg;
-        let remKg=maxKg*aP/(maxKg+aP);          // 조우 제한 ~ 처리 제한 사이
-        for(const [h,pref,mk] of near){
-          if(remKg<=0) break;
-          const t=Math.min(h.n*TUNE.predTakePerHerd*pref, remKg/mk);
-          if(t<=0) continue;
-          h.n-=t; remKg-=t*mk; w.acc.dYr+=t; w.acc.killYr+=t; got+=t*mk;
-          noteKill(w,p,t,species[h.sp].name);
+        const allow=maxKg*aP/(maxKg+aP);        // 조우 제한 ~ 처리 제한 사이
+        /* 먹이가 개체가 되면서 갈라진다.
+             에너지 : 하루 할당량(allow)을 그대로 쓴다 - 연속 근사.
+             죽음   : 그 할당량에 해당하는 만큼 실제 개체를 죽인다 - 이산.
+           둘을 함께 이산화하면(잡은 날만 먹는다) 80kg짜리 한 마리를 하루치
+           1.7kg 확률로 잡게 되어 에너지가 요동치고, clamp 때문에 기댓값이
+           보존되지 않아 포식자가 통째로 굶어 죽는다. 실제로 그렇게 됐다.
+           큰 사냥감 하나를 여러 날 나눠 먹는 것을 연속 근사가 대신한다. */
+        got+=Math.min(allow,preyKg);
+        let remKg=allow, guard=0;
+        while(remKg>0&&guard++<8){
+          const a=pickPrey(w,cx,cy,rng);
+          if(!a) break;
+          const mk=species[a.sp].massKg;
+          if(remKg<mk){ if(rng()<remKg/mk) killPrey(w,a,p,sp,species); break; }
+          killPrey(w,a,p,sp,species); remKg-=mk;
         }
       }
       if(w.dens4[ci]>0&&rng()<TUNE.intraguildP*w.dens4[ci]){    // 길드내 포식
@@ -395,7 +516,9 @@ export function immigrate(w){
 }
 export function moveBy(w,a,dx,dy,stepC){
   if(!dx&&!dy) return;
-  const {g,land}=w, len=Math.hypot(dx,dy);
+  /* Math.hypot 은 정확도를 지키느라 느리다. 하루 수만 번 부르는 자리라
+     제곱근으로 직접 계산한다(값의 범위가 좁아 넘칠 일이 없다). */
+  const {g,land}=w, len=Math.sqrt(dx*dx+dy*dy);
   let nx=a.x+dx/len*stepC, ny=a.y+dy/len*stepC;
   for(let t=0;t<4;t++){
     const cx=clamp(nx,0.5,g.W-1.5)|0, cy=clamp(ny,0.5,g.H-1.5)|0;
@@ -406,11 +529,6 @@ export function moveBy(w,a,dx,dy,stepC){
 export function phaseBookkeeping(w){
   w.day++;
   if(w.day%5===0){ computeWaterDist(w); refreshSpeciesCounts(w); }
-  if((w.year*365+w.day)%TUNE.trackSampleDays===0)
-    for(const h of w.herds) if(h.lead){
-      h.lead.track.push([w.year*365+w.day,h.x,h.y]);
-      if(h.lead.track.length>TUNE.trackMaxPoints) h.lead.track.shift();
-    }
   if(++w.sampleTick>=w.sampleEvery){ w.sampleTick=0; recordSample(w); }
   if(w.day>=365) closeYear(w);
   watchEvents(w);

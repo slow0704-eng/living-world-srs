@@ -31,19 +31,31 @@ export const TUNE = {
   fireDrynessMin:0.40, fireFuelMinTonPerHa:0.75, fireFuelRefTonPerHa:1.45,   // 확정: 화재 19%/년 · 목본 32%
   fireBurnDays:2,
   fireGrassSurvive:0.11, fireWoodySurvive:0.80, fireAshFert:0.028, fireBigEventFrac:0.03,
-  herdSeedSize:45, herdSplitAt:92, herdMergeBelow:30, herdMinSize:4,
+  /* 대형 초식은 개체다. 무리는 자료구조가 아니라 결과다 —
+     같은 종끼리 모이려는 성향(utilFlock)과 과밀을 피하려는 성향(utilCrowd)이
+     맞물려 뭉치는 것이지, 어디에도 '무리'라는 객체는 없다. */
+  flockPull:0.5,             // 동종이 모인 셀을 선호하는 정도
+  flockRef:20,               // 그 선호가 포화하는 셀당 마릿수
+  decideEvery:4,             // 방향을 다시 고르는 주기(일). 개체마다 위상을 엇갈린다
+  thirstSeek:0.5,            // 이 아래로 마르면 다른 것을 접고 수원으로 향한다
+  seedClumpSize:45,          // 최초 배치를 이만큼씩 뭉쳐 놓는다(빈 초지에서 시작하지 않게)
+  maxAniPerCell:14,          // [T-12] 연산 예산. 육지 셀당 이 수를 넘으면 번식이 멎는다
+  trackedRate:0.01,          // 새로 난 개체를 추적 대상으로 삼을 확률
+  trackedAlive:2500,         // 동시에 추적할 개체 수 상한 (이름 · 동선 · 사건 기록)
   hydrationDays:6, drinkRadiusCells:1, waterGradientCells:60,
   moveGrazeKmDay:0.12, moveThirstKmDay:1.44,
   energyGainRate:0.12, satietyBreakEven:0.85,
   dehydrationPenalty:0.040, dehydrationOnset:0.20,
   birthRate:0.0020, birthEnergyMin:0.35, birthEnergySpan:0.40,
   deathRate:0.0060, deathEnergyMax:0.35,
-  utilFeed:1.0, utilThirst:4.4, utilFear:1.5, utilCrowd:0.00004, utilNoise:0.16,
+  /* 혼잡 : 무리 시절에는 셀당 몇십 마리라 사실상 꺼져 있던 항이다(0.00004).
+     개체가 되면 한 셀에 수백이 몰릴 수 있어, 이 항이 군집 크기를 정하는
+     손잡이가 된다. 모이려는 힘(flockPull)과 맞물려 적정 군집이 정해진다. */
+  utilFeed:1.0, utilThirst:4.4, utilFear:1.5, utilCrowd:0.005, utilNoise:0.16,
   t2GrowthPerYr:2.6, t2UpdateEvery:5,      // T2 종별 갱신을 5일 주기로 엇갈리게 돌린다
   predMoveKmDay:{apex:0.72, small:0.48},
   predKillSurplus:1.8,        // 처리시간 한계 (홀링 II형의 포화 상한)
   predAttackRate:0.0065,      // 탐색 효율. 국소 먹이 500kg에서 절반 포화
-  predTakePerHerd:0.02,
   predAltPreyShare:{apex:0.45, small:1.0},
   predEnergyRate:0.03, predSatietyBreakEven:0.85,
   predBreedP:0.0016, predBreedEnergy:0.72, predDeathEnergy:0.05,

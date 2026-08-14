@@ -1,0 +1,11125 @@
+{
+ "meta": {
+  "stamp": "20260814-개체판",
+  "ms": 80158,
+  "command": "--run --years 12 --stamp 20260814-개체판",
+  "seed": 20260812,
+  "tier": "XL",
+  "climate": "SAVANNA",
+  "landCells": 6250,
+  "years": 12,
+  "derived": {
+   "effKm2": 780,
+   "bodyMassT3Kg": 80,
+   "forageT2TonYr": 7020,
+   "forageT3TonYr": 21060,
+   "predBiomassKg": 12821.91780821918,
+   "T2": 320548,
+   "T3": 24041,
+   "T4": 641,
+   "T5": 192
+  },
+  "tune": {
+   "coastLow": 0.85,
+   "coastAmp": 0.3,
+   "boxFactor": 2.4,
+   "massifSigmaCells": 13.5,
+   "orographicLiftRefM": 230,
+   "moistureRecoverPerSea": 0.07,
+   "permanentWaterFrac": 0.025,
+   "seasonalWaterFrac": 0.08,
+   "fertBase": 0.62,
+   "fertNoiseAmp": 0.3,
+   "fertWaterBonus": 0.16,
+   "soilCapMm": 130,
+   "etBaseMm": 0.55,
+   "etPerDegC": 0.09,
+   "wiltMm": 12,
+   "fieldSpanMm": 58,
+   "seasonalWaterMinSoilMm": 34,
+   "grassShareOfStanding": 0.1,
+   "woodyGrowthPerYr": 0.3,
+   "tempSigma": 320,
+   "woodySuppression": 0.55,
+   "fireSeasonStart": 0.35,
+   "ignitionsPerKm2Yr": 0.01,
+   "fireSpreadP": 0.31,
+   "fireWindBias": 0.55,
+   "fireMaxAgeDays": 999,
+   "fireDrynessMin": 0.4,
+   "fireFuelMinTonPerHa": 0.75,
+   "fireFuelRefTonPerHa": 1.45,
+   "fireBurnDays": 2,
+   "fireGrassSurvive": 0.11,
+   "fireWoodySurvive": 0.8,
+   "fireAshFert": 0.028,
+   "fireBigEventFrac": 0.03,
+   "flockPull": 0.5,
+   "flockRef": 20,
+   "decideEvery": 4,
+   "thirstSeek": 0.5,
+   "seedClumpSize": 45,
+   "maxAniPerCell": 14,
+   "trackedRate": 0.01,
+   "trackedAlive": 2500,
+   "hydrationDays": 6,
+   "drinkRadiusCells": 1,
+   "waterGradientCells": 60,
+   "moveGrazeKmDay": 0.12,
+   "moveThirstKmDay": 1.44,
+   "energyGainRate": 0.12,
+   "satietyBreakEven": 0.85,
+   "dehydrationPenalty": 0.04,
+   "dehydrationOnset": 0.2,
+   "birthRate": 0.002,
+   "birthEnergyMin": 0.35,
+   "birthEnergySpan": 0.4,
+   "deathRate": 0.006,
+   "deathEnergyMax": 0.35,
+   "utilFeed": 1,
+   "utilThirst": 4.4,
+   "utilFear": 1.5,
+   "utilCrowd": 0.005,
+   "utilNoise": 0.16,
+   "t2GrowthPerYr": 2.6,
+   "t2UpdateEvery": 5,
+   "predMoveKmDay": {
+    "apex": 0.72,
+    "small": 0.48
+   },
+   "predKillSurplus": 1.8,
+   "predAttackRate": 0.0065,
+   "predAltPreyShare": {
+    "apex": 0.45,
+    "small": 1
+   },
+   "predEnergyRate": 0.03,
+   "predSatietyBreakEven": 0.85,
+   "predBreedP": 0.0016,
+   "predBreedEnergy": 0.72,
+   "predDeathEnergy": 0.05,
+   "predTerritoryK": 0.06,
+   "intraguildP": 0.004,
+   "alleeFloor": 0.15,
+   "predOffDietEff": 0.4,
+   "fearGain": {
+    "apex": 0.16,
+    "small": 0.05
+   },
+   "fearDecay": 0.93,
+   "immigrationPerYear": 0.025,
+   "immigrationFounders": 6,
+   "immigrationBelowFrac": 0.25,
+   "rankAbundanceRatio": 0.75,
+   "speciesMax": {
+    "T0": 2,
+    "T1": 1,
+    "T2": 2,
+    "T3": 3,
+    "T4": 1,
+    "T5": 1
+   },
+   "simGrassMax": 1,
+   "simWoodyMax": 1,
+   "dietWidthMin": 2,
+   "woodyBrowseFrac": 0.06,
+   "massSpreadLog": 0.55,
+   "lifespanFromMass": {
+    "a": 11.5,
+    "b": 0.2
+   },
+   "trackSampleDays": 20,
+   "trackMaxPoints": 90,
+   "eventMax": 36,
+   "deadRegistryMax": 400
+  }
+ },
+ "years": [
+  {
+   "year": 0,
+   "T2": 539195,
+   "T3": 42883,
+   "T4": 511,
+   "T5": 142,
+   "grassKt": 108.63134702674445,
+   "woodyPct": 30.817481703864196,
+   "burnPct": 16.432,
+   "fires": 7,
+   "species": 7,
+   "births": 14900,
+   "deaths": 4066
+  },
+  {
+   "year": 1,
+   "T2": 537651,
+   "T3": 55547,
+   "T4": 468,
+   "T5": 189,
+   "grassKt": 100.15712154744743,
+   "woodyPct": 30.820520469456554,
+   "burnPct": 17.04,
+   "fires": 1,
+   "species": 7,
+   "births": 19211,
+   "deaths": 6547
+  },
+  {
+   "year": 2,
+   "T2": 513339,
+   "T3": 68988,
+   "T4": 484,
+   "T5": 245,
+   "grassKt": 65.20847233630529,
+   "woodyPct": 29.91062773571619,
+   "burnPct": 27.535999999999998,
+   "fires": 7,
+   "species": 7,
+   "births": 23875,
+   "deaths": 10434
+  },
+  {
+   "year": 3,
+   "T2": 428359,
+   "T3": 68444,
+   "T4": 445,
+   "T5": 286,
+   "grassKt": 57.75849171810048,
+   "woodyPct": 28.443126869755996,
+   "burnPct": 33.6,
+   "fires": 4,
+   "species": 7,
+   "births": 25632,
+   "deaths": 26176
+  },
+  {
+   "year": 4,
+   "T2": 454515,
+   "T3": 51600,
+   "T4": 471,
+   "T5": 336,
+   "grassKt": 84.27591128764963,
+   "woodyPct": 29.10082368526329,
+   "burnPct": 5.008,
+   "fires": 2,
+   "species": 7,
+   "births": 18608,
+   "deaths": 35452
+  },
+  {
+   "year": 5,
+   "T2": 461339,
+   "T3": 38979,
+   "T4": 486,
+   "T5": 353,
+   "grassKt": 52.95915925332662,
+   "woodyPct": 28.32189292678762,
+   "burnPct": 31.408,
+   "fires": 4,
+   "species": 7,
+   "births": 13717,
+   "deaths": 26338
+  },
+  {
+   "year": 6,
+   "T2": 453188,
+   "T3": 32809,
+   "T4": 471,
+   "T5": 361,
+   "grassKt": 81.85287515028858,
+   "woodyPct": 29.18558232938709,
+   "burnPct": 6.927999999999999,
+   "fires": 5,
+   "species": 7,
+   "births": 11173,
+   "deaths": 17343
+  },
+  {
+   "year": 7,
+   "T2": 483554,
+   "T3": 30465,
+   "T4": 439,
+   "T5": 304,
+   "grassKt": 73.77896142115195,
+   "woodyPct": 29.323257689106065,
+   "burnPct": 19.024,
+   "fires": 4,
+   "species": 7,
+   "births": 10324,
+   "deaths": 12668
+  },
+  {
+   "year": 8,
+   "T2": 505634,
+   "T3": 27609,
+   "T4": 415,
+   "T5": 271,
+   "grassKt": 91.03903806104503,
+   "woodyPct": 30.46800477130478,
+   "burnPct": 3.5839999999999996,
+   "fires": 8,
+   "species": 7,
+   "births": 9261,
+   "deaths": 12117
+  },
+  {
+   "year": 9,
+   "T2": 539884,
+   "T3": 24723,
+   "T4": 434,
+   "T5": 227,
+   "grassKt": 98.09536160366366,
+   "woodyPct": 31.777931370525973,
+   "burnPct": 2.464,
+   "fires": 6,
+   "species": 7,
+   "births": 8170,
+   "deaths": 11056
+  },
+  {
+   "year": 10,
+   "T2": 545298,
+   "T3": 21499,
+   "T4": 469,
+   "T5": 205,
+   "grassKt": 93.42260852045955,
+   "woodyPct": 33.01972926554088,
+   "burnPct": 5.2,
+   "fires": 2,
+   "species": 7,
+   "births": 6784,
+   "deaths": 10008
+  },
+  {
+   "year": 11,
+   "T2": 561075,
+   "T3": 18296,
+   "T4": 484,
+   "T5": 210,
+   "grassKt": 96.07898413073796,
+   "woodyPct": 34.30879163771904,
+   "burnPct": 4.336,
+   "fires": 3,
+   "species": 7,
+   "births": 5581,
+   "deaths": 8784
+  }
+ ],
+ "species": [
+  {
+   "name": "메추라기",
+   "trophic": "T2",
+   "massKg": 2.6,
+   "diet": [
+    "뿔풀",
+    "가시나무"
+   ],
+   "droughtTol": 0.89,
+   "lifespanYr": 13.9,
+   "seedN": 143597,
+   "finalN": 340870,
+   "status": "VIABLE",
+   "extinctYear": null,
+   "peakN": 340870,
+   "peakYear": 11,
+   "minN": 260473,
+   "minYear": 3,
+   "milestones": [
+    {
+     "year": 0,
+     "kind": "seed",
+     "msg": "326,857마리로 시작",
+     "n": 326857
+    }
+   ]
+  },
+  {
+   "name": "비단털쥐",
+   "trophic": "T2",
+   "massKg": 3,
+   "diet": [
+    "뿔풀",
+    "가시나무"
+   ],
+   "droughtTol": 0.93,
+   "lifespanYr": 14.4,
+   "seedN": 90677,
+   "finalN": 220206,
+   "status": "VIABLE",
+   "extinctYear": null,
+   "peakN": 220206,
+   "peakYear": 11,
+   "minN": 167885,
+   "minYear": 3,
+   "milestones": [
+    {
+     "year": 0,
+     "kind": "seed",
+     "msg": "212,339마리로 시작",
+     "n": 212339
+    }
+   ]
+  },
+  {
+   "name": "임팔라",
+   "trophic": "T3",
+   "massKg": 50.4,
+   "diet": [
+    "뿔풀",
+    "가시나무"
+   ],
+   "droughtTol": 1,
+   "lifespanYr": 25.2,
+   "seedN": 16502,
+   "finalN": 8409,
+   "status": "VIABLE",
+   "extinctYear": null,
+   "peakN": 34438,
+   "peakYear": 2,
+   "minN": 8409,
+   "minYear": 11,
+   "milestones": [
+    {
+     "year": 0,
+     "kind": "seed",
+     "msg": "22,216마리로 시작",
+     "n": 22216
+    },
+    {
+     "year": 6,
+     "kind": "crash",
+     "msg": "2년 34,438마리에서 16,185마리로",
+     "n": 16185
+    }
+   ]
+  },
+  {
+   "name": "혹멧돼지",
+   "trophic": "T3",
+   "massKg": 113.2,
+   "diet": [
+    "가시나무",
+    "뿔풀"
+   ],
+   "droughtTol": 0.82,
+   "lifespanYr": 29.6,
+   "seedN": 5511,
+   "finalN": 2918,
+   "status": "VIABLE",
+   "extinctYear": null,
+   "peakN": 10961,
+   "peakYear": 2,
+   "minN": 2918,
+   "minYear": 11,
+   "milestones": [
+    {
+     "year": 0,
+     "kind": "seed",
+     "msg": "7,016마리로 시작",
+     "n": 7016
+    },
+    {
+     "year": 8,
+     "kind": "crash",
+     "msg": "2년 10,961마리에서 4,808마리로",
+     "n": 4808
+    }
+   ]
+  },
+  {
+   "name": "줄무늬말",
+   "trophic": "T3",
+   "massKg": 46.6,
+   "diet": [
+    "뿔풀",
+    "가시나무"
+   ],
+   "droughtTol": 1,
+   "lifespanYr": 24.8,
+   "seedN": 10036,
+   "finalN": 6969,
+   "status": "VIABLE",
+   "extinctYear": null,
+   "peakN": 23589,
+   "peakYear": 2,
+   "minN": 6969,
+   "minYear": 11,
+   "milestones": [
+    {
+     "year": 0,
+     "kind": "seed",
+     "msg": "13,651마리로 시작",
+     "n": 13651
+    },
+    {
+     "year": 1,
+     "kind": "peak",
+     "msg": "18,436마리 — 0년 최대의 1.4배",
+     "n": 18436
+    },
+    {
+     "year": 6,
+     "kind": "crash",
+     "msg": "2년 23,589마리에서 10,544마리로",
+     "n": 10544
+    }
+   ]
+  },
+  {
+   "name": "검은등자칼",
+   "trophic": "T4",
+   "massKg": 8,
+   "diet": [
+    "메추라기",
+    "비단털쥐"
+   ],
+   "droughtTol": 0.84,
+   "lifespanYr": 17.4,
+   "seedN": 644,
+   "finalN": 484,
+   "status": "VIABLE",
+   "extinctYear": null,
+   "peakN": 511,
+   "peakYear": 0,
+   "minN": 415,
+   "minYear": 8,
+   "milestones": [
+    {
+     "year": 0,
+     "kind": "seed",
+     "msg": "511마리로 시작",
+     "n": 511
+    }
+   ]
+  },
+  {
+   "name": "들개무리",
+   "trophic": "T5",
+   "massKg": 60.1,
+   "diet": [
+    "혹멧돼지",
+    "임팔라",
+    "줄무늬말"
+   ],
+   "droughtTol": 1,
+   "lifespanYr": 26.1,
+   "seedN": 128,
+   "finalN": 210,
+   "status": "SEMI_VIABLE",
+   "extinctYear": null,
+   "peakN": 361,
+   "peakYear": 6,
+   "minN": 142,
+   "minYear": 0,
+   "milestones": [
+    {
+     "year": 0,
+     "kind": "seed",
+     "msg": "142마리로 시작",
+     "n": 142
+    },
+    {
+     "year": 1,
+     "kind": "peak",
+     "msg": "189마리 — 0년 최대의 1.3배",
+     "n": 189
+    }
+   ]
+  }
+ ],
+ "legacy": [
+  {
+   "name": "임팔라",
+   "trophic": "T3",
+   "massKg": 50.4,
+   "lifespanYr": 25.2,
+   "tracked": 1051,
+   "alive": 88,
+   "deaths": 963,
+   "merges": 0,
+   "causes": {
+    "아사": 597,
+    "들개무리에게 죽음": 329,
+    "노쇠": 35,
+    "갈증": 2
+   },
+   "records": [
+    {
+     "key": "longest",
+     "lab": "최장수",
+     "unit": "년",
+     "value": 23.3,
+     "ind": {
+      "uid": 116,
+      "name": "임팔라 #116",
+      "sp": "임팔라",
+      "trophic": "T3",
+      "sex": "F",
+      "bornYear": -11.3,
+      "deathYear": null,
+      "ageYr": 23.3,
+      "cause": null,
+      "fate": "alive",
+      "kills": 0,
+      "offspring": 4,
+      "peakHerd": 580,
+      "events": [
+       [
+        0,
+        "birth",
+        "태어남"
+       ],
+       [
+        0,
+        "move",
+        "50마리 무리 속에 있었음"
+       ],
+       [
+        0.1,
+        "move",
+        "100마리 무리 속에 있었음"
+       ],
+       [
+        0.1,
+        "move",
+        "200마리 무리 속에 있었음"
+       ],
+       [
+        0.8,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        1.5,
+        "breed",
+        "첫 새끼를 남김"
+       ],
+       [
+        2.7,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        3.3,
+        "move",
+        "400마리 무리 속에 있었음"
+       ],
+       [
+        3.8,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        4.8,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        4.8,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        9.9,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ]
+      ]
+     }
+    },
+    {
+     "key": "breeder",
+     "lab": "최다번식",
+     "unit": "마리",
+     "value": 14,
+     "ind": {
+      "uid": 97,
+      "name": "임팔라 #97",
+      "sp": "임팔라",
+      "trophic": "T3",
+      "sex": "F",
+      "bornYear": -11.1,
+      "deathYear": 10.2,
+      "ageYr": 21.3,
+      "cause": "들개무리에게 죽음",
+      "fate": "death",
+      "kills": 0,
+      "offspring": 14,
+      "peakHerd": 712,
+      "events": [
+       [
+        0,
+        "birth",
+        "태어남"
+       ],
+       [
+        0,
+        "move",
+        "50마리 무리 속에 있었음"
+       ],
+       [
+        0.1,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        0.1,
+        "move",
+        "100마리 무리 속에 있었음"
+       ],
+       [
+        0.4,
+        "breed",
+        "첫 새끼를 남김"
+       ],
+       [
+        1,
+        "move",
+        "200마리 무리 속에 있었음"
+       ],
+       [
+        3.9,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        4.8,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        6.1,
+        "move",
+        "400마리 무리 속에 있었음"
+       ],
+       [
+        6.8,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        9.9,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        9.9,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        10.2,
+        "death",
+        "들개무리에게 죽음"
+       ]
+      ]
+     }
+    },
+    {
+     "key": "herd",
+     "lab": "최대무리",
+     "unit": "마리",
+     "value": 923,
+     "ind": {
+      "uid": 155,
+      "name": "임팔라 #155",
+      "sp": "임팔라",
+      "trophic": "T3",
+      "sex": "M",
+      "bornYear": -2,
+      "deathYear": 5,
+      "ageYr": 7,
+      "cause": "아사",
+      "fate": "death",
+      "kills": 0,
+      "offspring": 3,
+      "peakHerd": 923,
+      "events": [
+       [
+        0,
+        "birth",
+        "태어남"
+       ],
+       [
+        0,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        0,
+        "move",
+        "50마리 무리 속에 있었음"
+       ],
+       [
+        0.1,
+        "move",
+        "100마리 무리 속에 있었음"
+       ],
+       [
+        0.1,
+        "move",
+        "200마리 무리 속에 있었음"
+       ],
+       [
+        0.3,
+        "breed",
+        "첫 새끼를 남김"
+       ],
+       [
+        0.8,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        1.9,
+        "move",
+        "400마리 무리 속에 있었음"
+       ],
+       [
+        3.7,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        4.3,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        4.7,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        5,
+        "death",
+        "아사"
+       ]
+      ]
+     }
+    }
+   ],
+   "meanLifeYr": 3.9
+  },
+  {
+   "name": "줄무늬말",
+   "trophic": "T3",
+   "massKg": 46.6,
+   "lifespanYr": 24.8,
+   "tracked": 678,
+   "alive": 77,
+   "deaths": 601,
+   "merges": 0,
+   "causes": {
+    "들개무리에게 죽음": 202,
+    "아사": 370,
+    "갈증": 3,
+    "노쇠": 26
+   },
+   "records": [
+    {
+     "key": "longest",
+     "lab": "최장수",
+     "unit": "년",
+     "value": 23.4,
+     "ind": {
+      "uid": 284,
+      "name": "줄무늬말 #284",
+      "sp": "줄무늬말",
+      "trophic": "T3",
+      "sex": "M",
+      "bornYear": -14.4,
+      "deathYear": 9,
+      "ageYr": 23.4,
+      "cause": "아사",
+      "fate": "death",
+      "kills": 0,
+      "offspring": 4,
+      "peakHerd": 469,
+      "events": [
+       [
+        0,
+        "birth",
+        "태어남"
+       ],
+       [
+        0,
+        "move",
+        "50마리 무리 속에 있었음"
+       ],
+       [
+        0.1,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        0.2,
+        "move",
+        "100마리 무리 속에 있었음"
+       ],
+       [
+        0.7,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        1.4,
+        "move",
+        "200마리 무리 속에 있었음"
+       ],
+       [
+        1.7,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        2.7,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        3.8,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        3.9,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        5,
+        "breed",
+        "첫 새끼를 남김"
+       ],
+       [
+        5.9,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        8,
+        "move",
+        "400마리 무리 속에 있었음"
+       ],
+       [
+        9,
+        "death",
+        "아사"
+       ]
+      ]
+     }
+    },
+    {
+     "key": "breeder",
+     "lab": "최다번식",
+     "unit": "마리",
+     "value": 8,
+     "ind": {
+      "uid": 2838,
+      "name": "줄무늬말 #2838",
+      "sp": "줄무늬말",
+      "trophic": "T3",
+      "sex": "M",
+      "bornYear": 5.1,
+      "deathYear": 11.8,
+      "ageYr": 6.7,
+      "cause": "아사",
+      "fate": "death",
+      "kills": 0,
+      "offspring": 8,
+      "peakHerd": 731,
+      "events": [
+       [
+        5.1,
+        "birth",
+        "태어남"
+       ],
+       [
+        5.1,
+        "move",
+        "50마리 무리 속에 있었음"
+       ],
+       [
+        5.1,
+        "move",
+        "100마리 무리 속에 있었음"
+       ],
+       [
+        5.2,
+        "breed",
+        "첫 새끼를 남김"
+       ],
+       [
+        5.4,
+        "move",
+        "200마리 무리 속에 있었음"
+       ],
+       [
+        6,
+        "move",
+        "400마리 무리 속에 있었음"
+       ],
+       [
+        6.8,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        7.8,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        8.8,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        10.7,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        11.7,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        11.8,
+        "death",
+        "아사"
+       ]
+      ]
+     }
+    },
+    {
+     "key": "herd",
+     "lab": "최대무리",
+     "unit": "마리",
+     "value": 731,
+     "ind": {
+      "uid": 337,
+      "name": "줄무늬말 #337",
+      "sp": "줄무늬말",
+      "trophic": "T3",
+      "sex": "M",
+      "bornYear": -13.9,
+      "deathYear": 7.9,
+      "ageYr": 21.8,
+      "cause": "아사",
+      "fate": "death",
+      "kills": 0,
+      "offspring": 1,
+      "peakHerd": 731,
+      "events": [
+       [
+        0,
+        "birth",
+        "태어남"
+       ],
+       [
+        0.1,
+        "move",
+        "50마리 무리 속에 있었음"
+       ],
+       [
+        0.2,
+        "move",
+        "100마리 무리 속에 있었음"
+       ],
+       [
+        0.5,
+        "move",
+        "200마리 무리 속에 있었음"
+       ],
+       [
+        2.2,
+        "breed",
+        "첫 새끼를 남김"
+       ],
+       [
+        6,
+        "move",
+        "400마리 무리 속에 있었음"
+       ],
+       [
+        7.8,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        7.9,
+        "death",
+        "아사"
+       ]
+      ]
+     }
+    }
+   ],
+   "meanLifeYr": 4
+  },
+  {
+   "name": "혹멧돼지",
+   "trophic": "T3",
+   "massKg": 113.2,
+   "lifespanYr": 29.6,
+   "tracked": 263,
+   "alive": 39,
+   "deaths": 224,
+   "merges": 0,
+   "causes": {
+    "아사": 138,
+    "들개무리에게 죽음": 68,
+    "노쇠": 14,
+    "갈증": 4
+   },
+   "records": [
+    {
+     "key": "longest",
+     "lab": "최장수",
+     "unit": "년",
+     "value": 25,
+     "ind": {
+      "uid": 193,
+      "name": "혹멧돼지 #193",
+      "sp": "혹멧돼지",
+      "trophic": "T3",
+      "sex": "F",
+      "bornYear": -16.9,
+      "deathYear": 8.1,
+      "ageYr": 25,
+      "cause": "아사",
+      "fate": "death",
+      "kills": 0,
+      "offspring": 2,
+      "peakHerd": 356,
+      "events": [
+       [
+        0,
+        "birth",
+        "태어남"
+       ],
+       [
+        0,
+        "breed",
+        "첫 새끼를 남김"
+       ],
+       [
+        0,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        0.8,
+        "move",
+        "50마리 무리 속에 있었음"
+       ],
+       [
+        0.8,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        2.8,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        3.8,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        3.9,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        3.9,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        4.1,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        4.1,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        4.2,
+        "move",
+        "100마리 무리 속에 있었음"
+       ],
+       [
+        4.3,
+        "move",
+        "200마리 무리 속에 있었음"
+       ],
+       [
+        4.6,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        7.1,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        7.8,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        8.1,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        8.1,
+        "death",
+        "아사"
+       ]
+      ]
+     }
+    },
+    {
+     "key": "breeder",
+     "lab": "최다번식",
+     "unit": "마리",
+     "value": 5,
+     "ind": {
+      "uid": 228,
+      "name": "혹멧돼지 #228",
+      "sp": "혹멧돼지",
+      "trophic": "T3",
+      "sex": "F",
+      "bornYear": -5.1,
+      "deathYear": 4.2,
+      "ageYr": 9.3,
+      "cause": "아사",
+      "fate": "death",
+      "kills": 0,
+      "offspring": 5,
+      "peakHerd": 365,
+      "events": [
+       [
+        0,
+        "birth",
+        "태어남"
+       ],
+       [
+        0,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        0.1,
+        "move",
+        "50마리 무리 속에 있었음"
+       ],
+       [
+        0.1,
+        "move",
+        "100마리 무리 속에 있었음"
+       ],
+       [
+        1,
+        "breed",
+        "첫 새끼를 남김"
+       ],
+       [
+        1.9,
+        "move",
+        "200마리 무리 속에 있었음"
+       ],
+       [
+        4.2,
+        "death",
+        "아사"
+       ]
+      ]
+     }
+    },
+    {
+     "key": "herd",
+     "lab": "최대무리",
+     "unit": "마리",
+     "value": 417,
+     "ind": {
+      "uid": 188,
+      "name": "혹멧돼지 #188",
+      "sp": "혹멧돼지",
+      "trophic": "T3",
+      "sex": "F",
+      "bornYear": -2.2,
+      "deathYear": null,
+      "ageYr": 14.2,
+      "cause": null,
+      "fate": "alive",
+      "kills": 0,
+      "offspring": 3,
+      "peakHerd": 417,
+      "events": [
+       [
+        0,
+        "birth",
+        "태어남"
+       ],
+       [
+        0,
+        "move",
+        "50마리 무리 속에 있었음"
+       ],
+       [
+        0.2,
+        "move",
+        "100마리 무리 속에 있었음"
+       ],
+       [
+        1.1,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        1.6,
+        "move",
+        "200마리 무리 속에 있었음"
+       ],
+       [
+        2,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        3.5,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        5.2,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        5.3,
+        "breed",
+        "첫 새끼를 남김"
+       ],
+       [
+        5.7,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        6,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        6.2,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        6.6,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        7.1,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        7.4,
+        "move",
+        "400마리 무리 속에 있었음"
+       ],
+       [
+        8,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        8.2,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        8.7,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        8.9,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        9,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        9.3,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        9.6,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        9.8,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        10.1,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        10.1,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ],
+       [
+        10.5,
+        "move",
+        "말라죽기 직전 수원에 닿음"
+       ]
+      ]
+     }
+    }
+   ],
+   "meanLifeYr": 4.6
+  },
+  {
+   "name": "검은등자칼",
+   "trophic": "T4",
+   "massKg": 8,
+   "lifespanYr": 17.4,
+   "tracked": 1666,
+   "alive": 484,
+   "deaths": 1182,
+   "merges": 0,
+   "causes": {
+    "아사": 1005,
+    "노쇠": 60,
+    "들개무리에게 죽음": 117
+   },
+   "records": [
+    {
+     "key": "longest",
+     "lab": "최장수",
+     "unit": "년",
+     "value": 18.5,
+     "ind": {
+      "uid": 454,
+      "name": "검은등자칼 #454",
+      "sp": "검은등자칼",
+      "trophic": "T4",
+      "sex": "M",
+      "bornYear": -10.1,
+      "deathYear": 8.4,
+      "ageYr": 18.5,
+      "cause": "노쇠",
+      "fate": "death",
+      "kills": 286.7,
+      "offspring": 5,
+      "peakHerd": 0,
+      "events": [
+       [
+        0,
+        "birth",
+        "태어남"
+       ],
+       [
+        0,
+        "hunt",
+        "첫 사냥 성공 — 메추라기"
+       ],
+       [
+        1.5,
+        "breed",
+        "첫 새끼를 남김"
+       ],
+       [
+        8.4,
+        "death",
+        "노쇠"
+       ]
+      ]
+     }
+    },
+    {
+     "key": "breeder",
+     "lab": "최다번식",
+     "unit": "마리",
+     "value": 11,
+     "ind": {
+      "uid": 458,
+      "name": "검은등자칼 #458",
+      "sp": "검은등자칼",
+      "trophic": "T4",
+      "sex": "M",
+      "bornYear": -3.9,
+      "deathYear": 10.5,
+      "ageYr": 14.4,
+      "cause": "노쇠",
+      "fate": "death",
+      "kills": 357.3,
+      "offspring": 11,
+      "peakHerd": 0,
+      "events": [
+       [
+        0,
+        "birth",
+        "태어남"
+       ],
+       [
+        0,
+        "hunt",
+        "첫 사냥 성공 — 메추라기"
+       ],
+       [
+        0.9,
+        "breed",
+        "첫 새끼를 남김"
+       ],
+       [
+        10.5,
+        "death",
+        "노쇠"
+       ]
+      ]
+     }
+    },
+    {
+     "key": "hunter",
+     "lab": "최다사냥",
+     "unit": "마리",
+     "value": 410,
+     "ind": {
+      "uid": 346,
+      "name": "검은등자칼 #346",
+      "sp": "검은등자칼",
+      "trophic": "T4",
+      "sex": "M",
+      "bornYear": -4.8,
+      "deathYear": null,
+      "ageYr": 16.8,
+      "cause": null,
+      "fate": "alive",
+      "kills": 410,
+      "offspring": 5,
+      "peakHerd": 0,
+      "events": [
+       [
+        0,
+        "birth",
+        "태어남"
+       ],
+       [
+        0,
+        "hunt",
+        "첫 사냥 성공 — 메추라기"
+       ],
+       [
+        1.1,
+        "breed",
+        "첫 새끼를 남김"
+       ]
+      ]
+     }
+    }
+   ],
+   "meanLifeYr": 5.5
+  },
+  {
+   "name": "들개무리",
+   "trophic": "T5",
+   "massKg": 60.1,
+   "lifespanYr": 26.1,
+   "tracked": 680,
+   "alive": 210,
+   "deaths": 470,
+   "merges": 0,
+   "causes": {
+    "아사": 454,
+    "노쇠": 16
+   },
+   "records": [
+    {
+     "key": "longest",
+     "lab": "최장수",
+     "unit": "년",
+     "value": 25.8,
+     "ind": {
+      "uid": 1030,
+      "name": "들개무리 #1030",
+      "sp": "들개무리",
+      "trophic": "T5",
+      "sex": "M",
+      "bornYear": -14.7,
+      "deathYear": 11,
+      "ageYr": 25.8,
+      "cause": "노쇠",
+      "fate": "death",
+      "kills": 207,
+      "offspring": 6,
+      "peakHerd": 0,
+      "events": [
+       [
+        0,
+        "birth",
+        "태어남"
+       ],
+       [
+        0.1,
+        "hunt",
+        "첫 사냥 성공 — 임팔라"
+       ],
+       [
+        0.5,
+        "breed",
+        "첫 새끼를 남김"
+       ],
+       [
+        5,
+        "hunt",
+        "길드내 포식 — 검은등자칼 #2050"
+       ],
+       [
+        11,
+        "death",
+        "노쇠"
+       ]
+      ]
+     }
+    },
+    {
+     "key": "breeder",
+     "lab": "최다번식",
+     "unit": "마리",
+     "value": 10,
+     "ind": {
+      "uid": 1044,
+      "name": "들개무리 #1044",
+      "sp": "들개무리",
+      "trophic": "T5",
+      "sex": "F",
+      "bornYear": -5.7,
+      "deathYear": null,
+      "ageYr": 17.7,
+      "cause": null,
+      "fate": "alive",
+      "kills": 218,
+      "offspring": 10,
+      "peakHerd": 0,
+      "events": [
+       [
+        0,
+        "birth",
+        "태어남"
+       ],
+       [
+        0.1,
+        "hunt",
+        "첫 사냥 성공 — 임팔라"
+       ],
+       [
+        0.6,
+        "hunt",
+        "길드내 포식 — 검은등자칼 #1125"
+       ],
+       [
+        0.7,
+        "hunt",
+        "길드내 포식 — 검은등자칼 #739"
+       ],
+       [
+        0.7,
+        "hunt",
+        "길드내 포식 — 검은등자칼 #907"
+       ],
+       [
+        1.5,
+        "breed",
+        "첫 새끼를 남김"
+       ]
+      ]
+     }
+    },
+    {
+     "key": "hunter",
+     "lab": "최다사냥",
+     "unit": "마리",
+     "value": 283,
+     "ind": {
+      "uid": 1358,
+      "name": "들개무리 #1358",
+      "sp": "들개무리",
+      "trophic": "T5",
+      "sex": "M",
+      "bornYear": 0.7,
+      "deathYear": null,
+      "ageYr": 11.3,
+      "cause": null,
+      "fate": "alive",
+      "kills": 283,
+      "offspring": 2,
+      "peakHerd": 0,
+      "events": [
+       [
+        0.7,
+        "birth",
+        "태어남"
+       ],
+       [
+        0.8,
+        "hunt",
+        "첫 사냥 성공 — 임팔라"
+       ],
+       [
+        11,
+        "breed",
+        "첫 새끼를 남김"
+       ]
+      ]
+     }
+    }
+   ],
+   "meanLifeYr": 6.1
+  }
+ ],
+ "individuals": [
+  {
+   "uid": 4039,
+   "name": "혹멧돼지 #4039",
+   "sp": "혹멧돼지",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 10.4,
+   "deathYear": null,
+   "ageYr": 1.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 187,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.4,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     10.4,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4040,
+   "name": "임팔라 #4040",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 10.4,
+   "deathYear": null,
+   "ageYr": 1.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 408,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.4,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     10.4,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     10.4,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     10.6,
+     "move",
+     "400마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4041,
+   "name": "들개무리 #4041",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 10.4,
+   "deathYear": 10.9,
+   "ageYr": 0.5,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 12,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.4,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ],
+    [
+     10.4,
+     "hunt",
+     "길드내 포식 — 검은등자칼 #3901"
+    ],
+    [
+     10.9,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4042,
+   "name": "줄무늬말 #4042",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 10.4,
+   "deathYear": 10.7,
+   "ageYr": 0.3,
+   "cause": "들개무리에게 죽음",
+   "fate": "death",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 19,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.7,
+     "death",
+     "들개무리에게 죽음"
+    ]
+   ]
+  },
+  {
+   "uid": 4043,
+   "name": "임팔라 #4043",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 10.4,
+   "deathYear": 11.2,
+   "ageYr": 0.8,
+   "cause": "갈증",
+   "fate": "death",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 71,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.2,
+     "death",
+     "갈증"
+    ]
+   ]
+  },
+  {
+   "uid": 4044,
+   "name": "줄무늬말 #4044",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 10.4,
+   "deathYear": null,
+   "ageYr": 1.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 1,
+   "peakHerd": 448,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.4,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     10.4,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     10.4,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     10.4,
+     "breed",
+     "첫 새끼를 남김"
+    ],
+    [
+     10.5,
+     "move",
+     "400마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4045,
+   "name": "줄무늬말 #4045",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 10.4,
+   "deathYear": 11.2,
+   "ageYr": 0.9,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 415,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.4,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     10.4,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     10.4,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     10.4,
+     "move",
+     "400마리 무리 속에 있었음"
+    ],
+    [
+     10.7,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11.2,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4046,
+   "name": "들개무리 #4046",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 10.4,
+   "deathYear": null,
+   "ageYr": 1.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 30,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.4,
+     "hunt",
+     "첫 사냥 성공 — 혹멧돼지"
+    ]
+   ]
+  },
+  {
+   "uid": 4047,
+   "name": "임팔라 #4047",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 10.4,
+   "deathYear": null,
+   "ageYr": 1.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 334,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.4,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     10.6,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     10.7,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     10.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     10.9,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4048,
+   "name": "들개무리 #4048",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 10.4,
+   "deathYear": null,
+   "ageYr": 1.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 44,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.4,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ]
+   ]
+  },
+  {
+   "uid": 4049,
+   "name": "검은등자칼 #4049",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.4,
+   "deathYear": null,
+   "ageYr": 1.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 55.2,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.4,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4050,
+   "name": "임팔라 #4050",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 10.4,
+   "deathYear": null,
+   "ageYr": 1.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 429,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.4,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     10.4,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     10.4,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     11.7,
+     "move",
+     "400마리 무리 속에 있었음"
+    ],
+    [
+     11.7,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4051,
+   "name": "검은등자칼 #4051",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.4,
+   "deathYear": null,
+   "ageYr": 1.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 55,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.4,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4052,
+   "name": "임팔라 #4052",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 10.4,
+   "deathYear": null,
+   "ageYr": 1.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 2,
+   "peakHerd": 573,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.4,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     10.4,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     10.4,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     10.7,
+     "move",
+     "400마리 무리 속에 있었음"
+    ],
+    [
+     10.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     10.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     10.9,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11.2,
+     "breed",
+     "첫 새끼를 남김"
+    ],
+    [
+     11.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4053,
+   "name": "검은등자칼 #4053",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.4,
+   "deathYear": null,
+   "ageYr": 1.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 54.9,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.4,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4054,
+   "name": "검은등자칼 #4054",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.4,
+   "deathYear": null,
+   "ageYr": 1.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 54.9,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.4,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4055,
+   "name": "줄무늬말 #4055",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 10.4,
+   "deathYear": null,
+   "ageYr": 1.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 1,
+   "peakHerd": 299,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.4,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     10.5,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     10.6,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     11.3,
+     "breed",
+     "첫 새끼를 남김"
+    ]
+   ]
+  },
+  {
+   "uid": 4056,
+   "name": "임팔라 #4056",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 10.4,
+   "deathYear": null,
+   "ageYr": 1.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 89,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4057,
+   "name": "들개무리 #4057",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 10.4,
+   "deathYear": null,
+   "ageYr": 1.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 40,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.4,
+     "hunt",
+     "첫 사냥 성공 — 줄무늬말"
+    ]
+   ]
+  },
+  {
+   "uid": 4058,
+   "name": "줄무늬말 #4058",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 10.4,
+   "deathYear": 10.8,
+   "ageYr": 0.4,
+   "cause": "들개무리에게 죽음",
+   "fate": "death",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 320,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.4,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     10.4,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     10.5,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     10.8,
+     "death",
+     "들개무리에게 죽음"
+    ]
+   ]
+  },
+  {
+   "uid": 4059,
+   "name": "줄무늬말 #4059",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 10.4,
+   "deathYear": null,
+   "ageYr": 1.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 511,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.4,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     10.4,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     10.4,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     10.5,
+     "move",
+     "400마리 무리 속에 있었음"
+    ],
+    [
+     10.9,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4060,
+   "name": "임팔라 #4060",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 10.4,
+   "deathYear": null,
+   "ageYr": 1.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 320,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.4,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     10.4,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     10.5,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     10.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4061,
+   "name": "줄무늬말 #4061",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 10.4,
+   "deathYear": null,
+   "ageYr": 1.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 351,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.4,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     10.5,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     10.5,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     11.6,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4062,
+   "name": "혹멧돼지 #4062",
+   "sp": "혹멧돼지",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 10.4,
+   "deathYear": null,
+   "ageYr": 1.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 1,
+   "peakHerd": 176,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.4,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     10.7,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     10.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11.4,
+     "breed",
+     "첫 새끼를 남김"
+    ]
+   ]
+  },
+  {
+   "uid": 4063,
+   "name": "검은등자칼 #4063",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.4,
+   "deathYear": null,
+   "ageYr": 1.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 53.7,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4064,
+   "name": "검은등자칼 #4064",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.4,
+   "deathYear": null,
+   "ageYr": 1.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 53.4,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4065,
+   "name": "검은등자칼 #4065",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.4,
+   "deathYear": null,
+   "ageYr": 1.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 53.4,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4066,
+   "name": "줄무늬말 #4066",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 10.4,
+   "deathYear": 11,
+   "ageYr": 0.6,
+   "cause": "들개무리에게 죽음",
+   "fate": "death",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 111,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     10.6,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     10.7,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11,
+     "death",
+     "들개무리에게 죽음"
+    ]
+   ]
+  },
+  {
+   "uid": 4067,
+   "name": "줄무늬말 #4067",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 10.4,
+   "deathYear": null,
+   "ageYr": 1.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 263,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.4,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     10.4,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     10.5,
+     "move",
+     "200마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4068,
+   "name": "검은등자칼 #4068",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.4,
+   "deathYear": null,
+   "ageYr": 1.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 53.2,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4069,
+   "name": "검은등자칼 #4069",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.4,
+   "deathYear": 11.8,
+   "ageYr": 1.4,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 47.3,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ],
+    [
+     11.8,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4070,
+   "name": "줄무늬말 #4070",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 10.4,
+   "deathYear": null,
+   "ageYr": 1.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 567,
+   "events": [
+    [
+     10.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     10.5,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "400마리 무리 속에 있었음"
+    ],
+    [
+     11.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4071,
+   "name": "혹멧돼지 #4071",
+   "sp": "혹멧돼지",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 10.5,
+   "deathYear": null,
+   "ageYr": 1.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 2,
+   "peakHerd": 108,
+   "events": [
+    [
+     10.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     10.5,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11.3,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11.4,
+     "breed",
+     "첫 새끼를 남김"
+    ],
+    [
+     11.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11.9,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     12,
+     "move",
+     "100마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4072,
+   "name": "줄무늬말 #4072",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 10.5,
+   "deathYear": 10.8,
+   "ageYr": 0.3,
+   "cause": "들개무리에게 죽음",
+   "fate": "death",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 133,
+   "events": [
+    [
+     10.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     10.7,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     10.8,
+     "death",
+     "들개무리에게 죽음"
+    ]
+   ]
+  },
+  {
+   "uid": 4073,
+   "name": "검은등자칼 #4073",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.5,
+   "deathYear": null,
+   "ageYr": 1.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 52.5,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4074,
+   "name": "검은등자칼 #4074",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.5,
+   "deathYear": null,
+   "ageYr": 1.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 52.5,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4075,
+   "name": "임팔라 #4075",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 10.5,
+   "deathYear": null,
+   "ageYr": 1.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 339,
+   "events": [
+    [
+     10.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     10.5,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     10.6,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     11.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4076,
+   "name": "임팔라 #4076",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 10.5,
+   "deathYear": 10.9,
+   "ageYr": 0.4,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 279,
+   "events": [
+    [
+     10.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     10.5,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     10.5,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     10.9,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4077,
+   "name": "검은등자칼 #4077",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.5,
+   "deathYear": null,
+   "ageYr": 1.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 52.4,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4078,
+   "name": "검은등자칼 #4078",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.5,
+   "deathYear": 10.9,
+   "ageYr": 0.5,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 15.6,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ],
+    [
+     10.9,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4079,
+   "name": "들개무리 #4079",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 10.5,
+   "deathYear": null,
+   "ageYr": 1.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 31,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ]
+   ]
+  },
+  {
+   "uid": 4080,
+   "name": "임팔라 #4080",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 10.5,
+   "deathYear": null,
+   "ageYr": 1.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 1,
+   "peakHerd": 329,
+   "events": [
+    [
+     10.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     10.5,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     10.9,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     11.2,
+     "breed",
+     "첫 새끼를 남김"
+    ],
+    [
+     11.9,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4081,
+   "name": "혹멧돼지 #4081",
+   "sp": "혹멧돼지",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 10.5,
+   "deathYear": null,
+   "ageYr": 1.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 109,
+   "events": [
+    [
+     10.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.6,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.2,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11.6,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     12,
+     "move",
+     "100마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4082,
+   "name": "줄무늬말 #4082",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 10.5,
+   "deathYear": 11.9,
+   "ageYr": 1.5,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 173,
+   "events": [
+    [
+     10.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     10.5,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     10.7,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11.7,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11.9,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4083,
+   "name": "줄무늬말 #4083",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 10.5,
+   "deathYear": 11.9,
+   "ageYr": 1.4,
+   "cause": "들개무리에게 죽음",
+   "fate": "death",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 268,
+   "events": [
+    [
+     10.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     10.8,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     10.9,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     11.9,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11.9,
+     "death",
+     "들개무리에게 죽음"
+    ]
+   ]
+  },
+  {
+   "uid": 4084,
+   "name": "임팔라 #4084",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 10.5,
+   "deathYear": 11.5,
+   "ageYr": 1,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 124,
+   "events": [
+    [
+     10.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.2,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4085,
+   "name": "검은등자칼 #4085",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.5,
+   "deathYear": null,
+   "ageYr": 1.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 51.2,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4086,
+   "name": "검은등자칼 #4086",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.5,
+   "deathYear": null,
+   "ageYr": 1.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 50.8,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4087,
+   "name": "검은등자칼 #4087",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.5,
+   "deathYear": null,
+   "ageYr": 1.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 50.8,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4088,
+   "name": "들개무리 #4088",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 10.5,
+   "deathYear": null,
+   "ageYr": 1.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 16,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11,
+     "hunt",
+     "첫 사냥 성공 — 줄무늬말"
+    ]
+   ]
+  },
+  {
+   "uid": 4089,
+   "name": "들개무리 #4089",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 10.5,
+   "deathYear": null,
+   "ageYr": 1.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 25,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.6,
+     "hunt",
+     "첫 사냥 성공 — 줄무늬말"
+    ]
+   ]
+  },
+  {
+   "uid": 4090,
+   "name": "검은등자칼 #4090",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.5,
+   "deathYear": null,
+   "ageYr": 1.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 50.5,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.5,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4091,
+   "name": "들개무리 #4091",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 10.5,
+   "deathYear": null,
+   "ageYr": 1.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 30,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.6,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ]
+   ]
+  },
+  {
+   "uid": 4092,
+   "name": "들개무리 #4092",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 10.5,
+   "deathYear": null,
+   "ageYr": 1.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 30,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.6,
+     "hunt",
+     "첫 사냥 성공 — 혹멧돼지"
+    ]
+   ]
+  },
+  {
+   "uid": 4093,
+   "name": "검은등자칼 #4093",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.5,
+   "deathYear": 12,
+   "ageYr": 1.4,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 48.8,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.6,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ],
+    [
+     12,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4094,
+   "name": "들개무리 #4094",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 10.6,
+   "deathYear": null,
+   "ageYr": 1.4,
+   "cause": null,
+   "fate": "alive",
+   "kills": 36,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.6,
+     "hunt",
+     "첫 사냥 성공 — 혹멧돼지"
+    ]
+   ]
+  },
+  {
+   "uid": 4095,
+   "name": "들개무리 #4095",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 10.6,
+   "deathYear": null,
+   "ageYr": 1.4,
+   "cause": null,
+   "fate": "alive",
+   "kills": 20,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.6,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ]
+   ]
+  },
+  {
+   "uid": 4096,
+   "name": "검은등자칼 #4096",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.6,
+   "deathYear": 11,
+   "ageYr": 0.4,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 12.8,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.6,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ],
+    [
+     11,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4097,
+   "name": "검은등자칼 #4097",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.6,
+   "deathYear": null,
+   "ageYr": 1.4,
+   "cause": null,
+   "fate": "alive",
+   "kills": 48.4,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.6,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4098,
+   "name": "들개무리 #4098",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 10.6,
+   "deathYear": 11.2,
+   "ageYr": 0.6,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 9,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.7,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ],
+    [
+     11.2,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4099,
+   "name": "검은등자칼 #4099",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.6,
+   "deathYear": null,
+   "ageYr": 1.4,
+   "cause": null,
+   "fate": "alive",
+   "kills": 48.3,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.6,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4100,
+   "name": "들개무리 #4100",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 10.6,
+   "deathYear": 11.8,
+   "ageYr": 1.2,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 18,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.7,
+     "hunt",
+     "첫 사냥 성공 — 혹멧돼지"
+    ],
+    [
+     11.8,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4101,
+   "name": "들개무리 #4101",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 10.6,
+   "deathYear": null,
+   "ageYr": 1.4,
+   "cause": null,
+   "fate": "alive",
+   "kills": 23,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.6,
+     "hunt",
+     "첫 사냥 성공 — 줄무늬말"
+    ]
+   ]
+  },
+  {
+   "uid": 4102,
+   "name": "검은등자칼 #4102",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.6,
+   "deathYear": null,
+   "ageYr": 1.4,
+   "cause": null,
+   "fate": "alive",
+   "kills": 47.6,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.6,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4103,
+   "name": "검은등자칼 #4103",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.6,
+   "deathYear": null,
+   "ageYr": 1.4,
+   "cause": null,
+   "fate": "alive",
+   "kills": 47.6,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.6,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4104,
+   "name": "검은등자칼 #4104",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.6,
+   "deathYear": null,
+   "ageYr": 1.4,
+   "cause": null,
+   "fate": "alive",
+   "kills": 47.3,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.6,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4105,
+   "name": "검은등자칼 #4105",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.6,
+   "deathYear": null,
+   "ageYr": 1.4,
+   "cause": null,
+   "fate": "alive",
+   "kills": 47.3,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.6,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4106,
+   "name": "검은등자칼 #4106",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.6,
+   "deathYear": null,
+   "ageYr": 1.4,
+   "cause": null,
+   "fate": "alive",
+   "kills": 47.2,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.6,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4107,
+   "name": "검은등자칼 #4107",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.6,
+   "deathYear": null,
+   "ageYr": 1.4,
+   "cause": null,
+   "fate": "alive",
+   "kills": 47,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.7,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4108,
+   "name": "검은등자칼 #4108",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.6,
+   "deathYear": null,
+   "ageYr": 1.4,
+   "cause": null,
+   "fate": "alive",
+   "kills": 46.1,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.7,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4109,
+   "name": "검은등자칼 #4109",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.7,
+   "deathYear": null,
+   "ageYr": 1.3,
+   "cause": null,
+   "fate": "alive",
+   "kills": 46,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.7,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4110,
+   "name": "들개무리 #4110",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 10.7,
+   "deathYear": null,
+   "ageYr": 1.3,
+   "cause": null,
+   "fate": "alive",
+   "kills": 21,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.7,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ]
+   ]
+  },
+  {
+   "uid": 4111,
+   "name": "검은등자칼 #4111",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.7,
+   "deathYear": null,
+   "ageYr": 1.3,
+   "cause": null,
+   "fate": "alive",
+   "kills": 45.3,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.7,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4112,
+   "name": "검은등자칼 #4112",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.7,
+   "deathYear": null,
+   "ageYr": 1.3,
+   "cause": null,
+   "fate": "alive",
+   "kills": 45.2,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.7,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4113,
+   "name": "검은등자칼 #4113",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.7,
+   "deathYear": 11.2,
+   "ageYr": 0.5,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 18.7,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.7,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ],
+    [
+     11.2,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4114,
+   "name": "검은등자칼 #4114",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.7,
+   "deathYear": null,
+   "ageYr": 1.3,
+   "cause": null,
+   "fate": "alive",
+   "kills": 45.1,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.7,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4115,
+   "name": "검은등자칼 #4115",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.7,
+   "deathYear": null,
+   "ageYr": 1.3,
+   "cause": null,
+   "fate": "alive",
+   "kills": 44.9,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.7,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4116,
+   "name": "검은등자칼 #4116",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.7,
+   "deathYear": null,
+   "ageYr": 1.3,
+   "cause": null,
+   "fate": "alive",
+   "kills": 44.8,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.7,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4117,
+   "name": "검은등자칼 #4117",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.7,
+   "deathYear": null,
+   "ageYr": 1.3,
+   "cause": null,
+   "fate": "alive",
+   "kills": 44.6,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.7,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4118,
+   "name": "검은등자칼 #4118",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.7,
+   "deathYear": null,
+   "ageYr": 1.3,
+   "cause": null,
+   "fate": "alive",
+   "kills": 44.2,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.7,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4119,
+   "name": "검은등자칼 #4119",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.7,
+   "deathYear": null,
+   "ageYr": 1.3,
+   "cause": null,
+   "fate": "alive",
+   "kills": 44.2,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.7,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4120,
+   "name": "검은등자칼 #4120",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.7,
+   "deathYear": 11.7,
+   "ageYr": 1,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 34.1,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.7,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ],
+    [
+     11.7,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4121,
+   "name": "검은등자칼 #4121",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.7,
+   "deathYear": null,
+   "ageYr": 1.3,
+   "cause": null,
+   "fate": "alive",
+   "kills": 43.1,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.8,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4122,
+   "name": "검은등자칼 #4122",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.7,
+   "deathYear": null,
+   "ageYr": 1.3,
+   "cause": null,
+   "fate": "alive",
+   "kills": 43,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.8,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4123,
+   "name": "들개무리 #4123",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 10.7,
+   "deathYear": null,
+   "ageYr": 1.3,
+   "cause": null,
+   "fate": "alive",
+   "kills": 24,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.7,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ]
+   ]
+  },
+  {
+   "uid": 4124,
+   "name": "검은등자칼 #4124",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.7,
+   "deathYear": null,
+   "ageYr": 1.3,
+   "cause": null,
+   "fate": "alive",
+   "kills": 42.7,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.8,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4125,
+   "name": "검은등자칼 #4125",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.8,
+   "deathYear": null,
+   "ageYr": 1.2,
+   "cause": null,
+   "fate": "alive",
+   "kills": 42.2,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.8,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.8,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4126,
+   "name": "들개무리 #4126",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 10.8,
+   "deathYear": null,
+   "ageYr": 1.2,
+   "cause": null,
+   "fate": "alive",
+   "kills": 18,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.8,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.8,
+     "hunt",
+     "첫 사냥 성공 — 줄무늬말"
+    ]
+   ]
+  },
+  {
+   "uid": 4127,
+   "name": "검은등자칼 #4127",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.8,
+   "deathYear": null,
+   "ageYr": 1.2,
+   "cause": null,
+   "fate": "alive",
+   "kills": 41.4,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.8,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.8,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4128,
+   "name": "들개무리 #4128",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 10.8,
+   "deathYear": 12,
+   "ageYr": 1.2,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 6,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.8,
+     "birth",
+     "태어남"
+    ],
+    [
+     11,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ],
+    [
+     12,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4129,
+   "name": "검은등자칼 #4129",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.8,
+   "deathYear": 11.4,
+   "ageYr": 0.6,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 21.7,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.8,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.8,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ],
+    [
+     11.4,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4130,
+   "name": "들개무리 #4130",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 10.8,
+   "deathYear": null,
+   "ageYr": 1.2,
+   "cause": null,
+   "fate": "alive",
+   "kills": 19,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.8,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.8,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ]
+   ]
+  },
+  {
+   "uid": 4131,
+   "name": "검은등자칼 #4131",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.8,
+   "deathYear": null,
+   "ageYr": 1.2,
+   "cause": null,
+   "fate": "alive",
+   "kills": 40.6,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.8,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.8,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4132,
+   "name": "들개무리 #4132",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 10.8,
+   "deathYear": 11.5,
+   "ageYr": 0.7,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 9,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.8,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.9,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ],
+    [
+     11.5,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4133,
+   "name": "들개무리 #4133",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 10.8,
+   "deathYear": null,
+   "ageYr": 1.2,
+   "cause": null,
+   "fate": "alive",
+   "kills": 17,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.8,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.9,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ]
+   ]
+  },
+  {
+   "uid": 4134,
+   "name": "들개무리 #4134",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 10.8,
+   "deathYear": null,
+   "ageYr": 1.2,
+   "cause": null,
+   "fate": "alive",
+   "kills": 28,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.8,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.9,
+     "hunt",
+     "첫 사냥 성공 — 줄무늬말"
+    ]
+   ]
+  },
+  {
+   "uid": 4135,
+   "name": "검은등자칼 #4135",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.8,
+   "deathYear": 11.9,
+   "ageYr": 1.1,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 37.3,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.8,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.9,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ],
+    [
+     11.9,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4136,
+   "name": "들개무리 #4136",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 10.8,
+   "deathYear": null,
+   "ageYr": 1.2,
+   "cause": null,
+   "fate": "alive",
+   "kills": 17,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.8,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.1,
+     "hunt",
+     "첫 사냥 성공 — 혹멧돼지"
+    ]
+   ]
+  },
+  {
+   "uid": 4137,
+   "name": "검은등자칼 #4137",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.8,
+   "deathYear": null,
+   "ageYr": 1.2,
+   "cause": null,
+   "fate": "alive",
+   "kills": 39.2,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.8,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.9,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4138,
+   "name": "검은등자칼 #4138",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.9,
+   "deathYear": null,
+   "ageYr": 1.1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 38.8,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.9,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.9,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4139,
+   "name": "검은등자칼 #4139",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.9,
+   "deathYear": null,
+   "ageYr": 1.1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 38.5,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.9,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.9,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4140,
+   "name": "검은등자칼 #4140",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.9,
+   "deathYear": null,
+   "ageYr": 1.1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 38.4,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.9,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.9,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4141,
+   "name": "검은등자칼 #4141",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.9,
+   "deathYear": null,
+   "ageYr": 1.1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 37.3,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.9,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.9,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4142,
+   "name": "검은등자칼 #4142",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.9,
+   "deathYear": null,
+   "ageYr": 1.1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 37,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.9,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.9,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4143,
+   "name": "검은등자칼 #4143",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.9,
+   "deathYear": null,
+   "ageYr": 1.1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 37,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.9,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.9,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4144,
+   "name": "검은등자칼 #4144",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 10.9,
+   "deathYear": null,
+   "ageYr": 1.1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 36.8,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.9,
+     "birth",
+     "태어남"
+    ],
+    [
+     11,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4145,
+   "name": "검은등자칼 #4145",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 10.9,
+   "deathYear": null,
+   "ageYr": 1.1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 36.8,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.9,
+     "birth",
+     "태어남"
+    ],
+    [
+     11,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4146,
+   "name": "들개무리 #4146",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 10.9,
+   "deathYear": null,
+   "ageYr": 1.1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 17,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     10.9,
+     "birth",
+     "태어남"
+    ],
+    [
+     10.9,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ]
+   ]
+  },
+  {
+   "uid": 4147,
+   "name": "검은등자칼 #4147",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11,
+   "deathYear": null,
+   "ageYr": 1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 35.8,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11,
+     "birth",
+     "태어남"
+    ],
+    [
+     11,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4148,
+   "name": "검은등자칼 #4148",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11,
+   "deathYear": null,
+   "ageYr": 1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 35.7,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11,
+     "birth",
+     "태어남"
+    ],
+    [
+     11,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4149,
+   "name": "들개무리 #4149",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 11,
+   "deathYear": null,
+   "ageYr": 1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 19,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11,
+     "birth",
+     "태어남"
+    ],
+    [
+     11,
+     "hunt",
+     "첫 사냥 성공 — 혹멧돼지"
+    ]
+   ]
+  },
+  {
+   "uid": 4150,
+   "name": "들개무리 #4150",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 11,
+   "deathYear": 11.8,
+   "ageYr": 0.9,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 20,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11,
+     "birth",
+     "태어남"
+    ],
+    [
+     11,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ],
+    [
+     11.8,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4151,
+   "name": "검은등자칼 #4151",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11,
+   "deathYear": null,
+   "ageYr": 1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 35.2,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11,
+     "birth",
+     "태어남"
+    ],
+    [
+     11,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4152,
+   "name": "검은등자칼 #4152",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11,
+   "deathYear": null,
+   "ageYr": 1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 34.8,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11,
+     "birth",
+     "태어남"
+    ],
+    [
+     11,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4153,
+   "name": "검은등자칼 #4153",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11,
+   "deathYear": null,
+   "ageYr": 1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 34.7,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11,
+     "birth",
+     "태어남"
+    ],
+    [
+     11,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4154,
+   "name": "검은등자칼 #4154",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11,
+   "deathYear": null,
+   "ageYr": 1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 34.6,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11,
+     "birth",
+     "태어남"
+    ],
+    [
+     11,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4155,
+   "name": "줄무늬말 #4155",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 11,
+   "deathYear": 11.1,
+   "ageYr": 0.1,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 170,
+   "events": [
+    [
+     11,
+     "birth",
+     "태어남"
+    ],
+    [
+     11,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.1,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4156,
+   "name": "검은등자칼 #4156",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11,
+   "deathYear": null,
+   "ageYr": 1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 33.8,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11,
+     "birth",
+     "태어남"
+    ],
+    [
+     11,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4157,
+   "name": "검은등자칼 #4157",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11,
+   "deathYear": null,
+   "ageYr": 1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 33.7,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11,
+     "birth",
+     "태어남"
+    ],
+    [
+     11,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4158,
+   "name": "검은등자칼 #4158",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11,
+   "deathYear": null,
+   "ageYr": 1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 33.7,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11,
+     "birth",
+     "태어남"
+    ],
+    [
+     11,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4159,
+   "name": "들개무리 #4159",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 11,
+   "deathYear": 11.6,
+   "ageYr": 0.6,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 10,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11,
+     "birth",
+     "태어남"
+    ],
+    [
+     11,
+     "hunt",
+     "첫 사냥 성공 — 혹멧돼지"
+    ],
+    [
+     11.6,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4160,
+   "name": "혹멧돼지 #4160",
+   "sp": "혹멧돼지",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11,
+   "deathYear": null,
+   "ageYr": 1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 121,
+   "events": [
+    [
+     11,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.2,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.6,
+     "move",
+     "100마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4161,
+   "name": "검은등자칼 #4161",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11,
+   "deathYear": null,
+   "ageYr": 1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 33.3,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.1,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4162,
+   "name": "임팔라 #4162",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11,
+   "deathYear": 11.2,
+   "ageYr": 0.2,
+   "cause": "들개무리에게 죽음",
+   "fate": "death",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 71,
+   "events": [
+    [
+     11,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.1,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.2,
+     "death",
+     "들개무리에게 죽음"
+    ]
+   ]
+  },
+  {
+   "uid": 4163,
+   "name": "줄무늬말 #4163",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 11,
+   "deathYear": null,
+   "ageYr": 1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 1,
+   "peakHerd": 269,
+   "events": [
+    [
+     11,
+     "birth",
+     "태어남"
+    ],
+    [
+     11,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.1,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     11.3,
+     "breed",
+     "첫 새끼를 남김"
+    ]
+   ]
+  },
+  {
+   "uid": 4164,
+   "name": "들개무리 #4164",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 11,
+   "deathYear": null,
+   "ageYr": 1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 17,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11,
+     "birth",
+     "태어남"
+    ],
+    [
+     11,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ]
+   ]
+  },
+  {
+   "uid": 4165,
+   "name": "임팔라 #4165",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11,
+   "deathYear": 11.7,
+   "ageYr": 0.7,
+   "cause": "들개무리에게 죽음",
+   "fate": "death",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 69,
+   "events": [
+    [
+     11,
+     "birth",
+     "태어남"
+    ],
+    [
+     11,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.7,
+     "death",
+     "들개무리에게 죽음"
+    ]
+   ]
+  },
+  {
+   "uid": 4166,
+   "name": "검은등자칼 #4166",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11,
+   "deathYear": null,
+   "ageYr": 1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 32.9,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.1,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4167,
+   "name": "들개무리 #4167",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 11,
+   "deathYear": null,
+   "ageYr": 1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 9,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.2,
+     "hunt",
+     "첫 사냥 성공 — 줄무늬말"
+    ]
+   ]
+  },
+  {
+   "uid": 4168,
+   "name": "검은등자칼 #4168",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11,
+   "deathYear": null,
+   "ageYr": 1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 32.6,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.1,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4169,
+   "name": "검은등자칼 #4169",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11,
+   "deathYear": null,
+   "ageYr": 1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 32.6,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.1,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4170,
+   "name": "들개무리 #4170",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 11,
+   "deathYear": null,
+   "ageYr": 1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 18,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.2,
+     "hunt",
+     "첫 사냥 성공 — 줄무늬말"
+    ]
+   ]
+  },
+  {
+   "uid": 4171,
+   "name": "혹멧돼지 #4171",
+   "sp": "혹멧돼지",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 11.1,
+   "deathYear": null,
+   "ageYr": 0.9,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 147,
+   "events": [
+    [
+     11.1,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.1,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.1,
+     "move",
+     "100마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4172,
+   "name": "줄무늬말 #4172",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 11.1,
+   "deathYear": null,
+   "ageYr": 0.9,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 479,
+   "events": [
+    [
+     11.1,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.1,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.1,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.1,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     11.3,
+     "move",
+     "400마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4173,
+   "name": "검은등자칼 #4173",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.1,
+   "deathYear": null,
+   "ageYr": 0.9,
+   "cause": null,
+   "fate": "alive",
+   "kills": 32.3,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.1,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.1,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4174,
+   "name": "검은등자칼 #4174",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.1,
+   "deathYear": null,
+   "ageYr": 0.9,
+   "cause": null,
+   "fate": "alive",
+   "kills": 32.2,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.1,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.1,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4175,
+   "name": "검은등자칼 #4175",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.1,
+   "deathYear": null,
+   "ageYr": 0.9,
+   "cause": null,
+   "fate": "alive",
+   "kills": 32.2,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.1,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.1,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4176,
+   "name": "줄무늬말 #4176",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.1,
+   "deathYear": null,
+   "ageYr": 0.9,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 1,
+   "peakHerd": 42,
+   "events": [
+    [
+     11.1,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.2,
+     "breed",
+     "첫 새끼를 남김"
+    ]
+   ]
+  },
+  {
+   "uid": 4177,
+   "name": "검은등자칼 #4177",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.1,
+   "deathYear": null,
+   "ageYr": 0.9,
+   "cause": null,
+   "fate": "alive",
+   "kills": 31.9,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.1,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.1,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4178,
+   "name": "혹멧돼지 #4178",
+   "sp": "혹멧돼지",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 11.1,
+   "deathYear": 11.1,
+   "ageYr": 0,
+   "cause": "들개무리에게 죽음",
+   "fate": "death",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 5,
+   "events": [
+    [
+     11.1,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.1,
+     "death",
+     "들개무리에게 죽음"
+    ]
+   ]
+  },
+  {
+   "uid": 4179,
+   "name": "검은등자칼 #4179",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.1,
+   "deathYear": null,
+   "ageYr": 0.9,
+   "cause": null,
+   "fate": "alive",
+   "kills": 31.7,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.1,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.1,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4180,
+   "name": "줄무늬말 #4180",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 11.1,
+   "deathYear": null,
+   "ageYr": 0.9,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 442,
+   "events": [
+    [
+     11.1,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.1,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.1,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.2,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     11.3,
+     "move",
+     "400마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4181,
+   "name": "검은등자칼 #4181",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.1,
+   "deathYear": null,
+   "ageYr": 0.9,
+   "cause": null,
+   "fate": "alive",
+   "kills": 31.5,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.1,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.1,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4182,
+   "name": "들개무리 #4182",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 11.1,
+   "deathYear": null,
+   "ageYr": 0.9,
+   "cause": null,
+   "fate": "alive",
+   "kills": 19,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.1,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.1,
+     "hunt",
+     "첫 사냥 성공 — 줄무늬말"
+    ]
+   ]
+  },
+  {
+   "uid": 4183,
+   "name": "검은등자칼 #4183",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.1,
+   "deathYear": null,
+   "ageYr": 0.9,
+   "cause": null,
+   "fate": "alive",
+   "kills": 31.1,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.1,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.1,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4184,
+   "name": "혹멧돼지 #4184",
+   "sp": "혹멧돼지",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 11.1,
+   "deathYear": null,
+   "ageYr": 0.9,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 147,
+   "events": [
+    [
+     11.1,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.1,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.2,
+     "move",
+     "100마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4185,
+   "name": "검은등자칼 #4185",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.1,
+   "deathYear": null,
+   "ageYr": 0.9,
+   "cause": null,
+   "fate": "alive",
+   "kills": 30.6,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.1,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.1,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4186,
+   "name": "들개무리 #4186",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 11.1,
+   "deathYear": null,
+   "ageYr": 0.9,
+   "cause": null,
+   "fate": "alive",
+   "kills": 9,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.1,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.2,
+     "hunt",
+     "첫 사냥 성공 — 줄무늬말"
+    ]
+   ]
+  },
+  {
+   "uid": 4187,
+   "name": "혹멧돼지 #4187",
+   "sp": "혹멧돼지",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.1,
+   "deathYear": 11.8,
+   "ageYr": 0.7,
+   "cause": "들개무리에게 죽음",
+   "fate": "death",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 86,
+   "events": [
+    [
+     11.1,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.2,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.2,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11.4,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11.8,
+     "death",
+     "들개무리에게 죽음"
+    ]
+   ]
+  },
+  {
+   "uid": 4188,
+   "name": "들개무리 #4188",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 11.1,
+   "deathYear": null,
+   "ageYr": 0.9,
+   "cause": null,
+   "fate": "alive",
+   "kills": 21,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.1,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.2,
+     "hunt",
+     "첫 사냥 성공 — 혹멧돼지"
+    ]
+   ]
+  },
+  {
+   "uid": 4189,
+   "name": "검은등자칼 #4189",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.1,
+   "deathYear": null,
+   "ageYr": 0.9,
+   "cause": null,
+   "fate": "alive",
+   "kills": 29.9,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.1,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.2,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4190,
+   "name": "검은등자칼 #4190",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.1,
+   "deathYear": null,
+   "ageYr": 0.9,
+   "cause": null,
+   "fate": "alive",
+   "kills": 29.8,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.1,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.2,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4191,
+   "name": "검은등자칼 #4191",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.1,
+   "deathYear": null,
+   "ageYr": 0.9,
+   "cause": null,
+   "fate": "alive",
+   "kills": 29.7,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.1,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.2,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4192,
+   "name": "검은등자칼 #4192",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.1,
+   "deathYear": null,
+   "ageYr": 0.9,
+   "cause": null,
+   "fate": "alive",
+   "kills": 29,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.1,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.2,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4193,
+   "name": "검은등자칼 #4193",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.2,
+   "deathYear": null,
+   "ageYr": 0.8,
+   "cause": null,
+   "fate": "alive",
+   "kills": 28.6,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.2,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.2,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4194,
+   "name": "들개무리 #4194",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 11.2,
+   "deathYear": 11.5,
+   "ageYr": 0.3,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 2,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.2,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.3,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ],
+    [
+     11.5,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4195,
+   "name": "줄무늬말 #4195",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.2,
+   "deathYear": 11.3,
+   "ageYr": 0.1,
+   "cause": "들개무리에게 죽음",
+   "fate": "death",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 162,
+   "events": [
+    [
+     11.2,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.2,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.2,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.3,
+     "death",
+     "들개무리에게 죽음"
+    ]
+   ]
+  },
+  {
+   "uid": 4196,
+   "name": "혹멧돼지 #4196",
+   "sp": "혹멧돼지",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 11.2,
+   "deathYear": null,
+   "ageYr": 0.8,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 1,
+   "peakHerd": 64,
+   "events": [
+    [
+     11.2,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.2,
+     "breed",
+     "첫 새끼를 남김"
+    ],
+    [
+     11.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4197,
+   "name": "검은등자칼 #4197",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.2,
+   "deathYear": null,
+   "ageYr": 0.8,
+   "cause": null,
+   "fate": "alive",
+   "kills": 27.9,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.2,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.2,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4198,
+   "name": "혹멧돼지 #4198",
+   "sp": "혹멧돼지",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.2,
+   "deathYear": null,
+   "ageYr": 0.8,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 151,
+   "events": [
+    [
+     11.2,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.2,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11.4,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.4,
+     "move",
+     "100마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4199,
+   "name": "검은등자칼 #4199",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.2,
+   "deathYear": null,
+   "ageYr": 0.8,
+   "cause": null,
+   "fate": "alive",
+   "kills": 27,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.2,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.2,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4200,
+   "name": "줄무늬말 #4200",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 11.2,
+   "deathYear": null,
+   "ageYr": 0.8,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 203,
+   "events": [
+    [
+     11.2,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.2,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.2,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11.9,
+     "move",
+     "200마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4201,
+   "name": "줄무늬말 #4201",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 11.2,
+   "deathYear": null,
+   "ageYr": 0.8,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 269,
+   "events": [
+    [
+     11.2,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.3,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.3,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.8,
+     "move",
+     "200마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4202,
+   "name": "들개무리 #4202",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 11.2,
+   "deathYear": null,
+   "ageYr": 0.8,
+   "cause": null,
+   "fate": "alive",
+   "kills": 10,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.2,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.3,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ]
+   ]
+  },
+  {
+   "uid": 4203,
+   "name": "검은등자칼 #4203",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.3,
+   "deathYear": 12,
+   "ageYr": 0.7,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 24.1,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.3,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.3,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ],
+    [
+     12,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4204,
+   "name": "임팔라 #4204",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.3,
+   "deathYear": null,
+   "ageYr": 0.7,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 261,
+   "events": [
+    [
+     11.3,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.3,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "200마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4205,
+   "name": "검은등자칼 #4205",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.3,
+   "deathYear": null,
+   "ageYr": 0.7,
+   "cause": null,
+   "fate": "alive",
+   "kills": 25.2,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.3,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.3,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4206,
+   "name": "검은등자칼 #4206",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.3,
+   "deathYear": null,
+   "ageYr": 0.7,
+   "cause": null,
+   "fate": "alive",
+   "kills": 24.9,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.3,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.3,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4207,
+   "name": "줄무늬말 #4207",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.3,
+   "deathYear": null,
+   "ageYr": 0.7,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 150,
+   "events": [
+    [
+     11.3,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.3,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.3,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.7,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4208,
+   "name": "검은등자칼 #4208",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.3,
+   "deathYear": null,
+   "ageYr": 0.7,
+   "cause": null,
+   "fate": "alive",
+   "kills": 24.8,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.3,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.3,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4209,
+   "name": "임팔라 #4209",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.3,
+   "deathYear": null,
+   "ageYr": 0.7,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 227,
+   "events": [
+    [
+     11.3,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.3,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.3,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.3,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     11.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4210,
+   "name": "들개무리 #4210",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 11.3,
+   "deathYear": null,
+   "ageYr": 0.7,
+   "cause": null,
+   "fate": "alive",
+   "kills": 16,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.3,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.3,
+     "hunt",
+     "첫 사냥 성공 — 줄무늬말"
+    ]
+   ]
+  },
+  {
+   "uid": 4211,
+   "name": "임팔라 #4211",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 11.3,
+   "deathYear": null,
+   "ageYr": 0.7,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 354,
+   "events": [
+    [
+     11.3,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.3,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.3,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.4,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     11.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4212,
+   "name": "임팔라 #4212",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 11.3,
+   "deathYear": null,
+   "ageYr": 0.7,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 1,
+   "peakHerd": 94,
+   "events": [
+    [
+     11.3,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.3,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.4,
+     "breed",
+     "첫 새끼를 남김"
+    ]
+   ]
+  },
+  {
+   "uid": 4213,
+   "name": "줄무늬말 #4213",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.3,
+   "deathYear": null,
+   "ageYr": 0.7,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 348,
+   "events": [
+    [
+     11.3,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.3,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.6,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     11.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4214,
+   "name": "임팔라 #4214",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.3,
+   "deathYear": null,
+   "ageYr": 0.7,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 1,
+   "peakHerd": 268,
+   "events": [
+    [
+     11.3,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.3,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.4,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.4,
+     "breed",
+     "첫 새끼를 남김"
+    ],
+    [
+     11.8,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     11.9,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4215,
+   "name": "검은등자칼 #4215",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.3,
+   "deathYear": null,
+   "ageYr": 0.7,
+   "cause": null,
+   "fate": "alive",
+   "kills": 24.1,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.3,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.3,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4216,
+   "name": "줄무늬말 #4216",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.3,
+   "deathYear": null,
+   "ageYr": 0.7,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 146,
+   "events": [
+    [
+     11.3,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.3,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.6,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.7,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4217,
+   "name": "혹멧돼지 #4217",
+   "sp": "혹멧돼지",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.3,
+   "deathYear": 12,
+   "ageYr": 0.7,
+   "cause": "들개무리에게 죽음",
+   "fate": "death",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 158,
+   "events": [
+    [
+     11.3,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.4,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.6,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     12,
+     "death",
+     "들개무리에게 죽음"
+    ]
+   ]
+  },
+  {
+   "uid": 4218,
+   "name": "검은등자칼 #4218",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.3,
+   "deathYear": null,
+   "ageYr": 0.7,
+   "cause": null,
+   "fate": "alive",
+   "kills": 23.5,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.3,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.3,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4219,
+   "name": "검은등자칼 #4219",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.3,
+   "deathYear": null,
+   "ageYr": 0.7,
+   "cause": null,
+   "fate": "alive",
+   "kills": 23.4,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.3,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.3,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4220,
+   "name": "줄무늬말 #4220",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.3,
+   "deathYear": null,
+   "ageYr": 0.7,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 137,
+   "events": [
+    [
+     11.3,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.3,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.8,
+     "move",
+     "100마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4221,
+   "name": "검은등자칼 #4221",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.3,
+   "deathYear": null,
+   "ageYr": 0.7,
+   "cause": null,
+   "fate": "alive",
+   "kills": 23.1,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.3,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.4,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4222,
+   "name": "검은등자칼 #4222",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.3,
+   "deathYear": null,
+   "ageYr": 0.7,
+   "cause": null,
+   "fate": "alive",
+   "kills": 23,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.3,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.4,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4223,
+   "name": "임팔라 #4223",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.3,
+   "deathYear": null,
+   "ageYr": 0.7,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 52,
+   "events": [
+    [
+     11.3,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.9,
+     "move",
+     "50마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4224,
+   "name": "검은등자칼 #4224",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.3,
+   "deathYear": 11.9,
+   "ageYr": 0.5,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 17.6,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.3,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.4,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ],
+    [
+     11.9,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4225,
+   "name": "줄무늬말 #4225",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 301,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.4,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.4,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "200마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4226,
+   "name": "임팔라 #4226",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.4,
+   "deathYear": 11.9,
+   "ageYr": 0.6,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 370,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.4,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.4,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     11.9,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4227,
+   "name": "들개무리 #4227",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 16,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.4,
+     "hunt",
+     "첫 사냥 성공 — 줄무늬말"
+    ]
+   ]
+  },
+  {
+   "uid": 4228,
+   "name": "들개무리 #4228",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 10,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.4,
+     "hunt",
+     "첫 사냥 성공 — 혹멧돼지"
+    ]
+   ]
+  },
+  {
+   "uid": 4229,
+   "name": "검은등자칼 #4229",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 21.3,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.4,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4230,
+   "name": "검은등자칼 #4230",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 21,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.4,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4231,
+   "name": "줄무늬말 #4231",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 11.4,
+   "deathYear": 11.5,
+   "ageYr": 0.1,
+   "cause": "들개무리에게 죽음",
+   "fate": "death",
+   "kills": 0,
+   "offspring": 1,
+   "peakHerd": 211,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.4,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.4,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.4,
+     "breed",
+     "첫 새끼를 남김"
+    ],
+    [
+     11.5,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "death",
+     "들개무리에게 죽음"
+    ]
+   ]
+  },
+  {
+   "uid": 4232,
+   "name": "줄무늬말 #4232",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 405,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.4,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.4,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.4,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "400마리 무리 속에 있었음"
+    ],
+    [
+     11.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4233,
+   "name": "검은등자칼 #4233",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 20.9,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.4,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4234,
+   "name": "들개무리 #4234",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 7,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.4,
+     "hunt",
+     "첫 사냥 성공 — 혹멧돼지"
+    ]
+   ]
+  },
+  {
+   "uid": 4235,
+   "name": "들개무리 #4235",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 7,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "hunt",
+     "첫 사냥 성공 — 혹멧돼지"
+    ]
+   ]
+  },
+  {
+   "uid": 4236,
+   "name": "임팔라 #4236",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 414,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.4,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.4,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.6,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     11.7,
+     "move",
+     "400마리 무리 속에 있었음"
+    ],
+    [
+     11.7,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4237,
+   "name": "검은등자칼 #4237",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 20.4,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.4,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4238,
+   "name": "임팔라 #4238",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 353,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.4,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     11.7,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4239,
+   "name": "혹멧돼지 #4239",
+   "sp": "혹멧돼지",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 148,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     12,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4240,
+   "name": "혹멧돼지 #4240",
+   "sp": "혹멧돼지",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 27,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4241,
+   "name": "검은등자칼 #4241",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 19.9,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.4,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4242,
+   "name": "혹멧돼지 #4242",
+   "sp": "혹멧돼지",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 129,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.4,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.6,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     12,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4243,
+   "name": "검은등자칼 #4243",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 19.8,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.4,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4244,
+   "name": "검은등자칼 #4244",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 19.8,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.4,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4245,
+   "name": "혹멧돼지 #4245",
+   "sp": "혹멧돼지",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 91,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     12,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4246,
+   "name": "혹멧돼지 #4246",
+   "sp": "혹멧돼지",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 119,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "100마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4247,
+   "name": "줄무늬말 #4247",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 269,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.4,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.4,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.4,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     11.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4248,
+   "name": "줄무늬말 #4248",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 129,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.7,
+     "move",
+     "100마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4249,
+   "name": "줄무늬말 #4249",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 269,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.4,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.8,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.9,
+     "move",
+     "200마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4250,
+   "name": "검은등자칼 #4250",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 19.5,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4251,
+   "name": "들개무리 #4251",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 19,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.4,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ]
+   ]
+  },
+  {
+   "uid": 4252,
+   "name": "검은등자칼 #4252",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 19.3,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4253,
+   "name": "들개무리 #4253",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 11.4,
+   "deathYear": 12,
+   "ageYr": 0.6,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 7,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ],
+    [
+     12,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4254,
+   "name": "임팔라 #4254",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.4,
+   "deathYear": 11.7,
+   "ageYr": 0.3,
+   "cause": "들개무리에게 죽음",
+   "fate": "death",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 49,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.7,
+     "death",
+     "들개무리에게 죽음"
+    ]
+   ]
+  },
+  {
+   "uid": 4255,
+   "name": "줄무늬말 #4255",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 440,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     11.7,
+     "move",
+     "400마리 무리 속에 있었음"
+    ],
+    [
+     11.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4256,
+   "name": "들개무리 #4256",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 11.4,
+   "deathYear": null,
+   "ageYr": 0.6,
+   "cause": null,
+   "fate": "alive",
+   "kills": 14,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.4,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "hunt",
+     "첫 사냥 성공 — 줄무늬말"
+    ]
+   ]
+  },
+  {
+   "uid": 4257,
+   "name": "임팔라 #4257",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 306,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     11.7,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4258,
+   "name": "줄무늬말 #4258",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 348,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "200마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4259,
+   "name": "줄무늬말 #4259",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 388,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "200마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4260,
+   "name": "줄무늬말 #4260",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 221,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.6,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.6,
+     "move",
+     "200마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4261,
+   "name": "검은등자칼 #4261",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 18.3,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4262,
+   "name": "들개무리 #4262",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 14,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ]
+   ]
+  },
+  {
+   "uid": 4263,
+   "name": "임팔라 #4263",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 316,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     11.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4264,
+   "name": "줄무늬말 #4264",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 234,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.7,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11.7,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     11.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4265,
+   "name": "줄무늬말 #4265",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 11.5,
+   "deathYear": 12,
+   "ageYr": 0.5,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 143,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.7,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     12,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4266,
+   "name": "줄무늬말 #4266",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 289,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.6,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.9,
+     "move",
+     "200마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4267,
+   "name": "검은등자칼 #4267",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 17.7,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4268,
+   "name": "임팔라 #4268",
+   "sp": "임팔라",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 11.5,
+   "deathYear": 12,
+   "ageYr": 0.5,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 182,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.7,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     12,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4269,
+   "name": "혹멧돼지 #4269",
+   "sp": "혹멧돼지",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 148,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11.9,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4270,
+   "name": "줄무늬말 #4270",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 388,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.5,
+     "move",
+     "200마리 무리 속에 있었음"
+    ]
+   ]
+  },
+  {
+   "uid": 4271,
+   "name": "들개무리 #4271",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 4,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ]
+   ]
+  },
+  {
+   "uid": 4272,
+   "name": "혹멧돼지 #4272",
+   "sp": "혹멧돼지",
+   "trophic": "T3",
+   "sex": "M",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 80,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.6,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11.7,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ],
+    [
+     11.7,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     12,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4273,
+   "name": "줄무늬말 #4273",
+   "sp": "줄무늬말",
+   "trophic": "T3",
+   "sex": "F",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 351,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "move",
+     "50마리 무리 속에 있었음"
+    ],
+    [
+     11.6,
+     "move",
+     "100마리 무리 속에 있었음"
+    ],
+    [
+     11.7,
+     "move",
+     "200마리 무리 속에 있었음"
+    ],
+    [
+     11.8,
+     "move",
+     "말라죽기 직전 수원에 닿음"
+    ]
+   ]
+  },
+  {
+   "uid": 4274,
+   "name": "검은등자칼 #4274",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 16.9,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4275,
+   "name": "검은등자칼 #4275",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 16.8,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4276,
+   "name": "들개무리 #4276",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 11,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "hunt",
+     "첫 사냥 성공 — 줄무늬말"
+    ]
+   ]
+  },
+  {
+   "uid": 4277,
+   "name": "검은등자칼 #4277",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 16.3,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.6,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4278,
+   "name": "검은등자칼 #4278",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 15.9,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.6,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4279,
+   "name": "검은등자칼 #4279",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 15.9,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.6,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4280,
+   "name": "검은등자칼 #4280",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 15.8,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.6,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4281,
+   "name": "들개무리 #4281",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 15,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.5,
+     "hunt",
+     "첫 사냥 성공 — 줄무늬말"
+    ]
+   ]
+  },
+  {
+   "uid": 4282,
+   "name": "들개무리 #4282",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 11.5,
+   "deathYear": 12,
+   "ageYr": 0.4,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 4,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.6,
+     "hunt",
+     "첫 사냥 성공 — 혹멧돼지"
+    ],
+    [
+     12,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4283,
+   "name": "들개무리 #4283",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 7,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.7,
+     "hunt",
+     "첫 사냥 성공 — 줄무늬말"
+    ]
+   ]
+  },
+  {
+   "uid": 4284,
+   "name": "검은등자칼 #4284",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 15.4,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.6,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4285,
+   "name": "검은등자칼 #4285",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 15.3,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.6,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4286,
+   "name": "검은등자칼 #4286",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.5,
+   "deathYear": null,
+   "ageYr": 0.5,
+   "cause": null,
+   "fate": "alive",
+   "kills": 15.4,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.5,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.6,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4287,
+   "name": "검은등자칼 #4287",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.6,
+   "deathYear": null,
+   "ageYr": 0.4,
+   "cause": null,
+   "fate": "alive",
+   "kills": 15.3,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.6,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4288,
+   "name": "들개무리 #4288",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 11.6,
+   "deathYear": null,
+   "ageYr": 0.4,
+   "cause": null,
+   "fate": "alive",
+   "kills": 8,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.7,
+     "hunt",
+     "첫 사냥 성공 — 줄무늬말"
+    ]
+   ]
+  },
+  {
+   "uid": 4289,
+   "name": "검은등자칼 #4289",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.6,
+   "deathYear": null,
+   "ageYr": 0.4,
+   "cause": null,
+   "fate": "alive",
+   "kills": 14.9,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.6,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4290,
+   "name": "들개무리 #4290",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 11.6,
+   "deathYear": null,
+   "ageYr": 0.4,
+   "cause": null,
+   "fate": "alive",
+   "kills": 8,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.6,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ]
+   ]
+  },
+  {
+   "uid": 4291,
+   "name": "검은등자칼 #4291",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.6,
+   "deathYear": null,
+   "ageYr": 0.4,
+   "cause": null,
+   "fate": "alive",
+   "kills": 14.1,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.6,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4292,
+   "name": "검은등자칼 #4292",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.6,
+   "deathYear": null,
+   "ageYr": 0.4,
+   "cause": null,
+   "fate": "alive",
+   "kills": 14.1,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.6,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4293,
+   "name": "들개무리 #4293",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 11.6,
+   "deathYear": 11.8,
+   "ageYr": 0.2,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 1,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.7,
+     "hunt",
+     "첫 사냥 성공 — 혹멧돼지"
+    ],
+    [
+     11.8,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4294,
+   "name": "들개무리 #4294",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 11.6,
+   "deathYear": null,
+   "ageYr": 0.4,
+   "cause": null,
+   "fate": "alive",
+   "kills": 10,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.6,
+     "hunt",
+     "첫 사냥 성공 — 줄무늬말"
+    ]
+   ]
+  },
+  {
+   "uid": 4295,
+   "name": "검은등자칼 #4295",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.6,
+   "deathYear": null,
+   "ageYr": 0.4,
+   "cause": null,
+   "fate": "alive",
+   "kills": 13.9,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.6,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4296,
+   "name": "들개무리 #4296",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 11.6,
+   "deathYear": null,
+   "ageYr": 0.4,
+   "cause": null,
+   "fate": "alive",
+   "kills": 8,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.7,
+     "hunt",
+     "첫 사냥 성공 — 줄무늬말"
+    ]
+   ]
+  },
+  {
+   "uid": 4297,
+   "name": "검은등자칼 #4297",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.6,
+   "deathYear": null,
+   "ageYr": 0.4,
+   "cause": null,
+   "fate": "alive",
+   "kills": 13.2,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.6,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4298,
+   "name": "들개무리 #4298",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 11.6,
+   "deathYear": null,
+   "ageYr": 0.4,
+   "cause": null,
+   "fate": "alive",
+   "kills": 6,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.7,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ]
+   ]
+  },
+  {
+   "uid": 4299,
+   "name": "들개무리 #4299",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 11.6,
+   "deathYear": 11.9,
+   "ageYr": 0.3,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 3,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.7,
+     "hunt",
+     "첫 사냥 성공 — 혹멧돼지"
+    ],
+    [
+     11.9,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4300,
+   "name": "들개무리 #4300",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 11.6,
+   "deathYear": 12,
+   "ageYr": 0.4,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 6,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.7,
+     "hunt",
+     "첫 사냥 성공 — 줄무늬말"
+    ],
+    [
+     12,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4301,
+   "name": "들개무리 #4301",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 11.6,
+   "deathYear": null,
+   "ageYr": 0.4,
+   "cause": null,
+   "fate": "alive",
+   "kills": 12,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.6,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ]
+   ]
+  },
+  {
+   "uid": 4302,
+   "name": "들개무리 #4302",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 11.6,
+   "deathYear": 12,
+   "ageYr": 0.3,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 5,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.7,
+     "hunt",
+     "첫 사냥 성공 — 줄무늬말"
+    ],
+    [
+     12,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4303,
+   "name": "검은등자칼 #4303",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.6,
+   "deathYear": null,
+   "ageYr": 0.4,
+   "cause": null,
+   "fate": "alive",
+   "kills": 12.2,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.6,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.7,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4304,
+   "name": "들개무리 #4304",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 11.7,
+   "deathYear": 11.8,
+   "ageYr": 0.1,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 2,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.7,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ],
+    [
+     11.8,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4305,
+   "name": "검은등자칼 #4305",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.7,
+   "deathYear": null,
+   "ageYr": 0.3,
+   "cause": null,
+   "fate": "alive",
+   "kills": 11.4,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.7,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4306,
+   "name": "검은등자칼 #4306",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.7,
+   "deathYear": null,
+   "ageYr": 0.3,
+   "cause": null,
+   "fate": "alive",
+   "kills": 11.4,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.7,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4307,
+   "name": "들개무리 #4307",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 11.7,
+   "deathYear": null,
+   "ageYr": 0.3,
+   "cause": null,
+   "fate": "alive",
+   "kills": 4,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.7,
+     "hunt",
+     "첫 사냥 성공 — 줄무늬말"
+    ]
+   ]
+  },
+  {
+   "uid": 4308,
+   "name": "들개무리 #4308",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 11.7,
+   "deathYear": 11.8,
+   "ageYr": 0.1,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 2,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.7,
+     "hunt",
+     "첫 사냥 성공 — 줄무늬말"
+    ],
+    [
+     11.8,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4309,
+   "name": "검은등자칼 #4309",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.7,
+   "deathYear": null,
+   "ageYr": 0.3,
+   "cause": null,
+   "fate": "alive",
+   "kills": 11,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.7,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4310,
+   "name": "들개무리 #4310",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 11.7,
+   "deathYear": null,
+   "ageYr": 0.3,
+   "cause": null,
+   "fate": "alive",
+   "kills": 9,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.8,
+     "hunt",
+     "첫 사냥 성공 — 혹멧돼지"
+    ]
+   ]
+  },
+  {
+   "uid": 4311,
+   "name": "들개무리 #4311",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 11.7,
+   "deathYear": 11.8,
+   "ageYr": 0.1,
+   "cause": "아사",
+   "fate": "death",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.8,
+     "death",
+     "아사"
+    ]
+   ]
+  },
+  {
+   "uid": 4312,
+   "name": "검은등자칼 #4312",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.7,
+   "deathYear": null,
+   "ageYr": 0.3,
+   "cause": null,
+   "fate": "alive",
+   "kills": 9.9,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.7,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4313,
+   "name": "들개무리 #4313",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 11.7,
+   "deathYear": null,
+   "ageYr": 0.3,
+   "cause": null,
+   "fate": "alive",
+   "kills": 2,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.8,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ]
+   ]
+  },
+  {
+   "uid": 4314,
+   "name": "들개무리 #4314",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 11.7,
+   "deathYear": null,
+   "ageYr": 0.3,
+   "cause": null,
+   "fate": "alive",
+   "kills": 4,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.9,
+     "hunt",
+     "첫 사냥 성공 — 혹멧돼지"
+    ]
+   ]
+  },
+  {
+   "uid": 4315,
+   "name": "검은등자칼 #4315",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.7,
+   "deathYear": null,
+   "ageYr": 0.3,
+   "cause": null,
+   "fate": "alive",
+   "kills": 8.8,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.7,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.8,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4316,
+   "name": "검은등자칼 #4316",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.8,
+   "deathYear": null,
+   "ageYr": 0.2,
+   "cause": null,
+   "fate": "alive",
+   "kills": 7.7,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.8,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.8,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4317,
+   "name": "검은등자칼 #4317",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.8,
+   "deathYear": null,
+   "ageYr": 0.2,
+   "cause": null,
+   "fate": "alive",
+   "kills": 7.6,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.8,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.8,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4318,
+   "name": "검은등자칼 #4318",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.8,
+   "deathYear": null,
+   "ageYr": 0.2,
+   "cause": null,
+   "fate": "alive",
+   "kills": 7.5,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.8,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.8,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4319,
+   "name": "검은등자칼 #4319",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.8,
+   "deathYear": null,
+   "ageYr": 0.2,
+   "cause": null,
+   "fate": "alive",
+   "kills": 7.5,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.8,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.8,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4320,
+   "name": "들개무리 #4320",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 11.8,
+   "deathYear": null,
+   "ageYr": 0.2,
+   "cause": null,
+   "fate": "alive",
+   "kills": 2,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.8,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.9,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ]
+   ]
+  },
+  {
+   "uid": 4321,
+   "name": "검은등자칼 #4321",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.8,
+   "deathYear": null,
+   "ageYr": 0.2,
+   "cause": null,
+   "fate": "alive",
+   "kills": 5.2,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.8,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.9,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4322,
+   "name": "검은등자칼 #4322",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.9,
+   "deathYear": null,
+   "ageYr": 0.1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 4.9,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.9,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.9,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4323,
+   "name": "검은등자칼 #4323",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.9,
+   "deathYear": null,
+   "ageYr": 0.1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 4.8,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.9,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.9,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4324,
+   "name": "검은등자칼 #4324",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.9,
+   "deathYear": null,
+   "ageYr": 0.1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 4.8,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.9,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.9,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4325,
+   "name": "들개무리 #4325",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 11.9,
+   "deathYear": null,
+   "ageYr": 0.1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 3,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.9,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.9,
+     "hunt",
+     "첫 사냥 성공 — 줄무늬말"
+    ]
+   ]
+  },
+  {
+   "uid": 4326,
+   "name": "검은등자칼 #4326",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.9,
+   "deathYear": null,
+   "ageYr": 0.1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 4.7,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.9,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.9,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4327,
+   "name": "검은등자칼 #4327",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 11.9,
+   "deathYear": null,
+   "ageYr": 0.1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 3.8,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.9,
+     "birth",
+     "태어남"
+    ],
+    [
+     11.9,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4328,
+   "name": "들개무리 #4328",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 11.9,
+   "deathYear": null,
+   "ageYr": 0.1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 1,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.9,
+     "birth",
+     "태어남"
+    ],
+    [
+     12,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ]
+   ]
+  },
+  {
+   "uid": 4329,
+   "name": "들개무리 #4329",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 11.9,
+   "deathYear": null,
+   "ageYr": 0.1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 2,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.9,
+     "birth",
+     "태어남"
+    ],
+    [
+     12,
+     "hunt",
+     "첫 사냥 성공 — 임팔라"
+    ]
+   ]
+  },
+  {
+   "uid": 4330,
+   "name": "검은등자칼 #4330",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.9,
+   "deathYear": null,
+   "ageYr": 0.1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 2.5,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.9,
+     "birth",
+     "태어남"
+    ],
+    [
+     12,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4331,
+   "name": "검은등자칼 #4331",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.9,
+   "deathYear": null,
+   "ageYr": 0.1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 2.4,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.9,
+     "birth",
+     "태어남"
+    ],
+    [
+     12,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4332,
+   "name": "검은등자칼 #4332",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 11.9,
+   "deathYear": null,
+   "ageYr": 0.1,
+   "cause": null,
+   "fate": "alive",
+   "kills": 1.7,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     11.9,
+     "birth",
+     "태어남"
+    ],
+    [
+     12,
+     "hunt",
+     "첫 사냥 성공 — 메추라기"
+    ]
+   ]
+  },
+  {
+   "uid": 4333,
+   "name": "들개무리 #4333",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 12,
+   "deathYear": null,
+   "ageYr": 0,
+   "cause": null,
+   "fate": "alive",
+   "kills": 1,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     12,
+     "birth",
+     "태어남"
+    ],
+    [
+     12,
+     "hunt",
+     "첫 사냥 성공 — 줄무늬말"
+    ]
+   ]
+  },
+  {
+   "uid": 4334,
+   "name": "검은등자칼 #4334",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "F",
+   "bornYear": 12,
+   "deathYear": null,
+   "ageYr": 0,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0.8,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     12,
+     "birth",
+     "태어남"
+    ]
+   ]
+  },
+  {
+   "uid": 4335,
+   "name": "들개무리 #4335",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "F",
+   "bornYear": 12,
+   "deathYear": null,
+   "ageYr": 0,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     12,
+     "birth",
+     "태어남"
+    ]
+   ]
+  },
+  {
+   "uid": 4336,
+   "name": "들개무리 #4336",
+   "sp": "들개무리",
+   "trophic": "T5",
+   "sex": "M",
+   "bornYear": 12,
+   "deathYear": null,
+   "ageYr": 0,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     12,
+     "birth",
+     "태어남"
+    ]
+   ]
+  },
+  {
+   "uid": 4337,
+   "name": "검은등자칼 #4337",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 12,
+   "deathYear": null,
+   "ageYr": 0,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0.1,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     12,
+     "birth",
+     "태어남"
+    ]
+   ]
+  },
+  {
+   "uid": 4338,
+   "name": "검은등자칼 #4338",
+   "sp": "검은등자칼",
+   "trophic": "T4",
+   "sex": "M",
+   "bornYear": 12,
+   "deathYear": null,
+   "ageYr": 0,
+   "cause": null,
+   "fate": "alive",
+   "kills": 0.1,
+   "offspring": 0,
+   "peakHerd": 0,
+   "events": [
+    [
+     12,
+     "birth",
+     "태어남"
+    ]
+   ]
+  }
+ ],
+ "chronicle": [
+  {
+   "year": 0,
+   "day": 0,
+   "kind": "act",
+   "msg": "섬 생성 · XL 1,000km² · 사바나 · 육지 6,250셀 · 동물 7종"
+  },
+  {
+   "year": 0,
+   "day": 365,
+   "kind": "fire",
+   "msg": "16% 소실 · 발화 7건"
+  },
+  {
+   "year": 1,
+   "day": 365,
+   "kind": "fire",
+   "msg": "17% 소실 · 발화 1건"
+  },
+  {
+   "year": 2,
+   "day": 365,
+   "kind": "fire",
+   "msg": "28% 소실 · 발화 7건"
+  },
+  {
+   "year": 3,
+   "day": 365,
+   "kind": "fire",
+   "msg": "34% 소실 · 발화 4건"
+  },
+  {
+   "year": 4,
+   "day": 365,
+   "kind": "fire",
+   "msg": "5% 소실 · 발화 2건"
+  },
+  {
+   "year": 5,
+   "day": 365,
+   "kind": "fire",
+   "msg": "31% 소실 · 발화 4건"
+  },
+  {
+   "year": 6,
+   "day": 365,
+   "kind": "fire",
+   "msg": "7% 소실 · 발화 5건"
+  },
+  {
+   "year": 6,
+   "day": 365,
+   "kind": "spec",
+   "msg": "임팔라(T3) 급감 — 2년 34,438마리에서 16,185마리로"
+  },
+  {
+   "year": 6,
+   "day": 365,
+   "kind": "spec",
+   "msg": "줄무늬말(T3) 급감 — 2년 23,589마리에서 10,544마리로"
+  },
+  {
+   "year": 7,
+   "day": 365,
+   "kind": "fire",
+   "msg": "19% 소실 · 발화 4건"
+  },
+  {
+   "year": 8,
+   "day": 365,
+   "kind": "fire",
+   "msg": "4% 소실 · 발화 8건"
+  },
+  {
+   "year": 8,
+   "day": 365,
+   "kind": "spec",
+   "msg": "혹멧돼지(T3) 급감 — 2년 10,961마리에서 4,808마리로"
+  },
+  {
+   "year": 10,
+   "day": 365,
+   "kind": "fire",
+   "msg": "5% 소실 · 발화 2건"
+  },
+  {
+   "year": 11,
+   "day": 365,
+   "kind": "fire",
+   "msg": "4% 소실 · 발화 3건"
+  }
+ ],
+ "totals": {
+  "births": 167236,
+  "deaths": 180989,
+  "kills": 58899,
+  "burned": 10785,
+  "fires": 53,
+  "extinct": 0
+ }
+}

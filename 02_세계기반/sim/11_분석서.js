@@ -114,7 +114,8 @@ export function buildReport(j) {
   const hall = j.legacy || null;
   if (hall && hall.length) {
     push('─ 명예의 전당 ─────────────────────────────────────────────────────────');
-    push('  판 전체의 추적 개체에서 종별 기록을 뽑았다. 무리 흡수는 죽음으로 세지 않는다.');
+    push('  판 전체의 추적 개체에서 종별 기록을 뽑았다.');
+    push("  출생이 '시작전'인 개체는 처음부터 어른으로 놓인 것이다(나이를 흩어 놓는다).");
     push('');
     for (const g of hall) {
       push(`  ${g.trophic} ${g.name} — 추적 ${rptN(g.tracked)}마리`
@@ -124,8 +125,9 @@ export function buildReport(j) {
       if (cz.length) push('     사인 ' + cz.map(([c, n]) => `${c} ${n}(${rptPct(n, g.deaths)})`).join(' · '));
       for (const r of g.records) {
         const i = r.ind;
+        const born = i.bornYear < 0 ? `시작전 ${(-i.bornYear).toFixed(1)}년생` : `${i.bornYear}년생`;
         push(`     [${r.lab}] ${r.value}${r.unit} — ${i.name} (${i.sex === 'M' ? '수' : '암'}`
-           + ` · ${i.bornYear}년생${i.deathYear != null ? ` · ${i.deathYear}년 ${i.cause}` : ' · 생존'})`);
+           + ` · ${born}${i.deathYear != null ? ` · ${i.deathYear}년 ${i.cause}` : ' · 생존'})`);
         for (const line of rptLifeLines(i)) push('       ' + line);
       }
       push('');

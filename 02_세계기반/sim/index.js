@@ -11,7 +11,7 @@ export { HALL_CATS, hallOfFame, indBrief } from './10_기록.js';
 export { buildReport, traceDeaths } from './11_분석서.js';
 export { SPEC_EVENTS, trackSpecies, speciesTrail } from './12_종발자취.js';
 export { createWorld, computeWaterDist } from './07_세계생성.js';
-export { stepDay, DAY_PHASES } from './08_하루.js';
+export { stepDay, DAY_PHASES, newAnimal, attachInd } from './08_하루.js';
 export { collectStats, refreshSpeciesCounts, tierCount, aliveSpecies,
          recordSample, closeYear, watchEvents, logChron,
          chronDirty, setChronDirty } from './09_통계이력.js';

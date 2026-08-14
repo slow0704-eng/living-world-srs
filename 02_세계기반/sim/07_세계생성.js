@@ -7,6 +7,7 @@ import { clamp, mulberry32, makeNoise, fbm, makeGrid } from './03_유틸.js';
 import { deriveCapacity } from './04_유도.js';
 import { buildRoster } from './05_종.js';
 import { newInd } from './06_개체.js';
+import { newAnimal } from './08_하루.js';
 import { refreshSpeciesCounts, recordSample, logChron } from './09_통계이력.js';
 
 export function createWorld(seed, tierKey='XL', climateKey='SAVANNA'){
@@ -29,7 +30,17 @@ export function createWorld(seed, tierKey='XL', climateKey='SAVANNA'){
     dens4:new Float32Array(N), dens5:new Float32Array(N),
     plantB:null, plantCap:null, t2d:null,          // 종별 x 셀 (아래에서 할당)
     grass:new Float32Array(N), woody:new Float32Array(N),   // 기능군 합계(표현·화재용)
-    herds:[], p4:[], p5:[], herdAt:new Map(),
+    /* 대형 초식은 개체다. aniAt 은 셀 -> 그 셀의 개체들(포식이 쓴다),
+       dens 는 종별 셀 밀도(모이려는 성향이 읽는다), util 은 종별 이동 효용 필드다. */
+    /* 셀 버킷은 두 벌을 번갈아 쓴다(오늘 채우는 동안 어제 것을 읽어야 한다).
+       배열을 매일 새로 만들면 그 쓰레기 치우는 값이 시뮬레이션보다 비싸다. */
+    ani:[], aniA:new Array(N), aniB:new Array(N), cellsA:[], cellsB:[],
+    aniAt:null, aniCells:null, aniNext:null, nextCells:null,
+    aniKilled:false, trackedAlive:0,
+    t3Cnt:null, t3Sat:null,
+    dens:null, densPrev:null, util:null, wpull:new Float32Array(N),
+    flowX:new Int8Array(N), flowY:new Int8Array(N),   // 셀마다 물로 가는 방향
+    p4:[], p5:[],
     rng:mulberry32(seed^0x51ED270B), uid:1,
     inds:[], dead:[],                              // 추적 개체 · 사망 명부
     day:0, year:0, landCount:0, nearCells:0, waterCells:0,
@@ -47,6 +58,12 @@ export function createWorld(seed, tierKey='XL', climateKey='SAVANNA'){
   w.plantB=new Float32Array(nP*N); w.plantCap=new Float32Array(nP*N); w.t2d=new Float32Array(nT2*N);
   w.plantIdx=new Map(w.simPlants.map((id,k)=>[id,k]));
   w.t2Idx=new Map(w.byTier.T2.map((id,k)=>[id,k]));
+  w.t3Idx=new Map(w.byTier.T3.map((id,k)=>[id,k]));
+  const nT3=Math.max(1,w.byTier.T3.length);
+  w.dens=new Float32Array(nT3*N); w.densPrev=new Float32Array(nT3*N);
+  w.util=new Float32Array(nT3*N);
+  w.t3Cnt=new Int32Array(nT3); w.t3Sat=new Float32Array(nT3);
+  w.aniAt=w.aniA; w.aniCells=w.cellsA; w.aniNext=w.aniB; w.nextCells=w.cellsB;
 
   buildSpeciesMeta(w);
   genCoastline(w,noise); genElevation(w,noise); genRainfall(w);
@@ -212,6 +229,9 @@ export function buildDietMeta(w){
     }
     sp._capRef=Math.max(tot/Math.max(n,1),1e-6);
   }
+  /* 개체 루프에서 종 슬롯을 Map 으로 찾으면 하루 수만 번의 해시 조회가 된다.
+     종 객체에 박아 두고 속성으로 읽는다. */
+  for(const [id,k] of w.t3Idx) w.species[id]._t3=k;
 }
 
 /* 종별 식물 바이오매스를 기능군 합계로 접는다. 화재와 표현이 이 값을 쓴다. */
@@ -241,6 +261,27 @@ export function computeWaterDist(w){
     }
   }
   for(let i=0;i<g.N;i++) if(land[i]&&wdist[i]<=TUNE.drinkRadiusCells) w.nearCells++;
+  computeWaterFlow(w);
+}
+/* 셀마다 '물로 가는 방향'을 미리 적어 둔다.
+   수원 기울기는 셀당 1/60 밖에 안 되어 이동 잡음(0.16)에 묻힌다. 무리 시절에는
+   매일 아홉 칸을 훑어 평균적으로 옳은 쪽으로 갔지만, 개체는 나흘에 한 번만
+   방향을 고르므로 잘못 든 길을 나흘 동안 간다 — 실제로 개체의 1/4이
+   완전 탈수 상태로 굶어 죽었다. 목마른 개체는 이 화살표를 그대로 따라간다. */
+export function computeWaterFlow(w){
+  const {g,land,wdist,flowX,flowY}=w;
+  for(let i=0;i<g.N;i++){
+    if(!land[i]){ flowX[i]=0; flowY[i]=0; continue; }
+    const x=g.xOf(i), y=g.yOf(i);
+    let best=wdist[i], bx=0, by=0;
+    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+      if(!dx&&!dy) continue;
+      if(!g.inside(x+dx,y+dy)) continue;
+      const j=g.idx(x+dx,y+dy);
+      if(land[j]&&wdist[j]<best){ best=wdist[j]; bx=dx; by=dy; }
+    }
+    flowX[i]=bx; flowY[i]=by;
+  }
 }
 
 export function seedFauna(w,rand){
@@ -253,16 +294,36 @@ export function seedFauna(w,rand){
     const k=w.t2Idx.get(id), off=k*g.N;
     for(let m=0;m<idx.length;m++) w.t2d[off+idx[m]]=sp.seedN*wgt[m]/tot;
   });
-  // T3 : 종별 무리. 무리마다 우두머리 하나를 개체로 추적한다.
+  /* T3 : 개체를 하나씩 놓는다. 다만 섬 전체에 고루 뿌리면 첫 해에 서로를
+     못 찾아 모이는 성향이 작동하지 않으므로, 자리 하나에 한 떼씩 몰아 놓는다.
+     이 뭉침은 초기 조건일 뿐이고 이후로는 개체들이 알아서 모이고 흩어진다. */
   for(const id of byTier.T3){
     const sp=species[id]; if(sp.status==='ABSENT') continue;
-    const nH=Math.max(1,Math.round(sp.seedN/TUNE.herdSeedSize)), size=sp.seedN/nH;
-    for(let n=0;n<nH;n++){
-      const i=pick(), x=g.xOf(i)+rand(), y=g.yOf(i)+rand();
-      const h={x,y,n:size,e:0.8,hyd:1,sp:id,lead:null};
-      h.lead=newInd(w,id,x,y); h.lead.herd=h;
-      w.herds.push(h);
+    let left=sp.seedN;
+    while(left>0){
+      const i=pick(), cx=g.xOf(i), cy=g.yOf(i);
+      const size=Math.min(left,TUNE.seedClumpSize); left-=size;
+      for(let n=0;n<size;n++){
+        const a=newAnimal(w,id,cx+rand(),cy+rand(),0);
+        // 나이를 흩는다. 전부 0살로 두면 한 세대가 통째로 같이 늙어 죽는다.
+        a.bornDay=-Math.floor(rand()*sp.lifespanYr*365*0.6);
+        if(a.ind) a.ind.bornDay=a.bornDay;
+        w.ani.push(a);
+      }
     }
+  }
+  /* 첫 버킷을 채운다. 하루 파이프라인은 '어제의 셀 버킷'을 훑으므로
+     여기서 넣어 두지 않으면 첫날에 아무도 움직이지 않는다.
+     개체 수도 여기서 세어 둔다 — T3 의 sp.n 은 초식 위상이 채우는데,
+     첫 판정이 그보다 먼저 와서 멀쩡한 종이 0년차에 절멸로 찍혔다. */
+  for(const id of byTier.T3) species[id].n=0;
+  for(const a of w.ani){
+    species[a.sp].n++;
+    const ci=g.idx(clamp(a.x|0,0,g.W-1),clamp(a.y|0,0,g.H-1));
+    let l=w.aniAt[ci];
+    if(!l) l=w.aniAt[ci]=[];
+    if(!l.length) w.aniCells.push(ci);
+    l.push(a);
   }
   // T4 · T5 : 전부 개체
   for(const [tier,arr] of [['T4',w.p4],['T5',w.p5]])

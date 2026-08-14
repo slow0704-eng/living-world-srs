@@ -3,7 +3,7 @@
 
 import { CLIMATE_PROFILES, ISLAND_TIERS, ECO, TUNE, clamp, lerp,
          createWorld, stepDay, collectStats, viability, indAge,
-         hallOfFame, indBrief, buildReport, speciesTrail, SPEC_EVENTS,
+         hallOfFame, indBrief, buildReport, speciesTrail, SPEC_EVENTS, attachInd,
          logChron, chronDirty, setChronDirty } from '../sim/index.js';
 
 
@@ -23,7 +23,8 @@ const GA=[{id:'year',lab:'경과',unit:'년',get:s=>s.year},{id:'day',lab:'일�
 const GB=[{id:'grass',lab:'초본 현존량',unit:'천t',get:s=>fmt(s.grassT/1000)},
   {id:'woody',lab:'목본 임관',unit:'%',get:s=>Math.round(s.woodyFrac*100)},
   {id:'fire',lab:'연소 중',unit:'셀',get:s=>s.burning},
-  {id:'herds',lab:'무리 수',get:s=>fmt(s.herds)},
+  {id:'clump',lab:'군집 셀',get:s=>fmt(s.clumpCells)},
+  {id:'big',lab:'최대 군집',get:s=>fmt(s.biggestClump)},
   {id:'energy',lab:'T3 에너지',get:s=>s.energy.toFixed(2)},
   {id:'inds',lab:'추적 개체',get:s=>fmt(s.inds)}];
 const POP=[{k:'n2',cap:'T2',lab:'T2 소형초식'},{k:'n3',cap:'T3',lab:'T3 대형초식'},
@@ -64,9 +65,9 @@ $('layerSeg').innerHTML=Object.entries(LAYERS).map(([k,v],n)=>
 let dayFrac=1;
 const IX=o=>o.px==null?o.x:o.px+(o.x-o.px)*dayFrac;
 const IY=o=>o.py==null?o.y:o.py+(o.y-o.py)*dayFrac;
-/* 확대하면 무리를 구성원 점으로 펼친다. 무리 중심은 진짜 좌표지만
-   그 안의 개별 위치는 시뮬레이션이 아니라 표현이다 — 범례에 그렇게 적는다. */
-const SCATTER_ZOOM=3, SCATTER_BUDGET=6000;
+/* 대형 초식은 개체다. 점 하나가 한 마리이고 그 좌표는 진짜다.
+   다만 수만 마리를 다 찍으면 화면이 뭉개지므로 넓게 볼 때는 솎는다. */
+const SCATTER_BUDGET=6000;
 let scatterNote='';
 const NICE=[1,2,5,10,25,50,100,250,500,1000,2500,5000,10000];
 const niceStep=v=>{let o=NICE[0];for(const n of NICE) if(n<=v) o=n; return o;};
@@ -74,11 +75,8 @@ let t2PerDot=200, scatterShown='';
 function drawLegend(){
   $('legend').innerHTML=`<div class="lg"><span class="ramp"></span><span>초본 0 → 부양력</span></div>`
   +`<div class="lg"><span class="sw" style="background:var(--t2)"></span>T2 점 1개 = ${fmt(t2PerDot)}마리 · 밀도장(개체 아님)</div>`
-  +(scatterShown
-    ?`<div class="lg"><span class="sw" style="background:var(--t3)"></span>T3 구성원 표시 · ${scatterShown}
-       <span style="color:var(--ink-3)">— 무리 안 위치는 표현입니다</span></div>`
-    :`<div class="lg"><span class="sw" style="background:var(--t3)"></span>T3 점 1개 = 무리 하나 · 크기 = √개체수
-       <span style="color:var(--ink-3)">— ${SCATTER_ZOOM}배로 확대하면 구성원이 흩어집니다</span></div>`)
+  +`<div class="lg"><span class="sw" style="background:var(--t3)"></span>${scatterShown||'T3 점 1개 = 개체 하나'}
+     <span style="color:var(--ink-3)">— 무리는 객체가 아니라 모인 결과입니다</span></div>`
   +`<div class="lg"><span class="sw" style="background:var(--t4)"></span>T4 점 1개 = 개체 하나</div>`
   +`<div class="lg"><span class="sw" style="background:var(--t5)"></span>T5 점 1개 = 개체 하나</div>`
   +`<div class="lg"><span class="sw" style="background:var(--water);border-radius:1px"></span>수원
@@ -194,31 +192,22 @@ function paintMap(){
   ctx.fillStyle=cssVar('--t4');
   for(const p of W.p4){ if(!seen(p.x,p.y,1)) continue;
     ctx.beginPath();ctx.arc(SX(IX(p)),SY(IY(p)),2*rz,0,6.2832);ctx.fill();ctx.stroke();}
-  /* T3 : 멀리서는 무리 하나가 점 하나, 가까이서는 구성원 한 마리가 점 하나 */
+  /* T3 : 이제 무리라는 객체가 없다. 점 하나가 개체 하나다.
+     다 그리면 수만 개라 화면이 뭉개지므로, 넓게 볼 때는 솎아 그리고
+     솎은 비율을 범례에 적는다. 확대하면 한 마리씩 다 보인다. */
   ctx.fillStyle=cssVar('--t3');
-  const near=zoom>=SCATTER_ZOOM?W.herds.filter(h=>seen(h.x,h.y,2)):null;
-  if(near&&near.length){
-    let want=0; for(const h of near) want+=Math.max(1,Math.round(h.n));
-    const per=Math.min(1,SCATTER_BUDGET/Math.max(want,1));   // 예산을 넘으면 솎는다
-    scatterNote=per>=1?'점 1개 = 1마리'
-      :`점 1개 ≈ ${fmt(1/per)}마리 (표시 예산)`;
-    const t=(W.year*365+W.day+dayFrac)*0.06;
-    const rDot=Math.max(1.1,1.5*rz);
-    for(const h of near){
-      const cx=SX(IX(h)), cy=SY(IY(h));
-      const n=Math.max(1,Math.round(h.n)), shown=Math.max(1,Math.round(n*per));
-      /* 무리 반경 : 마릿수가 늘면 넓게 퍼진다. 표현이라 셀 크기에 맞춰 둔다 */
-      const rad=Math.min(1.2,0.16+Math.sqrt(n)*0.035)*s;
-      for(let k=0;k<shown;k++){
-        const a=((k*2654435761)>>>8&1023)/1023*6.2832+t*(0.4+((k*40503)>>>8&15)/40);
-        const rr=rad*Math.sqrt(((k*1597334677)>>>8&255)/255);
-        ctx.beginPath();ctx.arc(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr,rDot,0,6.2832);ctx.fill();
-      }
+  {
+    const visible=[];
+    for(const a of W.ani) if(seen(a.x,a.y,1)) visible.push(a);
+    const per=Math.min(1,SCATTER_BUDGET/Math.max(visible.length,1));
+    const stride=Math.max(1,Math.round(1/per));
+    scatterNote=stride<=1?'점 1개 = 개체 하나'
+      :`점 1개 = 개체 하나 · ${stride}마리 중 1마리만 표시(예산)`;
+    const rDot=Math.max(1.1,1.4*rz);
+    for(let k=0;k<visible.length;k+=stride){
+      const a=visible[k];
+      ctx.beginPath();ctx.arc(SX(IX(a)),SY(IY(a)),rDot,0,6.2832);ctx.fill();
     }
-  } else {
-    scatterNote='';
-    for(const h of W.herds){ if(!seen(h.x,h.y,2)) continue;
-      ctx.beginPath();ctx.arc(SX(IX(h)),SY(IY(h)),Math.max(1.8,Math.sqrt(h.n)*0.62)*rz,0,6.2832);ctx.fill();ctx.stroke();}
   }
   ctx.fillStyle=cssVar('--t5'); ctx.strokeStyle='rgba(255,255,255,.7)';
   for(const p of W.p5){ if(!seen(p.x,p.y,1)) continue;
@@ -244,7 +233,14 @@ function pickAt(fx,fy){
     if(d<bd){ bd=d; best=ind; } };
   for(const p of W.p5) test(p,p);
   for(const p of W.p4) test(p,p);
-  for(const h of W.herds) test(h,h.lead);
+  /* 초식은 표본만 이름을 갖는다. 이름 없는 개체를 고르면 그 자리에서
+     추적 대상으로 승격한다 — 클릭한 그 한 마리를 따라갈 수 있어야 한다. */
+  let bestAni=null, ad=bd;
+  for(const a of W.ani){
+    const dx=IX(a)-fx, dy=IY(a)-fy, d=dx*dx+dy*dy;
+    if(d<ad){ ad=d; bestAni=a; }
+  }
+  if(bestAni&&ad<=bd){ best=bestAni.ind||attachInd(W,bestAni); bd=ad; }
   if(best){ selUid=best.uid; drawInd(); drawLife();
     $('vCursor').textContent=`선택 · ${best.name}`; }
   return !!best;
@@ -498,10 +494,12 @@ const chip=(id,ok,txt)=>{const e=$(id);e.className='chip '+(ok?'ok':'no');e.quer
 /* 추적 중에는 커서 칸이 그 개체의 지금 상태를 보여 준다 */
 function showSelState(){
   const i=findInd(selUid); if(!i) return;
-  const h=i.herd&&i.herd.n>0?i.herd:null;
+  const ci=W.g.idx(clamp(i.x|0,0,W.g.W-1),clamp(i.y|0,0,W.g.H-1));
+  const lst=W.aniAt[ci];
   $('vCursor').textContent=`${i.name} · ${indAge(W,i).toFixed(1)}년`
     +` · 에너지 ${i.e.toFixed(2)} · 수분 ${i.hyd.toFixed(2)}`
-    +(h?` · 무리 ${fmt(h.n)}마리`:'')+(i.kills>=1?` · 사냥 ${fmt(i.kills)}마리`:'');
+    +(i.animal&&lst?` · 같은 자리 ${fmt(lst.length)}마리`:'')
+    +(i.kills>=1?` · 사냥 ${fmt(i.kills)}마리`:'');
 }
 function frame(){
   if(playing){acc+=speed;let n=0;while(acc>=1&&n<40){stepDay(W);acc--;n++;} if(acc>2)acc=0;}
@@ -618,11 +616,11 @@ cv.addEventListener('mousemove',ev=>{
   if(!W.land[i]){ $('vCursor').textContent='해상'; return; }
   /* 이 셀에 무엇이 있는지 등급별로 실제 값을 보여 준다 — 점의 기준을 눈으로 확인하는 자리 */
   let t2=0; for(const id of W.byTier.T2){ const o=W.t2Idx.get(id); if(o!==undefined) t2+=W.t2d[o*W.g.N+i]; }
-  let hn=0,hc=0; for(const h of W.herds) if(W.g.idx(h.x|0,h.y|0)===i){hc++;hn+=h.n;}
+  const lst=W.aniAt[i], hn=lst?lst.length:0;
   const pc=W.p4.filter(p=>W.g.idx(p.x|0,p.y|0)===i).length+W.p5.filter(p=>W.g.idx(p.x|0,p.y|0)===i).length;
   $('vCursor').textContent=`${W.elev[i]|0}m · 초본 ${W.grass[i].toFixed(1)}t · 수분 ${W.soil[i].toFixed(0)}mm`
      +(W.water[i]===2?' · 항구수원':W.water[i]===1?' · 계절수원':'')
-     +` │ T2 ${fmt(t2)}마리 · 무리 ${hc}(${fmt(hn)}마리) · 육식 ${pc}`;});
+     +` │ T2 ${fmt(t2)}마리 · 대형초식 ${fmt(hn)}마리 · 육식 ${pc}`;});
 cv.addEventListener('mouseleave',()=>{$('vCursor').textContent='셀 위로 이동';drag=null;});
 $('zoomSeg').onclick=e=>{const b=e.target.closest('[data-z]');if(!b)return;
   if(b.dataset.z==='in') setZoom(zoom*1.6);
