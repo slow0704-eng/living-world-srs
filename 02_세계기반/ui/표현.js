@@ -1,5 +1,5 @@
 /* 섬 생태 시뮬레이터 — 표현 계층 — DOM은 여기서만 만진다
-   소스는 이 모듈이고, 32_사바나XL_생태시뮬.html 은 `node 빌드.mjs` 산출물이다. */
+   소스는 이 모듈이고, 32_섬생태_시뮬레이터.html 은 `node 빌드.mjs` 산출물이다. */
 
 import { CLIMATE_PROFILES, ISLAND_TIERS, ECO, TUNE, clamp, lerp, mulberry32,
          createWorld, stepDay, collectStats, viability, indAge,

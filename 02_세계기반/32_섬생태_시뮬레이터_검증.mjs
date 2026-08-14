@@ -1,13 +1,13 @@
 /* 섬 생태 시뮬레이터 헤드리스 검증
  * 31_섬생태계_스키마와검증.txt [V-1]~[V-8]을 실행으로 확인한다.
  *
- *   node 32_사바나XL_생태시뮬_검증.mjs             기본 (XL x 사바나, 70년)
- *   node 32_사바나XL_생태시뮬_검증.mjs --years 30
- *   node 32_사바나XL_생태시뮬_검증.mjs --all       12개 조합 전부 짧게
- *   node 32_사바나XL_생태시뮬_검증.mjs --fire      화재 통계만 상세히
- *   node 32_사바나XL_생태시뮬_검증.mjs --interv    표 C-2 개입 대조
- *   node 32_사바나XL_생태시뮬_검증.mjs --mvp       T5 경계 개체군 (150년 필요)
- *   node 32_사바나XL_생태시뮬_검증.mjs --run --years 300 [--seed N --tier XL --climate SAVANNA]
+ *   node 32_섬생태_시뮬레이터_검증.mjs             기본 (XL x 사바나, 70년)
+ *   node 32_섬생태_시뮬레이터_검증.mjs --years 30
+ *   node 32_섬생태_시뮬레이터_검증.mjs --all       12개 조합 전부 짧게
+ *   node 32_섬생태_시뮬레이터_검증.mjs --fire      화재 통계만 상세히
+ *   node 32_섬생태_시뮬레이터_검증.mjs --interv    표 C-2 개입 대조
+ *   node 32_섬생태_시뮬레이터_검증.mjs --mvp       T5 경계 개체군 (150년 필요)
+ *   node 32_섬생태_시뮬레이터_검증.mjs --run --years 300 [--seed N --tier XL --climate SAVANNA]
  *       -> _결과/ 폴더에 .txt(사람용 요약 + 자동 판독)와 .json(전체 시계열)을 남긴다
  *
  * TUNE 값을 만졌다면 반드시 이 스크립트를 다시 돌릴 것.

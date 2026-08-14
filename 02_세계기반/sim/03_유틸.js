@@ -1,5 +1,5 @@
 /* 섬 생태 시뮬레이터 — 저수준 유틸 (난수 · 노이즈 · 격자)
-   소스는 이 모듈이고, 32_사바나XL_생태시뮬.html 은 `node 빌드.mjs` 산출물이다. */
+   소스는 이 모듈이고, 32_섬생태_시뮬레이터.html 은 `node 빌드.mjs` 산출물이다. */
 
 export const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 export const lerp=(a,b,t)=>a+(b-a)*t;

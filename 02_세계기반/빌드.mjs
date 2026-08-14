@@ -4,7 +4,7 @@
  *
  * 아티팩트는 CSP 때문에 외부 요청을 할 수 없어 반드시 단일 파일이어야 한다.
  * 그래서 소스는 sim/ · ui/ 로 나눠 두고, 이 스크립트가 하나로 합친다.
- * 편집은 언제나 모듈 쪽에서 하고, 산출물(32_사바나XL_생태시뮬.html)은 건드리지 않는다.
+ * 편집은 언제나 모듈 쪽에서 하고, 산출물(32_섬생태_시뮬레이터.html)은 건드리지 않는다.
  *
  * 합치는 방식은 단순하다. import/export 문을 걷어내고 의존 순서대로 이어 붙인다.
  * 그래서 두 가지 규칙을 지켜야 한다.
@@ -16,7 +16,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const OUT = path.join(here, '32_사바나XL_생태시뮬.html');
+const OUT = path.join(here, '32_섬생태_시뮬레이터.html');
 
 /* 의존 순서. 위에 있는 것이 아래를 참조하지 않는다(단, 함수 호출은 예외 —
    호이스팅되므로 선언 순서와 무관하다). */

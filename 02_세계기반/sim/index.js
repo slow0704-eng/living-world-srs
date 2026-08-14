@@ -1,5 +1,5 @@
 /* 섬 생태 시뮬레이터 — 시뮬레이션 코어 진입점 (검증 스크립트가 여기서 가져간다)
-   소스는 이 모듈이고, 32_사바나XL_생태시뮬.html 은 `node 빌드.mjs` 산출물이다. */
+   소스는 이 모듈이고, 32_섬생태_시뮬레이터.html 은 `node 빌드.mjs` 산출물이다. */
 
 export { CLIMATE_PROFILES, ISLAND_TIERS, ECO, NAME_POOL } from './01_사양상수.js';
 export { TUNE } from './02_튜닝상수.js';

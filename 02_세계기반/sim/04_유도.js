@@ -1,5 +1,5 @@
 /* 섬 생태 시뮬레이터 — [I-4] 면적과 기후만으로 부양 개체수를 낸다
-   소스는 이 모듈이고, 32_사바나XL_생태시뮬.html 은 `node 빌드.mjs` 산출물이다. */
+   소스는 이 모듈이고, 32_섬생태_시뮬레이터.html 은 `node 빌드.mjs` 산출물이다. */
 
 import { CLIMATE_PROFILES, ISLAND_TIERS, ECO } from './01_사양상수.js';
 
