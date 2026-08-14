@@ -233,6 +233,20 @@ function rptLifeLines(i, keep = 7) {
   if (i.offspring > 0) tag.push(`자손 ${i.offspring}`);
   if (i.peakHerd > 0) tag.push(`최대 무리 ${rptN(i.peakHerd)}`);
   if (tag.length) out.push('      ' + tag.join(' · '));
+  /* 계보 — 누구의 자식이고 누구와 짝을 이뤘고 누구와 함께 났는가.
+     형제는 저장하지 않고 부모의 자식 목록에서 자기를 뺀 것으로 센다. */
+  const k = i.kin;
+  if (k) {
+    const kin = [];
+    if (k.parents && k.parents.length) kin.push(`부모 ${k.parents.join(' · ')}`);
+    if (k.mates && k.mates.length) kin.push(`배우자 ${k.mates.join(' · ')}`);
+    if (k.siblings && (k.siblings.full || k.siblings.half))
+      kin.push(`형제 ${k.siblings.full + k.siblings.half}`
+        + (k.siblings.half ? `(반 ${k.siblings.half})` : '')
+        + (k.siblings.names.length ? ` — ${k.siblings.names.join(' · ')}` : ''));
+    if (k.children && k.children.length) kin.push(`자식 ${k.children.join(' · ')}`);
+    for (const line of kin) out.push('      ' + line);
+  }
   return out;
 }
 

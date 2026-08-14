@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url';
 const here = path.dirname(fileURLToPath(import.meta.url));
 /* 모듈을 직접 가져온다. 예전에는 HTML에서 <script>를 잘라 eval 했는데,
    주석 한 줄만 옮겨도 깨지는 방식이었다. */
-import { createWorld, stepDay, collectStats, deriveCapacity, hallOfFame, indBrief, speciesTrail,
+import { createWorld, stepDay, collectStats, deriveCapacity, hallOfFame, indBrief, indexByUid, speciesTrail,
          CLIMATE_PROFILES, ISLAND_TIERS, ECO, TUNE } from './sim/index.js';
 import { writeReport } from './판독.mjs';
 const TUNE_SNAPSHOT = JSON.parse(JSON.stringify(TUNE));
@@ -164,7 +164,8 @@ function saveRun(w, meta) {
   }));
   /* 개체 표본은 최근 것만 남긴다. 전부 넣으면 수만 마리라 json 이 감당이 안 된다.
      대신 판 전체의 기록은 legacy(명예의 전당)가 들고 있다. */
-  const individuals = w.inds.slice(-300).map(i => indBrief(w, i));
+  const byUid = indexByUid(w);
+  const individuals = w.inds.slice(-300).map(i => indBrief(w, i, byUid));
   const json = {
     meta: { ...meta, seed: w.seed, tier: w.tierKey, climate: w.climateKey,
             landCells: w.landCount, years: w.year,

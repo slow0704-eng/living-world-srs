@@ -21,8 +21,36 @@ export const HALL_CATS = [
 
 /* 개체 한 마리를 기록용으로 굳힌다. 참조를 들고 있으면 되살아난 듯 값이
    변하므로, 뽑는 순간의 상태를 복사해 둔다. */
-export function indBrief(w,i){
+/* uid -> 개체. 계보를 이름으로 풀려면 필요하다. 저장할 때 한 번만 만든다. */
+export function indexByUid(w){
+  const m=new Map();
+  for(const i of w.inds) m.set(i.uid,i);
+  return m;
+}
+/* 형제는 저장하지 않는다 — 부모의 자식 목록에서 자기를 뺀 것이 형제다. */
+function kinOf(w,i,byUid){
+  if(!byUid) return null;
+  const nameOf=u=>{ const k=byUid.get(u); return k?k.name:null; };
+  const lists=[i.parent,i.parent2].map(u=>{ const p=byUid.get(u); return p?p.children:null; })
+    .filter(Boolean);
+  const full=new Set(), half=new Set();
+  for(const kids of lists) for(const u of kids){
+    if(u===i.uid) continue;
+    if(lists.length===2&&lists.every(k=>k.includes(u))) full.add(u); else half.add(u);
+  }
+  for(const u of full) half.delete(u);
   return {
+    parents:[i.parent,i.parent2].map(nameOf).filter(Boolean),
+    mates:i.mates.map(nameOf).filter(Boolean).slice(0,8),
+    siblings:{ full:full.size, half:half.size,
+               names:[...full,...half].map(nameOf).filter(Boolean).slice(0,8) },
+    children:i.children.map(nameOf).filter(Boolean).slice(0,8),
+  };
+}
+export function indBrief(w,i,byUid){
+  const kin=kinOf(w,i,byUid);
+  return {
+    ...(kin?{kin}:{}),
     uid:i.uid, name:i.name, sp:w.species[i.sp].name, trophic:w.species[i.sp].trophic,
     sex:i.sex, bornYear:+(i.bornDay/365).toFixed(1),
     deathYear:i.deathDay==null?null:+(i.deathDay/365).toFixed(1),
@@ -36,6 +64,7 @@ export function indBrief(w,i){
    수명 통계는 fate==='death' 인 개체만 쓴다. '무리 흡수'는 죽음이 아니라
    대표 자리를 잃은 것이라, 섞으면 평균 수명이 무리 병합 주기로 내려앉는다. */
 export function hallOfFame(w){
+  const byUid=indexByUid(w);
   const bySp=new Map();
   for(const i of w.inds){
     const sp=w.species[i.sp];
@@ -63,7 +92,7 @@ export function hallOfFame(w){
     for(const c of HALL_CATS){
       const p=g._pick[c.key]; if(!p) continue;
       g.records.push({ key:c.key, lab:c.lab, unit:c.unit,
-        value:+p.v.toFixed(c.fix), ind:indBrief(w,p.i) });
+        value:+p.v.toFixed(c.fix), ind:indBrief(w,p.i,byUid) });
     }
     delete g._pick; delete g.lifeSum;
     out.push(g);

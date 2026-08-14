@@ -4,7 +4,7 @@
 import { CLIMATE_PROFILES, ISLAND_TIERS, ECO, TUNE, clamp, lerp, mulberry32,
          createWorld, stepDay, collectStats, viability, indAge,
          deriveCapacity, buildRoster,
-         hallOfFame, indBrief, buildReport, speciesTrail, SPEC_EVENTS, attachInd,
+         hallOfFame, indBrief, indexByUid, buildReport, speciesTrail, SPEC_EVENTS, attachInd,
          logChron, chronDirty, setChronDirty } from '../sim/index.js';
 
 
@@ -528,20 +528,38 @@ function paintLifeMap(i){
   const km=vw*W.cellKm;
   $('lifeMapMeta').textContent=`${tr.length}점 · 화면폭 ${km.toFixed(1)}km · ${lifeZoom.toFixed(1)}×`;
 }
-/* 계보 : 부모 · 짝 · 자식. 눌러서 그 개체로 건너뛴다. */
+/* 형제는 따로 저장하지 않는다. 부모의 자식 목록에서 자기를 뺀 것이 형제다 —
+   개체마다 형제 배열을 들고 다니면 같은 사실을 두 번 적는 셈이다.
+   부모 둘을 다 공유하면 친형제, 한쪽만 공유하면 반형제로 갈라 보여 준다. */
+function siblingsOf(i){
+  const full=new Set(), half=new Set();
+  const lists=[i.parent,i.parent2].map(u=>{
+    const p=findInd(u); return p?p.children:null;
+  }).filter(Boolean);
+  for(const kids of lists) for(const u of kids){
+    if(u===i.uid) continue;
+    if(lists.length===2&&lists.every(k=>k.includes(u))) full.add(u); else half.add(u);
+  }
+  for(const u of full) half.delete(u);
+  return {full:[...full], half:[...half]};
+}
+/* 계보 : 부모 · 배우자 · 형제 · 자식. 눌러서 그 개체로 건너뛴다. */
 function kinChips(i){
-  const one=uid=>{
+  const one=(uid,tag)=>{
     const k=findInd(uid); if(!k) return '';
     const sp=W.species[k.sp];
-    return `<button class="kin" data-uid="${uid}" title="${sp.name}">`
-      +`${k.name}${k.deathDay!=null?' †':''}</button>`;
+    return `<button class="kin" data-uid="${uid}" title="${sp.name} · ${k.sex==='M'?'수':'암'}">`
+      +`${k.name}${k.deathDay!=null?' †':''}${tag?`<small>${tag}</small>`:''}</button>`;
   };
   const rows=[];
-  const par=[i.parent,i.parent2].filter(u=>u!=null&&findInd(u)).map(one).join('');
+  const par=[i.parent,i.parent2].filter(u=>u!=null&&findInd(u)).map(u=>one(u)).join('');
   if(par) rows.push(`<dt>부모</dt><dd class="kinbox">${par}</dd>`);
-  const mates=i.mates.map(one).filter(Boolean);
-  if(mates.length) rows.push(`<dt>짝 ${mates.length}</dt><dd class="kinbox">${mates.join('')}</dd>`);
-  const kids=i.children.map(one).filter(Boolean);
+  const mates=i.mates.map(u=>one(u)).filter(Boolean);
+  if(mates.length) rows.push(`<dt>배우자 ${mates.length}</dt><dd class="kinbox">${mates.join('')}</dd>`);
+  const sib=siblingsOf(i);
+  const sibs=sib.full.map(u=>one(u)).concat(sib.half.map(u=>one(u,'반'))).filter(Boolean);
+  if(sibs.length) rows.push(`<dt>형제 ${sibs.length}</dt><dd class="kinbox">${sibs.join('')}</dd>`);
+  const kids=i.children.map(u=>one(u)).filter(Boolean);
   if(kids.length) rows.push(`<dt>자식 ${i.offspring}</dt><dd class="kinbox">${kids.join('')}`
     +(i.offspring>kids.length?`<span style="color:var(--ink-3);font-size:10px">외 ${i.offspring-kids.length}</span>`:'')+`</dd>`);
   if(!rows.length) return `<dl class="meta"><dt>계보</dt><dd style="color:var(--ink-3)">기록된 혈연이 없습니다</dd></dl>`;
@@ -756,7 +774,8 @@ function resultJson(stamp){
     lifespanYr:+s.lifespanYr.toFixed(1), seedN:s.seedN, finalN:Math.round(s.n),
     status:s.status, extinctYear:s.extinctYear, ...speciesTrail(s) }));
   /* 개체 표본은 최근 300마리만. 판 전체의 기록은 legacy(명예의 전당)가 들고 있다. */
-  const inds=W.inds.slice(-300).map(i=>indBrief(W,i));
+  const byUid=indexByUid(W);
+  const inds=W.inds.slice(-300).map(i=>indBrief(W,i,byUid));
   return { meta:{ stamp, source:'browser', seed:W.seed, tier:W.tierKey, climate:W.climateKey,
       landCells:W.landCount, years:W.year, derived:W.cap, tune:TUNE },
     years:W.years, species, legacy:hallOfFame(W), individuals:inds,

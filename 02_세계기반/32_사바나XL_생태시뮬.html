@@ -779,8 +779,36 @@ const HALL_CATS = [
 
 /* 개체 한 마리를 기록용으로 굳힌다. 참조를 들고 있으면 되살아난 듯 값이
    변하므로, 뽑는 순간의 상태를 복사해 둔다. */
-function indBrief(w,i){
+/* uid -> 개체. 계보를 이름으로 풀려면 필요하다. 저장할 때 한 번만 만든다. */
+function indexByUid(w){
+  const m=new Map();
+  for(const i of w.inds) m.set(i.uid,i);
+  return m;
+}
+/* 형제는 저장하지 않는다 — 부모의 자식 목록에서 자기를 뺀 것이 형제다. */
+function kinOf(w,i,byUid){
+  if(!byUid) return null;
+  const nameOf=u=>{ const k=byUid.get(u); return k?k.name:null; };
+  const lists=[i.parent,i.parent2].map(u=>{ const p=byUid.get(u); return p?p.children:null; })
+    .filter(Boolean);
+  const full=new Set(), half=new Set();
+  for(const kids of lists) for(const u of kids){
+    if(u===i.uid) continue;
+    if(lists.length===2&&lists.every(k=>k.includes(u))) full.add(u); else half.add(u);
+  }
+  for(const u of full) half.delete(u);
   return {
+    parents:[i.parent,i.parent2].map(nameOf).filter(Boolean),
+    mates:i.mates.map(nameOf).filter(Boolean).slice(0,8),
+    siblings:{ full:full.size, half:half.size,
+               names:[...full,...half].map(nameOf).filter(Boolean).slice(0,8) },
+    children:i.children.map(nameOf).filter(Boolean).slice(0,8),
+  };
+}
+function indBrief(w,i,byUid){
+  const kin=kinOf(w,i,byUid);
+  return {
+    ...(kin?{kin}:{}),
     uid:i.uid, name:i.name, sp:w.species[i.sp].name, trophic:w.species[i.sp].trophic,
     sex:i.sex, bornYear:+(i.bornDay/365).toFixed(1),
     deathYear:i.deathDay==null?null:+(i.deathDay/365).toFixed(1),
@@ -794,6 +822,7 @@ function indBrief(w,i){
    수명 통계는 fate==='death' 인 개체만 쓴다. '무리 흡수'는 죽음이 아니라
    대표 자리를 잃은 것이라, 섞으면 평균 수명이 무리 병합 주기로 내려앉는다. */
 function hallOfFame(w){
+  const byUid=indexByUid(w);
   const bySp=new Map();
   for(const i of w.inds){
     const sp=w.species[i.sp];
@@ -821,7 +850,7 @@ function hallOfFame(w){
     for(const c of HALL_CATS){
       const p=g._pick[c.key]; if(!p) continue;
       g.records.push({ key:c.key, lab:c.lab, unit:c.unit,
-        value:+p.v.toFixed(c.fix), ind:indBrief(w,p.i) });
+        value:+p.v.toFixed(c.fix), ind:indBrief(w,p.i,byUid) });
     }
     delete g._pick; delete g.lifeSum;
     out.push(g);
@@ -1753,6 +1782,9 @@ function phaseHerds(w){
           if(!cl.length) nextCells.push(cj);
           cl.push(c); sp.n++;
           if(mate.ind) mate.ind.offspring++;
+          /* 한쪽만 추적 중이면 짝도 올린다. 그러지 않으면 배우자와 형제가
+             기록에 거의 남지 않는다 — 표본끼리 만날 확률이 낮기 때문이다. */
+          if(a.ind&&!mate.ind&&w.trackedAlive<TUNE.trackedAlive) attachInd(w,mate);
           if(a.ind||mate.ind){
             if(a.ind){
               a.ind.offspring++;
@@ -2305,6 +2337,20 @@ function rptLifeLines(i, keep = 7) {
   if (i.offspring > 0) tag.push(`자손 ${i.offspring}`);
   if (i.peakHerd > 0) tag.push(`최대 무리 ${rptN(i.peakHerd)}`);
   if (tag.length) out.push('      ' + tag.join(' · '));
+  /* 계보 — 누구의 자식이고 누구와 짝을 이뤘고 누구와 함께 났는가.
+     형제는 저장하지 않고 부모의 자식 목록에서 자기를 뺀 것으로 센다. */
+  const k = i.kin;
+  if (k) {
+    const kin = [];
+    if (k.parents && k.parents.length) kin.push(`부모 ${k.parents.join(' · ')}`);
+    if (k.mates && k.mates.length) kin.push(`배우자 ${k.mates.join(' · ')}`);
+    if (k.siblings && (k.siblings.full || k.siblings.half))
+      kin.push(`형제 ${k.siblings.full + k.siblings.half}`
+        + (k.siblings.half ? `(반 ${k.siblings.half})` : '')
+        + (k.siblings.names.length ? ` — ${k.siblings.names.join(' · ')}` : ''));
+    if (k.children && k.children.length) kin.push(`자식 ${k.children.join(' · ')}`);
+    for (const line of kin) out.push('      ' + line);
+  }
   return out;
 }
 
@@ -2935,20 +2981,38 @@ function paintLifeMap(i){
   const km=vw*W.cellKm;
   $('lifeMapMeta').textContent=`${tr.length}점 · 화면폭 ${km.toFixed(1)}km · ${lifeZoom.toFixed(1)}×`;
 }
-/* 계보 : 부모 · 짝 · 자식. 눌러서 그 개체로 건너뛴다. */
+/* 형제는 따로 저장하지 않는다. 부모의 자식 목록에서 자기를 뺀 것이 형제다 —
+   개체마다 형제 배열을 들고 다니면 같은 사실을 두 번 적는 셈이다.
+   부모 둘을 다 공유하면 친형제, 한쪽만 공유하면 반형제로 갈라 보여 준다. */
+function siblingsOf(i){
+  const full=new Set(), half=new Set();
+  const lists=[i.parent,i.parent2].map(u=>{
+    const p=findInd(u); return p?p.children:null;
+  }).filter(Boolean);
+  for(const kids of lists) for(const u of kids){
+    if(u===i.uid) continue;
+    if(lists.length===2&&lists.every(k=>k.includes(u))) full.add(u); else half.add(u);
+  }
+  for(const u of full) half.delete(u);
+  return {full:[...full], half:[...half]};
+}
+/* 계보 : 부모 · 배우자 · 형제 · 자식. 눌러서 그 개체로 건너뛴다. */
 function kinChips(i){
-  const one=uid=>{
+  const one=(uid,tag)=>{
     const k=findInd(uid); if(!k) return '';
     const sp=W.species[k.sp];
-    return `<button class="kin" data-uid="${uid}" title="${sp.name}">`
-      +`${k.name}${k.deathDay!=null?' †':''}</button>`;
+    return `<button class="kin" data-uid="${uid}" title="${sp.name} · ${k.sex==='M'?'수':'암'}">`
+      +`${k.name}${k.deathDay!=null?' †':''}${tag?`<small>${tag}</small>`:''}</button>`;
   };
   const rows=[];
-  const par=[i.parent,i.parent2].filter(u=>u!=null&&findInd(u)).map(one).join('');
+  const par=[i.parent,i.parent2].filter(u=>u!=null&&findInd(u)).map(u=>one(u)).join('');
   if(par) rows.push(`<dt>부모</dt><dd class="kinbox">${par}</dd>`);
-  const mates=i.mates.map(one).filter(Boolean);
-  if(mates.length) rows.push(`<dt>짝 ${mates.length}</dt><dd class="kinbox">${mates.join('')}</dd>`);
-  const kids=i.children.map(one).filter(Boolean);
+  const mates=i.mates.map(u=>one(u)).filter(Boolean);
+  if(mates.length) rows.push(`<dt>배우자 ${mates.length}</dt><dd class="kinbox">${mates.join('')}</dd>`);
+  const sib=siblingsOf(i);
+  const sibs=sib.full.map(u=>one(u)).concat(sib.half.map(u=>one(u,'반'))).filter(Boolean);
+  if(sibs.length) rows.push(`<dt>형제 ${sibs.length}</dt><dd class="kinbox">${sibs.join('')}</dd>`);
+  const kids=i.children.map(u=>one(u)).filter(Boolean);
   if(kids.length) rows.push(`<dt>자식 ${i.offspring}</dt><dd class="kinbox">${kids.join('')}`
     +(i.offspring>kids.length?`<span style="color:var(--ink-3);font-size:10px">외 ${i.offspring-kids.length}</span>`:'')+`</dd>`);
   if(!rows.length) return `<dl class="meta"><dt>계보</dt><dd style="color:var(--ink-3)">기록된 혈연이 없습니다</dd></dl>`;
@@ -3163,7 +3227,8 @@ function resultJson(stamp){
     lifespanYr:+s.lifespanYr.toFixed(1), seedN:s.seedN, finalN:Math.round(s.n),
     status:s.status, extinctYear:s.extinctYear, ...speciesTrail(s) }));
   /* 개체 표본은 최근 300마리만. 판 전체의 기록은 legacy(명예의 전당)가 들고 있다. */
-  const inds=W.inds.slice(-300).map(i=>indBrief(W,i));
+  const byUid=indexByUid(W);
+  const inds=W.inds.slice(-300).map(i=>indBrief(W,i,byUid));
   return { meta:{ stamp, source:'browser', seed:W.seed, tier:W.tierKey, climate:W.climateKey,
       landCells:W.landCount, years:W.year, derived:W.cap, tune:TUNE },
     years:W.years, species, legacy:hallOfFame(W), individuals:inds,

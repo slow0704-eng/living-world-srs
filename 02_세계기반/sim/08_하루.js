@@ -307,6 +307,9 @@ export function phaseHerds(w){
           if(!cl.length) nextCells.push(cj);
           cl.push(c); sp.n++;
           if(mate.ind) mate.ind.offspring++;
+          /* 한쪽만 추적 중이면 짝도 올린다. 그러지 않으면 배우자와 형제가
+             기록에 거의 남지 않는다 — 표본끼리 만날 확률이 낮기 때문이다. */
+          if(a.ind&&!mate.ind&&w.trackedAlive<TUNE.trackedAlive) attachInd(w,mate);
           if(a.ind||mate.ind){
             if(a.ind){
               a.ind.offspring++;

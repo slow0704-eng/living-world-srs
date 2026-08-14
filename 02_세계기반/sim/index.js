@@ -7,7 +7,7 @@ export * from './03_유틸.js';
 export { deriveCapacity, viability } from './04_유도.js';
 export { buildRoster } from './05_종.js';
 export { newInd, addEv, killInd, noteKill, indAge } from './06_개체.js';
-export { HALL_CATS, hallOfFame, indBrief } from './10_기록.js';
+export { HALL_CATS, hallOfFame, indBrief, indexByUid } from './10_기록.js';
 export { buildReport, traceDeaths } from './11_분석서.js';
 export { SPEC_EVENTS, trackSpecies, speciesTrail } from './12_종발자취.js';
 export { createWorld, computeWaterDist } from './07_세계생성.js';
