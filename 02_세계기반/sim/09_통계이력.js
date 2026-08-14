@@ -4,6 +4,7 @@
 import { ECO } from './01_사양상수.js';
 import { TUNE } from './02_튜닝상수.js';
 import { clamp } from './03_유틸.js';
+import { trackSpecies } from './12_종발자취.js';
 
 /* 화면 갱신 플래그. 모듈 경계를 넘어 대입할 수 없으므로 설정 함수를 함께 낸다. */
 export let chronDirty = true;
@@ -74,6 +75,7 @@ export function closeYear(w){
     births:Math.round(a.bYr), deaths:Math.round(a.dYr)});
   if(w.last.burnFrac>=TUNE.fireBigEventFrac)
     logChron(w,'fire',`${(w.last.burnFrac*100).toFixed(0)}% 소실 · 발화 ${a.fireCount}건`);
+  trackSpecies(w);          // 종의 발자취 — 연 단위로만 판정한다
   w.day=0; w.year++;
   w.acc={bYr:0,dYr:0,killYr:0,burnedYr:0,fireCount:0};
 }

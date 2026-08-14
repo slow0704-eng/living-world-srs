@@ -126,6 +126,12 @@ tbody tr[aria-selected="true"]{background:var(--accent-soft)}
 #chron time{color:var(--ink-3); flex:0 0 62px; font-family:ui-monospace,monospace}
 #chron .k{flex:0 0 52px; font-size:9.5px; letter-spacing:.06em; text-transform:uppercase; padding-top:1px}
 .k.fire{color:var(--warn)} .k.loss{color:var(--crit)} .k.gain{color:var(--good)} .k.act{color:var(--accent-ink)}
+.k.spec{color:var(--t3)}
+/* 종 발자취 연표의 점 — 사건 종류마다 색이 다르다 */
+#tl .pip.seed{background:var(--ink-3)} #tl .pip.peak{background:var(--t3)}
+#tl .pip.boom{background:var(--good)} #tl .pip.crash{background:var(--warn)}
+#tl .pip.trough{background:var(--warn)} #tl .pip.brink{background:var(--crit)}
+#tl .pip.recover{background:var(--good)} #tl .pip.extinct{background:var(--crit)}
 
 /* 개체 조회 */
 .split{display:grid; gap:13px; grid-template-columns:1fr}

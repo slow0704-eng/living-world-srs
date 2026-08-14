@@ -3,7 +3,7 @@
 
 import { CLIMATE_PROFILES, ISLAND_TIERS, ECO, TUNE, clamp, lerp,
          createWorld, stepDay, collectStats, viability, indAge,
-         hallOfFame, indBrief, buildReport,
+         hallOfFame, indBrief, buildReport, speciesTrail, SPEC_EVENTS,
          logChron, chronDirty, setChronDirty } from '../sim/index.js';
 
 
@@ -312,7 +312,7 @@ function drawBars(){
 }
 
 /* 종 목록 */
-let specSort={k:'n',dir:-1};
+let specSort={k:'n',dir:-1}, selSpec=null;
 const SPEC_COLS=[['name','종',s=>s.name,'nm'],['trophic','등급',s=>s.trophic,'nm'],
   ['massKg','체중 kg',s=>s.massKg?s.massKg.toFixed(1):'–'],
   ['diet','식이폭',s=>s.diet?s.diet.length:'–'],
@@ -320,6 +320,7 @@ const SPEC_COLS=[['name','종',s=>s.name,'nm'],['trophic','등급',s=>s.trophic,
   ['lifespanYr','수명 년',s=>s.lifespanYr?s.lifespanYr.toFixed(0):'–'],
   ['seedN','초기',s=>s.seedN!=null?fmt(s.seedN):'–'],
   ['n','현재',s=>s.kind==='PLANT'||s.aggregate?'–':fmt(s.n)],
+  ['milestones','발자취',s=>s.milestones?s.milestones.length:'–'],
   ['status','상태',s=>{
     if(s.kind==='PLANT') return `<span class="st">${s.simulated?'시뮬':'집계'}</span>`;
     if(s.aggregate) return '<span class="st">집계</span>';
@@ -335,8 +336,9 @@ function drawSpec(){
     return (typeof av==='string'?av.localeCompare(bv):av-bv)*specSort.dir;});
   $('tSpec').tHead.innerHTML='<tr>'+SPEC_COLS.map(c=>
     `<th data-k="${c[0]}">${c[1]}${specSort.k===c[0]?(specSort.dir>0?' ▲':' ▼'):''}</th>`).join('')+'</tr>';
-  $('tSpec').tBodies[0].innerHTML=rows.map(s=>'<tr>'+SPEC_COLS.map(c=>
-    `<td class="${c[3]||''}">${c[2](s)}</td>`).join('')+'</tr>').join('');
+  $('tSpec').tBodies[0].innerHTML=rows.map(s=>
+    `<tr data-sid="${s.id}"${s.id===selSpec?' aria-selected="true"':''}>`
+    +SPEC_COLS.map(c=>`<td class="${c[3]||''}">${c[2](s)}</td>`).join('')+'</tr>').join('');
 }
 /* 개체 조회 — 표 머리를 누르면 그 열로 정렬한다(다시 누르면 역순).
    자손 · 사냥 · 최대무리로 줄을 세우면 그것이 곧 레거시 조회다.
@@ -385,6 +387,29 @@ function drawInd(){
     :`<tr><td colspan="${IND_COLS.length}" style="text-align:left;color:var(--ink-3)">해당 개체가 없습니다</td></tr>`;
 }
 const EV_LABEL={birth:'탄생',death:'사망',hunt:'사냥',breed:'번식',move:'이동',fire:'화재'};
+/* 종의 발자취 — 고른 종이 지나온 사건을 연표로 편다 */
+function drawTrail(){
+  const sp=W.species.find(s=>s.id===selSpec);
+  const box=$('trail');
+  if(!sp||!sp.milestones||!sp.milestones.length){
+    box.innerHTML='<p style="color:var(--ink-3);font-size:11px;margin:0">'
+      +(selSpec==null?'위에서 종을 고르면 발자취가 표시됩니다.':'아직 남긴 발자취가 없습니다.')+'</p>';
+    return;
+  }
+  box.innerHTML=`<div class="hd"><b>${sp.name}</b>
+      <span class="chip" style="border-color:var(${TIER_VAR[sp.trophic]});color:var(${TIER_VAR[sp.trophic]})">${sp.trophic}</span>
+      ${sp.extinctYear!=null?`<span class="chip no">절멸 ${sp.extinctYear}년</span>`:''}</div>
+    <dl class="meta">
+      <dt>최대</dt><dd>${fmt(sp.peakN)}마리 · ${sp.peakYear}년</dd>
+      <dt>최저</dt><dd>${fmt(sp.minN)}마리 · ${sp.minYear}년</dd>
+      <dt>유도 배분</dt><dd>${fmt(sp.seedN)}마리</dd>
+      <dt>지금</dt><dd>${fmt(sp.n)}마리</dd>
+    </dl>
+    <div><div class="lab" style="margin-bottom:4px">발자취 ${sp.milestones.length}건</div>
+      <div id="tl">${sp.milestones.slice().reverse().map(e=>
+        `<div><time>${e.year}년</time><span class="pip ${e.kind}"></span>
+         <span><b>${SPEC_EVENTS[e.kind]?SPEC_EVENTS[e.kind].label:e.kind}</b> · ${e.msg}</span></div>`).join('')}</div></div>`;
+}
 function drawLife(){
   const i=findInd(selUid);
   if(!i){$('life').innerHTML='<p style="color:var(--ink-3);font-size:11px;margin:0">왼쪽에서 개체를 고르면 생애가 표시됩니다.</p>';return;}
@@ -443,7 +468,7 @@ function drawTiles(st){
    +tile('누적 소실',`${fmt(t.burned*W.cellKm2)}<span class="sub">km²</span>`,`발화 ${fmt(t.fires)}건`);
 }
 function drawChron(){
-  const K={fire:'화재',loss:'손실',gain:'회복',act:'개입'};
+  const K={fire:'화재',loss:'손실',gain:'회복',act:'개입',spec:'종'};
   $('chron').innerHTML=W.chron.slice(-80).reverse().map(e=>
     `<div><time>${e.y}년 ${String(e.d+1).padStart(3,' ')}일</time><span class="k ${e.kind}">${K[e.kind]||''}</span><span>${e.msg}</span></div>`).join('')
     ||`<div style="color:var(--ink-3)">아직 기록된 사건이 없습니다</div>`;
@@ -486,8 +511,8 @@ function frame(){
   const st=readout();
   if(follow) followSel();
   if($('mapCard').dataset.open==='true') paintMap();
-  if(frameN%12===0){ drawPop(); drawSpecChart(); drawBars(); drawTiles(st); drawSpec(); drawInd(); drawLife();
-    if(follow) showSelState(); }
+  if(frameN%12===0){ drawPop(); drawSpecChart(); drawBars(); drawTiles(st); drawSpec(); drawTrail();
+    drawInd(); drawLife(); if(follow) showSelState(); }
   if(chronDirty){drawChron();setChronDirty(false);}
   frameN++; requestAnimationFrame(frame);
 }
@@ -505,6 +530,8 @@ $('specFilter').onclick=e=>{const b=e.target.closest('[data-st]');if(!b)return;s
   $('specFilter').querySelectorAll('button').forEach(o=>o.setAttribute('aria-pressed',o===b));drawSpec();};
 $('tSpec').tHead.addEventListener('click',e=>{const th=e.target.closest('[data-k]');if(!th)return;
   const k=th.dataset.k; specSort=specSort.k===k?{k,dir:-specSort.dir}:{k,dir:-1}; drawSpec();});
+$('tSpec').tBodies[0].addEventListener('click',e=>{const tr=e.target.closest('[data-sid]');if(!tr)return;
+  selSpec=+tr.dataset.sid; drawSpec(); drawTrail();});
 $('indFilter').onclick=e=>{const b=e.target.closest('[data-live]');if(!b)return;indLive=b.dataset.live;
   $('indFilter').querySelectorAll('button').forEach(o=>o.setAttribute('aria-pressed',o===b));drawInd();};
 $('indSearch').oninput=e=>{indQuery=e.target.value.trim();drawInd();};
@@ -528,7 +555,7 @@ function resultJson(stamp){
     name:s.name, trophic:s.trophic, massKg:+s.massKg.toFixed(1),
     diet:s.diet.map(d=>W.species[d].name), droughtTol:+s.droughtTol.toFixed(2),
     lifespanYr:+s.lifespanYr.toFixed(1), seedN:s.seedN, finalN:Math.round(s.n),
-    status:s.status, extinctYear:s.extinctYear }));
+    status:s.status, extinctYear:s.extinctYear, ...speciesTrail(s) }));
   /* 개체 표본은 최근 300마리만. 판 전체의 기록은 legacy(명예의 전당)가 들고 있다. */
   const inds=W.inds.slice(-300).map(i=>indBrief(W,i));
   return { meta:{ stamp, source:'browser', seed:W.seed, tier:W.tierKey, climate:W.climateKey,

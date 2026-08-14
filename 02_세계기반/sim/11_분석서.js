@@ -22,6 +22,9 @@ const rptMean = (a, k) => a.reduce((s, r) => s + (typeof k === 'function' ? k(r)
 const rptPct = (a, b) => (a / Math.max(b, 1e-9) * 100).toFixed(0) + '%';
 const RPT_TIERS = ['T2', 'T3', 'T4', 'T5'];
 const RPT_TIER_LAB = { T2: 'T2 소형초식', T3: 'T3 대형초식', T4: 'T4 소형육식', T5: 'T5 대형육식' };
+const RPT_KIND_LAB = { fire:'화재', loss:'손실', gain:'회복', act:'개입', spec:'종' };
+const RPT_SPEC_LAB = { seed:'정착', peak:'최대', boom:'폭증', crash:'급감',
+                       trough:'최저', brink:'위기', recover:'회복', extinct:'절멸' };
 /* 무리 병합은 죽음이 아니다. 옛 json 에는 fate 가 없으므로 이름으로도 거른다. */
 const rptIsMerge = i => (i.fate === 'merge') || i.cause === '무리 흡수';
 
@@ -92,6 +95,21 @@ export function buildReport(j) {
   for (const line of traceDeaths(j)) push('  ' + line);
   push('');
 
+  /* ── 종의 발자취 ─────────────────────────────────────────────────── */
+  const trailed = j.species.filter(s => s.milestones && s.milestones.length);
+  if (trailed.length) {
+    push('─ 종의 발자취 ────────────────────────────────────────────────────────');
+    push('  주요(폭증 · 급감 · 위기 · 회복 · 절멸)는 사건 기록에도 남는다.');
+    push('');
+    for (const s of trailed) {
+      push(`  ${s.trophic} ${s.name} — 최대 ${rptN(s.peakN)}(${s.peakYear}년)`
+         + ` · 최저 ${rptN(s.minN)}(${s.minYear}년) · 유도 배분 ${rptN(s.seedN)}`);
+      for (const e of s.milestones)
+        push(`     ${rptPad(e.year, 5)}년 [${RPT_SPEC_LAB[e.kind] || e.kind}] ${e.msg}`);
+      push('');
+    }
+  }
+
   /* ── 명예의 전당 ─────────────────────────────────────────────────── */
   const hall = j.legacy || null;
   if (hall && hall.length) {
@@ -154,8 +172,9 @@ export function buildReport(j) {
   for (const e of ch) kinds.set(e.kind, (kinds.get(e.kind) || 0) + 1);
   push('─ 사건 기록 (최근 40) ─────────────────────────────────────────────────');
   if (kinds.size) push('  집계   ' + [...kinds.entries()].sort((a, b) => b[1] - a[1])
-    .map(([k, n]) => `${k} ${n}건`).join(' · '));
-  for (const e of ch.slice(-40)) push(`  ${rptPad(e.year, 5)}년 [${e.kind}] ${e.msg}`);
+    .map(([k, n]) => `${RPT_KIND_LAB[k] || k} ${n}건`).join(' · '));
+  for (const e of ch.slice(-40))
+    push(`  ${rptPad(e.year, 5)}년 [${RPT_KIND_LAB[e.kind] || e.kind}] ${e.msg}`);
   push('='.repeat(78));
   return L;
 }

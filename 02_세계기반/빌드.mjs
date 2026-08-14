@@ -28,6 +28,7 @@ const ORDER = [
   'sim/05_종.js',
   'sim/06_개체.js',
   'sim/10_기록.js',
+  'sim/12_종발자취.js',
   'sim/09_통계이력.js',
   'sim/07_세계생성.js',
   'sim/08_하루.js',
