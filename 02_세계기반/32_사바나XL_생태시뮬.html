@@ -497,7 +497,10 @@ const TUNE = {
   moveGrazeKmDay:0.12, moveThirstKmDay:1.44,
   energyGainRate:0.12, satietyBreakEven:0.85,
   dehydrationPenalty:0.040, dehydrationOnset:0.20,
-  birthRate:0.0020, birthEnergyMin:0.35, birthEnergySpan:0.40,
+  /* 다 자란 암컷만 낳게 되면서 낳는 개체가 3분의 1로 줄었다. 개체당 확률을
+     올려 개체군 수준의 출생률을 되돌린다 — 우기 182일 기준 성숙 암컷 한 마리가
+     한 해에 1.2마리 안팎(유제류의 실제 번식력)이 되는 값이다. */
+  birthRate:0.0033, birthEnergyMin:0.35, birthEnergySpan:0.40,
   deathRate:0.0060, deathEnergyMax:0.35,
   /* 혼잡 : 무리 시절에는 셀당 몇십 마리라 사실상 꺼져 있던 항이다(0.00004).
      개체가 되면 한 셀에 수백이 몰릴 수 있어, 이 항이 군집 크기를 정하는
@@ -508,11 +511,19 @@ const TUNE = {
   predMoveKmDay:{apex:0.72, small:0.48},
   predKillSurplus:1.8,        // 처리시간 한계 (홀링 II형의 포화 상한)
   predAttackRate:0.0065,      // 탐색 효율. 국소 먹이 500kg에서 절반 포화
-  predAltPreyShare:{apex:0.45, small:1.0},
+  /* 대체 먹이(T2)로 하루 소요의 몇 배까지 채울 수 있는가.
+     small 이 1.0 이면 최대로 먹어도 손익분기(0.85)를 겨우 넘고, 텃세가 15%만
+     깎으면 정확히 0이 된다 — T4 가 먹이가 넘치는데도 사인의 84%가 아사였던
+     이유다. 여유를 주고, 조절은 텃세(밀도 의존)에 맡긴다. */
+  predAltPreyShare:{apex:0.45, small:1.25},
   predEnergyRate:0.03, predSatietyBreakEven:0.85,
   predBreedP:0.0016, predBreedEnergy:0.72, predDeathEnergy:0.05,
-  predTerritoryK:0.06, intraguildP:0.0040, alleeFloor:0.15,
+  predTerritoryK:0.10, intraguildP:0.0040, alleeFloor:0.15,
   predOffDietEff:0.40,        // 선호 먹이가 아닌 종을 잡을 때의 효율
+  /* 성숙 연령 = 수명 x 이 비율. 초식과 육식이 다르다 —
+     유제류는 한두 해면 낳고, 대형 육식은 서너 해를 기다린다.
+     예전에는 둘 다 0.22 였고, 게다가 초식은 이 값을 보지도 않았다. */
+  matureFrac:{herb:0.10, pred:0.22},
   fearGain:{apex:0.16, small:0.05}, fearDecay:0.93,
   immigrationPerYear:0.025, immigrationFounders:6, immigrationBelowFrac:0.25,
   /* 종 */
@@ -642,7 +653,8 @@ function buildRoster(tierKey, climateKey, cap, rand){
         sp.droughtTol = clamp(C.droughtToleranceMin+rand()*(1-C.droughtToleranceMin),0,1);
         sp.grazerFrac = rand();                               // 0 잎따먹기 ~ 1 풀뜯기
         sp.lifespanYr = TUNE.lifespanFromMass.a*Math.pow(sp.massKg,TUNE.lifespanFromMass.b);
-        sp.matureYr = sp.lifespanYr*0.22;
+        sp.matureYr = sp.lifespanYr*(tier==='T4'||tier==='T5'
+                        ? TUNE.matureFrac.pred : TUNE.matureFrac.herb);
         sp.breedMul = Math.pow(sp.massKg/base,-0.25);          // 알로메트리 : 작을수록 빨리 번식
         // 내건성 배율도 중립화한다(0.7~1.3). 원시값을 그대로 곱하면
         // 사바나 전 종이 물 없이 30% 더 버텨 건기 수원 병목이 통째로 풀린다.
@@ -1800,7 +1812,12 @@ function phaseHerds(w){
          짝을 요구하면 밀도가 낮을 때 번식이 저절로 막힌다(앨리 효과).
          낳는 쪽을 암컷으로 한정했으므로 확률은 두 배로 둔다 — 개체군 수준의
          출생률은 무리 시절과 같게 유지하고, 짝 찾기 실패만 새로 더해진 것이다. */
-      if(s.wet&&roomToBreed&&!a.male){
+      const age=(today-a.bornDay)/365;
+      sp.ageSum+=age; sp.ageN++;
+      /* 다 자란 암컷만 낳는다. 예전에는 초식만 이 조건이 없어서 갓 태어난
+         개체도 낳았다 — 큰 종이 늦게 성숙하는 알로메트리가 초식에서만
+         빠져 있었고, 인구 피라미드가 실제보다 젊었다. */
+      if(s.wet&&roomToBreed&&!a.male&&age>=sp.matureYr){
         const p=TUNE.birthRate*2*sp.breedMul*clamp((a.e-TUNE.birthEnergyMin)/TUNE.birthEnergySpan,0,1);
         if(p>0&&rng()<p){
           const mate=findMate(w,a,ci,rng);
@@ -1836,8 +1853,6 @@ function phaseHerds(w){
       }
       /* 죽음 : 굶주림 · 갈증 · 노쇠. 무리 시절에는 사망률이 마릿수에 곱해지는
          연속량이었지만, 이제는 이 한 마리가 죽느냐 마느냐다. */
-      const age=(today-a.bornDay)/365;
-      sp.ageSum+=age; sp.ageN++;
       const senes=age>sp.lifespanYr?0.006:age>sp.lifespanYr*0.8?0.0012:0;
       const dp=TUNE.deathRate*clamp((TUNE.deathEnergyMax-a.e)/TUNE.deathEnergyMax,0,1)+senes;
       if(dp>0&&rng()<dp){

@@ -52,7 +52,10 @@ export const TUNE = {
   moveGrazeKmDay:0.12, moveThirstKmDay:1.44,
   energyGainRate:0.12, satietyBreakEven:0.85,
   dehydrationPenalty:0.040, dehydrationOnset:0.20,
-  birthRate:0.0020, birthEnergyMin:0.35, birthEnergySpan:0.40,
+  /* 다 자란 암컷만 낳게 되면서 낳는 개체가 3분의 1로 줄었다. 개체당 확률을
+     올려 개체군 수준의 출생률을 되돌린다 — 우기 182일 기준 성숙 암컷 한 마리가
+     한 해에 1.2마리 안팎(유제류의 실제 번식력)이 되는 값이다. */
+  birthRate:0.0033, birthEnergyMin:0.35, birthEnergySpan:0.40,
   deathRate:0.0060, deathEnergyMax:0.35,
   /* 혼잡 : 무리 시절에는 셀당 몇십 마리라 사실상 꺼져 있던 항이다(0.00004).
      개체가 되면 한 셀에 수백이 몰릴 수 있어, 이 항이 군집 크기를 정하는
@@ -63,11 +66,19 @@ export const TUNE = {
   predMoveKmDay:{apex:0.72, small:0.48},
   predKillSurplus:1.8,        // 처리시간 한계 (홀링 II형의 포화 상한)
   predAttackRate:0.0065,      // 탐색 효율. 국소 먹이 500kg에서 절반 포화
-  predAltPreyShare:{apex:0.45, small:1.0},
+  /* 대체 먹이(T2)로 하루 소요의 몇 배까지 채울 수 있는가.
+     small 이 1.0 이면 최대로 먹어도 손익분기(0.85)를 겨우 넘고, 텃세가 15%만
+     깎으면 정확히 0이 된다 — T4 가 먹이가 넘치는데도 사인의 84%가 아사였던
+     이유다. 여유를 주고, 조절은 텃세(밀도 의존)에 맡긴다. */
+  predAltPreyShare:{apex:0.45, small:1.25},
   predEnergyRate:0.03, predSatietyBreakEven:0.85,
   predBreedP:0.0016, predBreedEnergy:0.72, predDeathEnergy:0.05,
-  predTerritoryK:0.06, intraguildP:0.0040, alleeFloor:0.15,
+  predTerritoryK:0.10, intraguildP:0.0040, alleeFloor:0.15,
   predOffDietEff:0.40,        // 선호 먹이가 아닌 종을 잡을 때의 효율
+  /* 성숙 연령 = 수명 x 이 비율. 초식과 육식이 다르다 —
+     유제류는 한두 해면 낳고, 대형 육식은 서너 해를 기다린다.
+     예전에는 둘 다 0.22 였고, 게다가 초식은 이 값을 보지도 않았다. */
+  matureFrac:{herb:0.10, pred:0.22},
   fearGain:{apex:0.16, small:0.05}, fearDecay:0.93,
   immigrationPerYear:0.025, immigrationFounders:6, immigrationBelowFrac:0.25,
   /* 종 */

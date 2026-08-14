@@ -302,7 +302,12 @@ export function phaseHerds(w){
          짝을 요구하면 밀도가 낮을 때 번식이 저절로 막힌다(앨리 효과).
          낳는 쪽을 암컷으로 한정했으므로 확률은 두 배로 둔다 — 개체군 수준의
          출생률은 무리 시절과 같게 유지하고, 짝 찾기 실패만 새로 더해진 것이다. */
-      if(s.wet&&roomToBreed&&!a.male){
+      const age=(today-a.bornDay)/365;
+      sp.ageSum+=age; sp.ageN++;
+      /* 다 자란 암컷만 낳는다. 예전에는 초식만 이 조건이 없어서 갓 태어난
+         개체도 낳았다 — 큰 종이 늦게 성숙하는 알로메트리가 초식에서만
+         빠져 있었고, 인구 피라미드가 실제보다 젊었다. */
+      if(s.wet&&roomToBreed&&!a.male&&age>=sp.matureYr){
         const p=TUNE.birthRate*2*sp.breedMul*clamp((a.e-TUNE.birthEnergyMin)/TUNE.birthEnergySpan,0,1);
         if(p>0&&rng()<p){
           const mate=findMate(w,a,ci,rng);
@@ -338,8 +343,6 @@ export function phaseHerds(w){
       }
       /* 죽음 : 굶주림 · 갈증 · 노쇠. 무리 시절에는 사망률이 마릿수에 곱해지는
          연속량이었지만, 이제는 이 한 마리가 죽느냐 마느냐다. */
-      const age=(today-a.bornDay)/365;
-      sp.ageSum+=age; sp.ageN++;
       const senes=age>sp.lifespanYr?0.006:age>sp.lifespanYr*0.8?0.0012:0;
       const dp=TUNE.deathRate*clamp((TUNE.deathEnergyMax-a.e)/TUNE.deathEnergyMax,0,1)+senes;
       if(dp>0&&rng()<dp){

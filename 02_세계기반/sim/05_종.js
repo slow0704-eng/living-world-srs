@@ -40,7 +40,8 @@ export function buildRoster(tierKey, climateKey, cap, rand){
         sp.droughtTol = clamp(C.droughtToleranceMin+rand()*(1-C.droughtToleranceMin),0,1);
         sp.grazerFrac = rand();                               // 0 잎따먹기 ~ 1 풀뜯기
         sp.lifespanYr = TUNE.lifespanFromMass.a*Math.pow(sp.massKg,TUNE.lifespanFromMass.b);
-        sp.matureYr = sp.lifespanYr*0.22;
+        sp.matureYr = sp.lifespanYr*(tier==='T4'||tier==='T5'
+                        ? TUNE.matureFrac.pred : TUNE.matureFrac.herb);
         sp.breedMul = Math.pow(sp.massKg/base,-0.25);          // 알로메트리 : 작을수록 빨리 번식
         // 내건성 배율도 중립화한다(0.7~1.3). 원시값을 그대로 곱하면
         // 사바나 전 종이 물 없이 30% 더 버텨 건기 수원 병목이 통째로 풀린다.
