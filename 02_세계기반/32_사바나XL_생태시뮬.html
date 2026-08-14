@@ -465,6 +465,11 @@ const TUNE = {
   flockRef:20,               // 그 선호가 포화하는 셀당 마릿수
   decideEvery:4,             // 방향을 다시 고르는 주기(일). 개체마다 위상을 엇갈린다
   thirstSeek:0.5,            // 이 아래로 마르면 다른 것을 접고 수원으로 향한다
+  /* 허기 절박성. 갈증은 (1-수분)으로 이동에 들어가는데 허기는 빠져 있어서,
+     배부른 개체와 굶주린 개체가 똑같은 무게로 먹이를 찾았다. 대칭을 맞춘다.
+       먹이 가중 = utilFeed + hungerPull x (1 - 에너지)
+     굶주리면 더 자주 방향을 고치고(매일) 더 멀리 나선다. */
+  hungerPull:1.2, hungerRoam:0.5, hungerUrgent:0.4,
   mateRadiusCells:6,         // 포식자가 짝을 만난 것으로 치는 거리(세력권이 넓다)
   seedClumpSize:45,          // 최초 배치를 이만큼씩 뭉쳐 놓는다(빈 초지에서 시작하지 않게)
   maxAniPerCell:14,          // [T-12] 연산 예산. 육지 셀당 이 수를 넘으면 번식이 멎는다
@@ -1176,7 +1181,7 @@ function createWorld(seed, tierKey='XL', climateKey='SAVANNA', opts={}){
     aniAt:null, aniCells:null, aniNext:null, nextCells:null,
     aniKilled:false, trackedAlive:0,
     t3Cnt:null, t3Sat:null,
-    dens:null, densPrev:null, util:null, wpull:new Float32Array(N),
+    dens:null, densPrev:null, util:null, feedF:null, wpull:new Float32Array(N),
     flowX:new Int8Array(N), flowY:new Int8Array(N),   // 셀마다 물로 가는 방향
     p4:[], p5:[],
     rng:mulberry32(seed^0x51ED270B), uid:1,
@@ -1201,7 +1206,7 @@ function createWorld(seed, tierKey='XL', climateKey='SAVANNA', opts={}){
   w.t3Idx=new Map(w.byTier.T3.map((id,k)=>[id,k]));
   const nT3=Math.max(1,w.byTier.T3.length);
   w.dens=new Float32Array(nT3*N); w.densPrev=new Float32Array(nT3*N);
-  w.util=new Float32Array(nT3*N);
+  w.util=new Float32Array(nT3*N); w.feedF=new Float32Array(nT3*N);
   w.t3Cnt=new Int32Array(nT3); w.t3Sat=new Float32Array(nT3);
   w.aniAt=w.aniA; w.aniCells=w.cellsA; w.aniNext=w.aniB; w.nextCells=w.cellsB;
 
@@ -1639,26 +1644,28 @@ function phaseFire(w){
         간다. 개체마다 위상을 엇갈려 같은 날 몰리지 않게 한다.
    덕분에 개체 하나의 하루는 '9칸 조회 + 산술 몇 줄'이 된다. */
 function buildMoveFields(w){
-  const {g,land,plantB,fear,press,densPrev,util,wpull,wdist,species}=w, N=g.N;
+  const {g,land,plantB,fear,press,densPrev,util,feedF,wpull,wdist,species}=w, N=g.N;
   const dens=densPrev;                        // 어제의 분포로 오늘을 정한다
   for(let j=0;j<N;j++)
     wpull[j]=land[j]?1-clamp(wdist[j]/TUNE.waterGradientCells,0,1):0;
+  /* 먹이 항은 따로 깐다. 개체마다 배고픈 정도가 달라 가중치가 다르기 때문이다 —
+     한 필드에 미리 곱해 넣으면 모두가 같은 무게로 먹이를 찾게 된다. */
   for(const id of w.byTier.T3){
     const sp=species[id]; if(sp.status==='ABSENT') continue;
     const o=sp._t3*N, sl=sp._slots, ml=sp._mul;
     for(let j=0;j<N;j++){
-      if(!land[j]){ util[o+j]=-Infinity; continue; }
+      if(!land[j]){ util[o+j]=-Infinity; feedF[o+j]=0; continue; }
       let f=0;
       for(let m=0;m<sl.length;m++) f+=plantB[sl[m]*N+j]*ml[m];
-      const feed=clamp(f/sp._capRef,0,1);
+      feedF[o+j]=clamp(f/sp._capRef,0,1);
       const flock=clamp(dens[o+j]/TUNE.flockRef,0,1);      // 어제의 동종 분포
-      util[o+j]=TUNE.utilFeed*feed+TUNE.flockPull*flock
+      util[o+j]=TUNE.flockPull*flock
                -TUNE.utilFear*fear[j]-TUNE.utilCrowd*press[j];
     }
   }
 }
 function phaseHerds(w){
-  const {g,land,wdist,fear,press,util,wpull,C,species,plantB}=w, rng=w.rng, N=g.N;
+  const {g,land,wdist,fear,press,util,feedF,wpull,C,species,plantB}=w, rng=w.rng, N=g.N;
   const s=seasonOf(w);
   /* 밀도장은 두 벌을 번갈아 쓴다. 오늘 분포를 채우는 동안 어제 분포가
      그대로 남아 있어야 '어제 그 셀에 몇이 모여 있었나'를 읽을 수 있다. */
@@ -1722,22 +1729,28 @@ function phaseHerds(w){
       if(a.hyd<TUNE.thirstSeek){
         /* 목이 마르면 먹이도 무리도 뒤로 밀린다. 셀에 적힌 물 방향을 따라간다. */
         a.dx=w.flowX[ci]+(rng()-0.5)*0.4; a.dy=w.flowY[ci]+(rng()-0.5)*0.4;
-      } else if((today+a.phase)%TUNE.decideEvery===0){
-        /* 아홉 칸 중 가장 나은 쪽. 효용의 셀 성분은 이미 util 에 깔려 있고
-           여기서는 자기 갈증만 얹는다. */
-        const uo=slot*N, cx=g.xOf(ci), cy=g.yOf(ci), thirst=TUNE.utilThirst*(1-a.hyd);
+      } else if(a.e<TUNE.hungerUrgent||(today+a.phase)%TUNE.decideEvery===0){
+        /* 아홉 칸 중 가장 나은 쪽. 셀 성분은 util 에 깔려 있고, 여기서는
+           자기 갈증과 자기 허기를 얹는다. 굶주릴수록 먹이 쪽 무게가 커지고
+           (허기 절박성), 절박하면 나흘을 기다리지 않고 매일 방향을 고친다. */
+        const uo=slot*N, cx=g.xOf(ci), cy=g.yOf(ci);
+        const thirst=TUNE.utilThirst*(1-a.hyd);
+        const feedW=TUNE.utilFeed+TUNE.hungerPull*(1-a.e);
         let bs=-Infinity, bx=0, by=0;
         for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
           const nx=cx+dx, ny=cy+dy;
           if(nx<0||ny<0||nx>=g.W||ny>=g.H) continue;
           const j=g.idx(nx,ny);
           if(!land[j]) continue;
-          const v=util[uo+j]+thirst*wpull[j]+rng()*TUNE.utilNoise;
+          const v=util[uo+j]+feedW*feedF[uo+j]+thirst*wpull[j]+rng()*TUNE.utilNoise;
           if(v>bs){ bs=v; bx=dx; by=dy; }
         }
         a.dx=bx; a.dy=by;
       }
-      moveBy(w,a,a.dx,a.dy,lerp(stepGraze,stepThirst,1-a.hyd)*sp.moveMul);
+      /* 걸음도 절박함을 탄다. 목마르면 물을 찾아 멀리 가고(최대 12배),
+         굶주리면 그 절반까지는 더 나선다 — 자리에 앉아 굶지는 않는다. */
+      const urge=Math.max(1-a.hyd,TUNE.hungerRoam*(1-a.e));
+      moveBy(w,a,a.dx,a.dy,lerp(stepGraze,stepThirst,urge)*sp.moveMul);
 
       const ni=g.idx(clamp(a.x|0,0,g.W-1),clamp(a.y|0,0,g.H-1));
       press[ni]+=1; w.dens[slot*N+ni]+=1;
@@ -1959,7 +1972,8 @@ function hunt(w,arr,isApex){
       if(isApex){ prey=press[j]/60;
         for(const q of sp.diet) prey+=0;                       // 무리는 press로 대표
       } else for(const q of sp.diet){ const o=w.t2Idx.get(q); if(o!==undefined) prey+=t2d[o*N+j]/140; }
-      return prey*1.9+0.5*(1-clamp(wdist[j]/TUNE.waterGradientCells,0,1))+rng()*0.3;
+      // 굶주린 포식자는 먹이 쪽으로 더 세게 끌린다 (초식과 같은 대칭)
+      return prey*(1.9+TUNE.hungerPull*(1-p.e))+0.5*(1-clamp(wdist[j]/TUNE.waterGradientCells,0,1))+rng()*0.3;
     });
     p.px=p.x; p.py=p.y;                       // 화면 보간용 (하루 시작 위치)
     moveBy(w,p,dx,dy,TUNE.predMoveKmDay[kind]/w.cellKm*sp.moveMul);

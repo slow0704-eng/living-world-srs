@@ -38,6 +38,11 @@ export const TUNE = {
   flockRef:20,               // 그 선호가 포화하는 셀당 마릿수
   decideEvery:4,             // 방향을 다시 고르는 주기(일). 개체마다 위상을 엇갈린다
   thirstSeek:0.5,            // 이 아래로 마르면 다른 것을 접고 수원으로 향한다
+  /* 허기 절박성. 갈증은 (1-수분)으로 이동에 들어가는데 허기는 빠져 있어서,
+     배부른 개체와 굶주린 개체가 똑같은 무게로 먹이를 찾았다. 대칭을 맞춘다.
+       먹이 가중 = utilFeed + hungerPull x (1 - 에너지)
+     굶주리면 더 자주 방향을 고치고(매일) 더 멀리 나선다. */
+  hungerPull:1.2, hungerRoam:0.5, hungerUrgent:0.4,
   mateRadiusCells:6,         // 포식자가 짝을 만난 것으로 치는 거리(세력권이 넓다)
   seedClumpSize:45,          // 최초 배치를 이만큼씩 뭉쳐 놓는다(빈 초지에서 시작하지 않게)
   maxAniPerCell:14,          // [T-12] 연산 예산. 육지 셀당 이 수를 넘으면 번식이 멎는다

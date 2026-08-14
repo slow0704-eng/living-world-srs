@@ -46,7 +46,7 @@ export function createWorld(seed, tierKey='XL', climateKey='SAVANNA', opts={}){
     aniAt:null, aniCells:null, aniNext:null, nextCells:null,
     aniKilled:false, trackedAlive:0,
     t3Cnt:null, t3Sat:null,
-    dens:null, densPrev:null, util:null, wpull:new Float32Array(N),
+    dens:null, densPrev:null, util:null, feedF:null, wpull:new Float32Array(N),
     flowX:new Int8Array(N), flowY:new Int8Array(N),   // 셀마다 물로 가는 방향
     p4:[], p5:[],
     rng:mulberry32(seed^0x51ED270B), uid:1,
@@ -71,7 +71,7 @@ export function createWorld(seed, tierKey='XL', climateKey='SAVANNA', opts={}){
   w.t3Idx=new Map(w.byTier.T3.map((id,k)=>[id,k]));
   const nT3=Math.max(1,w.byTier.T3.length);
   w.dens=new Float32Array(nT3*N); w.densPrev=new Float32Array(nT3*N);
-  w.util=new Float32Array(nT3*N);
+  w.util=new Float32Array(nT3*N); w.feedF=new Float32Array(nT3*N);
   w.t3Cnt=new Int32Array(nT3); w.t3Sat=new Float32Array(nT3);
   w.aniAt=w.aniA; w.aniCells=w.cellsA; w.aniNext=w.aniB; w.nextCells=w.cellsB;
 
