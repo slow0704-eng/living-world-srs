@@ -47,6 +47,7 @@ export function createWorld(seed, tierKey='XL', climateKey='SAVANNA'){
     wetDays:Math.round(365*C.wetSeasonMonths/12),
     grassCapBase:C.standingTonPerHa*TUNE.grassShareOfStanding*cellHa,
     woodyCap:C.standingTonPerHa*(1-TUNE.grassShareOfStanding)*cellHa,
+    n1:0,                                          // T1 분해자 (수치 하나)
     supp:false, noPred:false, dry:false, noImmig:true,
     acc:{bYr:0,dYr:0,killYr:0,burnedYr:0,fireCount:0},
     last:{births:0,deaths:0,kills:0,burnFrac:0,fires:0},
@@ -65,11 +66,14 @@ export function createWorld(seed, tierKey='XL', climateKey='SAVANNA'){
   w.t3Cnt=new Int32Array(nT3); w.t3Sat=new Float32Array(nT3);
   w.aniAt=w.aniA; w.aniCells=w.cellsA; w.aniNext=w.aniB; w.nextCells=w.cellsB;
 
+  /* 그래프에서 종별로 볼 대상. 식물과 집계 종은 뺀다. */
+  w.trackedSpec=w.species.filter(s=>s.kind==='ANIMAL'&&s.status!=='ABSENT').map(s=>s.id);
   buildSpeciesMeta(w);
   genCoastline(w,noise); genElevation(w,noise); genRainfall(w);
   genHydrology(w); genSoil(w,noise,rand);
   buildDietMeta(w);
   computeWaterDist(w); seedFauna(w,mulberry32(seed^0x2545F491));
+  w.n1=w.cap.T1*0.6;                              // 분해자는 부양력의 절반쯤에서 시작한다
   syncPools(w); refreshSpeciesCounts(w); recordSample(w);
   const alive=w.species.filter(s=>s.status!=='ABSENT'&&s.kind==='ANIMAL'&&!s.aggregate).length;
   logChron(w,'act',`섬 생성 · ${T.name} ${T.areaKm2.toLocaleString('ko-KR')}km² · ${C.name} · 육지 ${w.landCount.toLocaleString('ko-KR')}셀 · 동물 ${alive}종`);

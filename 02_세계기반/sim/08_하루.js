@@ -4,7 +4,7 @@
 import { ECO } from './01_사양상수.js';
 import { TUNE } from './02_튜닝상수.js';
 import { clamp, lerp } from './03_유틸.js';
-import { newInd, addEv, killInd, noteKill, indAge } from './06_개체.js';
+import { newInd, addEv, killInd, noteKill, linkKin, noteMate, indAge } from './06_개체.js';
 import { computeWaterDist } from './07_세계생성.js';
 import { refreshSpeciesCounts, recordSample, closeYear, watchEvents } from './09_통계이력.js';
 import { logChron } from './09_통계이력.js';
@@ -81,6 +81,22 @@ export function phaseEnvironment(w){
       const nv=v+v*tm.rate[k]*(1-v/cap);
       t2d[o]=nv<0.001?0:nv;
     }
+  }
+  /* T1 분해자 : 개체가 아니라 하나의 수치다. 그 해 순생산에 부양력이 매이고
+     로지스틱으로 따라간다 — 초지가 타거나 마르면 분해자도 함께 줄어든다.
+     곤충이라 회전이 빨라 성장률이 크다. */
+  {
+    /* 부양력은 문서의 npp 가 아니라 '그 해 실제로 자란 양'에 걸린다.
+       [I-4] 의 T1 유도값은 기준선이고, 이쪽이 관측이다. */
+    const iy1=ECO.bodyMassT1Kg*ECO.dailyIntakeFrac*365/1000;   // 개체당 연간 섭취(t)
+    const capNow=Math.max(w.env.prodEMA*ECO.detritusShare/iy1,1);
+    if(!(w.n1>0)) w.n1=capNow*0.6;                 // 첫날 생산량을 보고 자리를 잡는다
+    /* 리커식으로 따라간다. 덧셈형 로지스틱은 부양력이 갑자기 내려앉으면
+       (1 - n/cap)이 큰 음수가 되어 개체수가 음의 무한대로 튄다. 실제로 튀었다. */
+    w.n1=Math.min(w.n1*Math.exp((TUNE.t1GrowthPerYr/365)*(1-w.n1/capNow)),capNow*3);
+    const t1=w.byTier.T1.filter(id=>w.species[id].status!=='ABSENT');
+    let sh=0; for(const id of t1) sh+=w.species[id].share;
+    for(const id of t1) w.species[id].n=w.n1*w.species[id].share/Math.max(sh,1e-9);
   }
   Object.assign(w.env,{tempC:s.tempC,rainMm:s.rainMm,soilMm:sumSoil/w.landCount,
     grassT:sumG,woodyT:sumW,woodyFrac:sumW/(w.landCount*w.woodyCap),
@@ -270,23 +286,45 @@ export function phaseHerds(w){
         }
       }
 
-      /* 번식 : 우기에 에너지가 남으면. 개체 하나가 낳는 것이므로 확률이다. */
-      if(s.wet&&roomToBreed){
-        const p=TUNE.birthRate*sp.breedMul*clamp((a.e-TUNE.birthEnergyMin)/TUNE.birthEnergySpan,0,1);
+      /* 번식 : 우기에 에너지가 남은 암컷이, 곁에 수컷이 있을 때 낳는다.
+         짝을 요구하면 밀도가 낮을 때 번식이 저절로 막힌다(앨리 효과).
+         낳는 쪽을 암컷으로 한정했으므로 확률은 두 배로 둔다 — 개체군 수준의
+         출생률은 무리 시절과 같게 유지하고, 짝 찾기 실패만 새로 더해진 것이다. */
+      if(s.wet&&roomToBreed&&!a.male){
+        const p=TUNE.birthRate*2*sp.breedMul*clamp((a.e-TUNE.birthEnergyMin)/TUNE.birthEnergySpan,0,1);
         if(p>0&&rng()<p){
+          const mate=findMate(w,a,ci,rng);
+          if(mate){
           const c=newAnimal(w,a.sp,a.x+rng()-.5,a.y+rng()-.5,today);
-          c.e=0.5; w.ani.push(c); born++;
+          c.e=0.5; w.ani.push(c); born++; sp.bornYr++;
           const cj=g.idx(clamp(c.x|0,0,g.W-1),clamp(c.y|0,0,g.H-1));
           let cl=next[cj];
           if(!cl) cl=next[cj]=[];
           if(!cl.length) nextCells.push(cj);
           cl.push(c); sp.n++;
-          if(a.ind){ a.ind.offspring++; if(a.ind.offspring===1) addEv(w,a.ind,'breed','첫 새끼를 남김'); }
+          if(mate.ind) mate.ind.offspring++;
+          if(a.ind||mate.ind){
+            if(a.ind){
+              a.ind.offspring++;
+              if(a.ind.offspring===1) addEv(w,a.ind,'breed','첫 새끼를 남김');
+            }
+            /* 부모를 추적 중이면 자식도 추적해 계보를 잇는다.
+               그래야 생애 화면에서 부모와 자식을 오갈 수 있다. */
+            if(!c.ind&&w.trackedAlive<TUNE.trackedAlive) attachInd(w,c);
+            if(c.ind){
+              linkKin(w,a.ind,c.ind,mate.ind);
+              const who=a.ind?a.ind.name:mate.ind.name;
+              addEv(w,c.ind,'birth',`${who}의 새끼로 태어남`);
+            }
+            if(a.ind&&mate.ind) noteMate(w,a.ind,mate.ind);
+          }
+          }
         }
       }
       /* 죽음 : 굶주림 · 갈증 · 노쇠. 무리 시절에는 사망률이 마릿수에 곱해지는
          연속량이었지만, 이제는 이 한 마리가 죽느냐 마느냐다. */
       const age=(today-a.bornDay)/365;
+      sp.ageSum+=age; sp.ageN++;
       const senes=age>sp.lifespanYr?0.006:age>sp.lifespanYr*0.8?0.0012:0;
       const dp=TUNE.deathRate*clamp((TUNE.deathEnergyMax-a.e)/TUNE.deathEnergyMax,0,1)+senes;
       if(dp>0&&rng()<dp){
@@ -309,7 +347,7 @@ export function phaseHerds(w){
 /* 개체 하나를 만든다. 표본만 이름 · 동선 · 사건을 갖는다 —
    수만 마리 전부에 붙이면 이름 문자열과 배열만으로 메모리가 무너진다. */
 export function newAnimal(w,spId,x,y,bornDay){
-  const a={ sp:spId, x, y, px:x, py:y, e:0.7, hyd:1,
+  const a={ sp:spId, x, y, px:x, py:y, e:0.7, hyd:1, male:w.rng()<0.5,
             bornDay, dx:0, dy:0, phase:(w.uid*7)%TUNE.decideEvery, ind:null };
   if(w.trackedAlive<TUNE.trackedAlive&&w.rng()<TUNE.trackedRate) attachInd(w,a);
   return a;
@@ -319,6 +357,7 @@ export function attachInd(w,a){
   if(a.ind) return a.ind;
   const ind=newInd(w,a.sp,a.x,a.y);
   ind.bornDay=a.bornDay; ind.e=a.e; ind.hyd=a.hyd; ind.animal=a;
+  ind.sex=a.male?'M':'F';
   a.ind=ind; w.trackedAlive++;
   return ind;
 }
@@ -336,6 +375,41 @@ export function phasePredation(w){
   hunt(w,w.p4,false); hunt(w,w.p5,true);
   if(w.aniKilled) sweepDead(w);
   immigrate(w);
+}
+/* 포식자의 짝. 세력권이 넓어 몇 킬로미터 안이면 만난 것으로 본다. */
+export function findPredMate(w,arr,p){
+  const R=TUNE.mateRadiusCells;
+  for(const q of arr){
+    if(q===p||q.sp!==p.sp||q.sex===p.sex) continue;
+    if(Math.abs(q.x-p.x)<=R&&Math.abs(q.y-p.y)<=R) return q;
+  }
+  return null;
+}
+/* 곁의 짝을 찾는다. 자기 칸부터 보고 없으면 이웃 여덟 칸까지.
+   못 찾으면 그 해에는 낳지 못한다 — 밀도가 낮으면 번식이 저절로 막힌다. */
+export function findMate(w,a,ci,rng){
+  const g=w.g, cx=g.xOf(ci), cy=g.yOf(ci);
+  for(let r=0;r<2;r++){
+    const lst=r===0?w.aniAt[ci]:null;
+    if(r===0){
+      if(lst) for(let k=0;k<lst.length;k++){
+        const b=lst[(k+((rng()*lst.length)|0))%lst.length];
+        if(b!==a&&!b.dead&&b.sp===a.sp&&b.male!==a.male) return b;
+      }
+      continue;
+    }
+    for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+      if(!dx&&!dy) continue;
+      if(!g.inside(cx+dx,cy+dy)) continue;
+      const nl=w.aniAt[g.idx(cx+dx,cy+dy)];
+      if(!nl||!nl.length) continue;
+      for(let k=0;k<nl.length;k++){
+        const b=nl[k];
+        if(!b.dead&&b.sp===a.sp&&b.male!==a.male) return b;
+      }
+    }
+  }
+  return null;
 }
 /* 주변 아홉 칸에서 살아 있는 먹이 하나를 집는다. 없으면 null. */
 function pickPrey(w,cx,cy,rng){
@@ -364,7 +438,9 @@ export function sweepDead(w){
     if(a.dead){
       if(a.ind){ killInd(w,a.ind,a.deadBy?`${a.deadBy}에게 죽음`:(a.cause||'죽음'));
         a.ind.animal=null; w.trackedAlive--; }
-      w.species[a.sp].n--; w.acc.dYr++;
+      const dsp=w.species[a.sp];
+      dsp.n--; w.acc.dYr++;
+      if(a.deadBy) dsp.eatenYr++; else dsp.diedYr++;
     } else w.ani[k++]=a;
   }
   w.ani.length=k;
@@ -457,7 +533,7 @@ export function hunt(w,arr,isApex){
         for(let m=w.p4.length-1;m>=0;m--){
           const q=w.p4[m];
           if(g.idx(q.x|0,q.y|0)===ci){
-            w.p4.splice(m,1); killInd(w,q,`${sp.name}에게 죽음`);
+            w.p4.splice(m,1); killInd(w,q,`${sp.name}에게 죽음`); species[q.sp].eatenYr++;
             noteKill(w,p,1,species[q.sp].name);
             addEv(w,p,'hunt',`길드내 포식 — ${q.name}`);
             got+=species[q.sp].massKg; break;
@@ -481,16 +557,25 @@ export function hunt(w,arr,isApex){
     p.e=clamp(p.e+(eff/need-TUNE.predSatietyBreakEven)*TUNE.predEnergyRate,0,1);
 
     const age=indAge(w,p);
+    sp.ageSum+=age; sp.ageN++;
     const senes=age>sp.lifespanYr?0.006:age>sp.lifespanYr*0.8?0.0012:0;
-    if(p.e<TUNE.predDeathEnergy){ arr.splice(k,1); killInd(w,p,'아사'); continue; }
-    if(senes&&rng()<senes){ arr.splice(k,1); killInd(w,p,'노쇠'); continue; }
+    if(p.e<TUNE.predDeathEnergy){ arr.splice(k,1); killInd(w,p,'아사'); sp.diedYr++; continue; }
+    if(senes&&rng()<senes){ arr.splice(k,1); killInd(w,p,'노쇠'); sp.diedYr++; continue; }
     const nSp=bySpecies.get(p.sp)||0;
     const allee=clamp(nSp/ECO.mvpShort,TUNE.alleeFloor,1);
-    if(p.e>TUNE.predBreedEnergy&&age>sp.matureYr&&rng()<TUNE.predBreedP*sp.breedMul*allee){
-      const c=newInd(w,p.sp,p.x+rng()-.5,p.y+rng()-.5);
-      c.e=0.5; arr.push(c); p.offspring++;
-      if(p.offspring===1) addEv(w,p,'breed','첫 새끼를 남김');
-      bySpecies.set(p.sp,nSp+1);
+    /* 포식자도 암컷이 낳고, 곁에 수컷이 있어야 한다. 낳는 쪽을 절반으로
+       한정했으므로 확률은 두 배다. 세력권이 넓어 짝 찾기 반경도 넓게 본다. */
+    if(p.sex==='F'&&p.e>TUNE.predBreedEnergy&&age>sp.matureYr
+       &&rng()<TUNE.predBreedP*2*sp.breedMul*allee){
+      const mate=findPredMate(w,arr,p);
+      if(mate){
+        const c=newInd(w,p.sp,p.x+rng()-.5,p.y+rng()-.5);
+        c.e=0.5; arr.push(c); p.offspring++; mate.offspring++; sp.bornYr++;
+        linkKin(w,p,c,mate); noteMate(w,p,mate);
+        addEv(w,c,'birth',`${p.name}의 새끼로 태어남`);
+        if(p.offspring===1) addEv(w,p,'breed','첫 새끼를 남김');
+        bySpecies.set(p.sp,nSp+1);
+      }
     }
   }
 }

@@ -35,7 +35,7 @@ export const tierCount=(w,t)=>{let n=0; for(const id of w.byTier[t]) n+=w.specie
 export const aliveSpecies=(w,t)=>w.byTier[t].filter(id=>w.species[id].status!=='ABSENT'&&w.species[id].n>=0.5).length;
 
 export function collectStats(w){
-  const n2=tierCount(w,'T2'), n3=w.ani.length, n4=w.p4.length, n5=w.p5.length;
+  const n1=w.n1, n2=tierCount(w,'T2'), n3=w.ani.length, n4=w.p4.length, n5=w.p5.length;
   /* 수원 밀집도와 '가장 큰 무리'는 개체 분포에서 직접 센다.
      무리라는 객체가 없어졌으므로, 무리는 이제 한 셀에 몇이 모였는가로 읽는다. */
   let near=0, clumpCells=0, biggest=0;
@@ -46,7 +46,7 @@ export function collectStats(w){
     if(w.land[ci]&&w.wdist[ci]<=TUNE.drinkRadiusCells) near+=lst.length;
   }
   const dIsl=n3/w.landCount, dNear=near/Math.max(w.nearCells,1);
-  return { n2,n3,n4,n5, year:w.year, day:w.day, wet:w.env.wet, tempC:w.env.tempC,
+  return { n1,n2,n3,n4,n5, year:w.year, day:w.day, wet:w.env.wet, tempC:w.env.tempC,
     rainMm:w.env.rainMm, soilMm:w.env.soilMm, grassT:w.env.grassT, woodyFrac:w.env.woodyFrac,
     burning:w.env.burning, waterCells:w.waterCells,
     clumpCells, biggestClump:biggest,
@@ -59,12 +59,15 @@ export function collectStats(w){
 }
 export function recordSample(w){
   const t=w.year+w.day/365;
-  w.samples.push({t, T2:tierCount(w,'T2'), T3:tierCount(w,'T3'), T4:w.p4.length, T5:w.p5.length,
-    grass:w.env.grassT, s2:aliveSpecies(w,'T2'), s3:aliveSpecies(w,'T3'),
+  /* 종별 값도 함께 남긴다. 등급 합계만 있으면 "어느 종이 무너지는 중인가"를
+     그래프에서 볼 수 없다. 종은 열 남짓이라 표본 하나가 크게 무겁지 않다. */
+  const per=w.trackedSpec.map(id=>Math.round(w.species[id].n));
+  w.samples.push({t, T1:w.n1, T2:tierCount(w,'T2'), T3:tierCount(w,'T3'), T4:w.p4.length, T5:w.p5.length,
+    per, grass:w.env.grassT, s2:aliveSpecies(w,'T2'), s3:aliveSpecies(w,'T3'),
     s4:aliveSpecies(w,'T4'), s5:aliveSpecies(w,'T5')});
   if(w.samples.length>600){ w.samples=w.samples.filter((_,i)=>i%2===0); w.sampleEvery*=2; }
   const last=w.samples[w.samples.length-1];
-  for(const k of ['T2','T3','T4','T5']){
+  for(const k of ['T1','T2','T3','T4','T5']){
     const v=last[k], p=w.peaks[k];
     if(!p) w.peaks[k]={max:v,maxT:w.year,min:v,minT:w.year};
     else { if(v>p.max){p.max=v;p.maxT=w.year;} if(v<p.min){p.min=v;p.minT=w.year;} }
@@ -75,7 +78,7 @@ export function closeYear(w){
   w.last={births:a.bYr,deaths:a.dYr,kills:a.killYr,burnFrac:a.burnedYr/w.landCount,fires:a.fireCount};
   w.totals.births+=a.bYr; w.totals.deaths+=a.dYr; w.totals.kills+=a.killYr;
   w.totals.burned+=a.burnedYr; w.totals.fires+=a.fireCount;
-  w.years.push({year:w.year, T2:Math.round(tierCount(w,'T2')), T3:Math.round(tierCount(w,'T3')),
+  w.years.push({year:w.year, T1:Math.round(w.n1), T2:Math.round(tierCount(w,'T2')), T3:Math.round(tierCount(w,'T3')),
     T4:w.p4.length, T5:w.p5.length, grassKt:w.env.grassT/1000, woodyPct:w.env.woodyFrac*100,
     burnPct:w.last.burnFrac*100, fires:a.fireCount, species:collectStats(w).specAlive,
     births:Math.round(a.bYr), deaths:Math.round(a.dYr)});

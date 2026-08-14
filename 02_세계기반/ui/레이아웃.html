@@ -83,7 +83,16 @@
     </header>
     <div class="body split">
       <div class="tw" style="max-height:340px"><table id="tInd"><thead></thead><tbody></tbody></table></div>
-      <div id="life"><p style="color:var(--ink-3);font-size:11px;margin:0">왼쪽에서 개체를 고르면 생애가 표시됩니다.</p></div>
+      <div id="life">
+        <div id="lifeHead"><p style="color:var(--ink-3);font-size:11px;margin:0">왼쪽에서 개체를 고르면 생애가 표시됩니다.</p></div>
+        <div id="lifeMapWrap" hidden>
+          <div class="lab" style="margin-bottom:4px">동선 · <span id="lifeMapMeta">–</span></div>
+          <canvas id="lifeMap" width="340" height="240"></canvas>
+          <div class="lab" style="margin-top:3px;color:var(--ink-3)">휠 확대 · 끌어 이동 · 더블클릭 전체</div>
+        </div>
+        <div id="lifeKin"></div>
+        <div id="lifeTl"></div>
+      </div>
     </div>
   </section>
 
@@ -96,7 +105,17 @@
     <div class="body">
       <div class="charts">
         <div class="chart wide"><h3>개체군 — 유도 부양력 대비</h3>
-          <p class="cap">등급별 개체수를 <span class="num">[I-4]</span> 유도 부양력으로 나눈 값. 100%가 문서의 유도값입니다.</p>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <div class="seg" role="group" aria-label="보기" id="popMode">
+              <button data-pm="tier" aria-pressed="true">등급</button>
+              <button data-pm="species">종별</button>
+            </div>
+            <div class="seg" role="group" aria-label="등급 필터" id="popTier"></div>
+            <span class="lab" id="popRange">전체 구간</span>
+            <button id="popReset">구간 초기화</button>
+          </div>
+          <p class="cap">등급별 개체수를 <span class="num">[I-4]</span> 유도 부양력으로 나눈 값. 100%가 문서의 유도값입니다.
+            차트 위에서 휠로 시간축을 확대하고 끌어서 옮깁니다.</p>
           <div class="legend" id="legPop"></div>
           <svg id="chPop" viewBox="0 0 720 190" role="img" aria-label="등급별 개체군 추이"></svg></div>
         <div class="chart"><h3>생존 종 수</h3>

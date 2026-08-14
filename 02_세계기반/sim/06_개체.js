@@ -9,6 +9,8 @@ export function newInd(w,spId,x,y){
   const ind={ uid:w.uid++, sp:spId, name:`${sp.name} #${w.uid-1}`,
     sex: w.rng()<0.5?'M':'F', bornDay:w.year*365+w.day, deathDay:null, cause:null, fate:null,
     x,y, e:0.7, hyd:1, herd:null, kills:0, offspring:0, peakHerd:0,
+    parent:null, parent2:null, children:[], mates:[],   // 계보 · 짝
+
     track:[[w.year*365+w.day,x,y]], ev:[] };
   addEv(w,ind,'birth','태어남');
   w.inds.push(ind);
@@ -48,5 +50,24 @@ export function noteKill(w,ind,n,preyName){
   const was=ind.kills;
   ind.kills+=n;
   if(was<1&&ind.kills>=1) addEv(w,ind,'hunt',`첫 사냥 성공 — ${preyName}`);
+}
+/* 계보를 잇는다. 목록에는 상한을 둔다 — 수십 년 사는 개체가 남긴 수를
+   전부 들고 있을 필요는 없고, 화면에도 그만큼은 못 띄운다. */
+const KIN_MAX=40;
+export function linkKin(w,mother,child,father){
+  if(!child) return;
+  for(const [p,key] of [[mother,'parent'],[father,'parent2']]){
+    if(!p) continue;
+    child[key]=p.uid;
+    if(p.children.length<KIN_MAX) p.children.push(child.uid);
+  }
+}
+/* 짝을 기록한다. 같은 상대와 여러 번 낳아도 한 번만 적는다. */
+export function noteMate(w,a,b){
+  for(const [x,y] of [[a,b],[b,a]]){
+    if(x.mates.includes(y.uid)) continue;
+    if(x.mates.length<KIN_MAX) x.mates.push(y.uid);
+    addEv(w,x,'breed',`${y.name}와(과) 짝을 이룸`);
+  }
 }
 export const indAge=(w,ind)=>((ind.deathDay??(w.year*365+w.day))-ind.bornDay)/365;

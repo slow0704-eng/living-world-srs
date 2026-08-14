@@ -3,7 +3,7 @@
   --ink:#181C17; --ink-2:#4D544A; --ink-3:#79816F;
   --accent:#186B57; --accent-ink:#0E4A3B; --accent-soft:#D3E3DC; --on-accent:#F5F7F2;
   --warn:#9C6A0E; --crit:#A03415; --good:#43701F;
-  --t2:#2E86C8; --t3:#7C4DDB; --t4:#E2761B; --t5:#C42A57; --t0:#4E7C2E;
+  --t1:#8A7A3C; --t2:#2E86C8; --t3:#7C4DDB; --t4:#E2761B; --t5:#C42A57; --t0:#4E7C2E;
   --water:#2A7285; --fire:#E8622A;
   --grid:rgba(24,28,23,.10);
   --shadow:0 1px 0 rgba(24,28,23,.04), 0 2px 10px -6px rgba(24,28,23,.22);
@@ -14,7 +14,7 @@
     --ink:#E7EBE0; --ink-2:#A2AC99; --ink-3:#727C69;
     --accent:#5CC0A2; --accent-ink:#8FD9C1; --accent-soft:#1D3830; --on-accent:#0C0F0A;
     --warn:#D9A03C; --crit:#E2704B; --good:#8CC154;
-    --t2:#2F9FC0; --t3:#9C63F2; --t4:#CE7F26; --t5:#EC5A85; --t0:#7FB05A;
+    --t1:#BFAE63; --t2:#2F9FC0; --t3:#9C63F2; --t4:#CE7F26; --t5:#EC5A85; --t0:#7FB05A;
     --grid:rgba(231,235,224,.10);
     --shadow:0 1px 0 rgba(0,0,0,.3), 0 2px 12px -6px rgba(0,0,0,.7);
   }
@@ -24,7 +24,7 @@
   --ink:#E7EBE0; --ink-2:#A2AC99; --ink-3:#727C69;
   --accent:#5CC0A2; --accent-ink:#8FD9C1; --accent-soft:#1D3830; --on-accent:#0C0F0A;
   --warn:#D9A03C; --crit:#E2704B; --good:#8CC154;
-  --t2:#2F9FC0; --t3:#9C63F2; --t4:#CE7F26; --t5:#EC5A85; --t0:#7FB05A;
+  --t1:#BFAE63; --t2:#2F9FC0; --t3:#9C63F2; --t4:#CE7F26; --t5:#EC5A85; --t0:#7FB05A;
   --grid:rgba(231,235,224,.10);
   --shadow:0 1px 0 rgba(0,0,0,.3), 0 2px 12px -6px rgba(0,0,0,.7);
 }
@@ -132,6 +132,10 @@ tbody tr[aria-selected="true"]{background:var(--accent-soft)}
 #tl .pip.boom{background:var(--good)} #tl .pip.crash{background:var(--warn)}
 #tl .pip.trough{background:var(--warn)} #tl .pip.brink{background:var(--crit)}
 #tl .pip.recover{background:var(--good)} #tl .pip.extinct{background:var(--crit)}
+#tl .pip.range{background:var(--good)} #tl .pip.shrink{background:var(--warn)}
+#tl .pip.crowd{background:var(--t3)} #tl .pip.aging{background:var(--ink-3)}
+#tl .pip.young{background:var(--t2)} #tl .pip.predation{background:var(--t5)}
+#tl .pip.decline{background:var(--warn)} #tl .pip.rebound{background:var(--good)}
 
 /* 개체 조회 */
 .split{display:grid; gap:13px; grid-template-columns:1fr}
@@ -145,6 +149,14 @@ tbody tr[aria-selected="true"]{background:var(--accent-soft)}
 #tl{display:flex; flex-direction:column; gap:0; font-size:10.5px; max-height:260px; overflow-y:auto}
 #tl div{display:grid; grid-template-columns:52px 12px 1fr; gap:8px; align-items:start; padding:3px 0}
 #tl time{color:var(--ink-3); font-family:ui-monospace,monospace}
+/* 생애 지도 · 계보 */
+#lifeMap{width:100%; height:auto; border-radius:6px; border:1px solid var(--line);
+  display:block; cursor:grab; background:var(--panel-2)}
+.kinbox{display:flex; flex-wrap:wrap; gap:3px}
+table.mini{font-size:10px} table.mini th,table.mini td{padding:2px 6px}
+button.kin{font-size:10.5px; padding:1px 6px; border-radius:9px; border:1px solid var(--line);
+  background:var(--panel-2); color:var(--ink-2); cursor:pointer; line-height:1.6}
+button.kin:hover{border-color:var(--accent); color:var(--ink-1)}
 #tl .pip{width:7px; height:7px; border-radius:50%; margin-top:4px; background:var(--ink-3)}
 #tl .pip.birth{background:var(--good)} #tl .pip.death{background:var(--crit)}
 #tl .pip.hunt{background:var(--t5)} #tl .pip.breed{background:var(--t3)}

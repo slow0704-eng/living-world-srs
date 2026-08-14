@@ -38,6 +38,7 @@ export const TUNE = {
   flockRef:20,               // 그 선호가 포화하는 셀당 마릿수
   decideEvery:4,             // 방향을 다시 고르는 주기(일). 개체마다 위상을 엇갈린다
   thirstSeek:0.5,            // 이 아래로 마르면 다른 것을 접고 수원으로 향한다
+  mateRadiusCells:6,         // 포식자가 짝을 만난 것으로 치는 거리(세력권이 넓다)
   seedClumpSize:45,          // 최초 배치를 이만큼씩 뭉쳐 놓는다(빈 초지에서 시작하지 않게)
   maxAniPerCell:14,          // [T-12] 연산 예산. 육지 셀당 이 수를 넘으면 번식이 멎는다
   trackedRate:0.01,          // 새로 난 개체를 추적 대상으로 삼을 확률
@@ -52,6 +53,7 @@ export const TUNE = {
      개체가 되면 한 셀에 수백이 몰릴 수 있어, 이 항이 군집 크기를 정하는
      손잡이가 된다. 모이려는 힘(flockPull)과 맞물려 적정 군집이 정해진다. */
   utilFeed:1.0, utilThirst:4.4, utilFear:1.5, utilCrowd:0.005, utilNoise:0.16,
+  t1GrowthPerYr:6.0,                       // 분해자는 회전이 빠르다
   t2GrowthPerYr:2.6, t2UpdateEvery:5,      // T2 종별 갱신을 5일 주기로 엇갈리게 돌린다
   predMoveKmDay:{apex:0.72, small:0.48},
   predKillSurplus:1.8,        // 처리시간 한계 (홀링 II형의 포화 상한)

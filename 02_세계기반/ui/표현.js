@@ -12,7 +12,7 @@ const $=id=>document.getElementById(id);
 const fmt=n=>Math.round(n).toLocaleString('ko-KR');
 const varCache={};
 const cssVar=n=>varCache[n]??=getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-const TIER_VAR={T0:'--t0',T2:'--t2',T3:'--t3',T4:'--t4',T5:'--t5'};
+const TIER_VAR={T0:'--t0',T1:'--t1',T2:'--t2',T3:'--t3',T4:'--t4',T5:'--t5'};
 
 const GA=[{id:'year',lab:'경과',unit:'년',get:s=>s.year},{id:'day',lab:'일차',get:s=>s.day+1},
   {id:'season',lab:'계절',txt:true,get:s=>s.wet?'우기':'건기'},
@@ -27,7 +27,7 @@ const GB=[{id:'grass',lab:'초본 현존량',unit:'천t',get:s=>fmt(s.grassT/100
   {id:'big',lab:'최대 군집',get:s=>fmt(s.biggestClump)},
   {id:'energy',lab:'T3 에너지',get:s=>s.energy.toFixed(2)},
   {id:'inds',lab:'추적 개체',get:s=>fmt(s.inds)}];
-const POP=[{k:'n2',cap:'T2',lab:'T2 소형초식'},{k:'n3',cap:'T3',lab:'T3 대형초식'},
+const POP=[{k:'n1',cap:'T1',lab:'T1 분해자'},{k:'n2',cap:'T2',lab:'T2 소형초식'},{k:'n3',cap:'T3',lab:'T3 대형초식'},
   {k:'n4',cap:'T4',lab:'T4 소형육식'},{k:'n5',cap:'T5',lab:'T5 대형육식'}];
 const build=(host,defs)=>host.innerHTML=defs.map(d=>
   `<div class="gauge"><div class="lab">${d.lab}</div><div class="val${d.txt?' txt':''}" id="g-${d.id}">–${d.unit?`<span class="u">${d.unit}</span>`:''}</div></div>`).join('');
@@ -103,7 +103,8 @@ function newWorld(seed,tier,climate){
   $('brandSub').textContent=`${W.T.name} ${W.T.areaKm2.toLocaleString('ko-KR')}km² · ${W.C.name} · 격자 ${W.T.cellM}m`;
   $('mapMeta').textContent=`${W.g.W}×${W.g.H} 셀 · 육지 ${fmt(W.landCount)}`;
   const c=W.cap;
-  $('histMeta').textContent=`유도 부양력 T2 ${fmt(c.T2)} · T3 ${fmt(c.T3)} · T4 ${fmt(c.T4)} · T5 ${fmt(c.T5)}`;
+  $('histMeta').textContent=`유도 부양력 T1 ${fmt(c.T1)} · T2 ${fmt(c.T2)} · T3 ${fmt(c.T3)}`
+    +` · T4 ${fmt(c.T4)} · T5 ${fmt(c.T5)}`;
   const ab=W.species.filter(s=>s.status==='ABSENT').length;
   $('specMeta').textContent=`[I-6.4] 계획 ${W.totalPlanned}종 · 결번 ${ab}종 · 식물 시뮬 ${W.simPlants.length}종`;
   $('specFilter').innerHTML=['ALL','T0','T2','T3','T4','T5'].map((t,i)=>
@@ -150,7 +151,12 @@ function followSel(){
   if(zoomed) zoomMeta();
 }
 const px=[0,0,0];
-function paintMap(){
+/* 지형을 오프스크린에 굽는다. 지도와 생애 화면이 같은 그림을 나눠 쓴다 —
+   생애 동선을 빈 바탕에 그리면 어디를 다녔는지 알 수 없다. */
+let terrainFrame=-1;
+function renderTerrain(){
+  if(terrainFrame===frameN) return;
+  terrainFrame=frameN;
   const g=W.g,d=img.data,L=LAYERS[layer];
   for(let i=0;i<g.N;i++){
     let r,gr,b;
@@ -162,6 +168,10 @@ function paintMap(){
     const o=i*4; d[o]=r;d[o+1]=gr;d[o+2]=b;d[o+3]=255;
   }
   octx.putImageData(img,0,0);
+}
+function paintMap(){
+  const g=W.g;
+  renderTerrain();
   ctx.imageSmoothingEnabled=false;
   const v=visCells();
   ctx.drawImage(off,vx,vy,v,v,0,0,cv.width,cv.height);
@@ -255,26 +265,59 @@ function fitMap(){
 const PAD={l:44,r:14,t:10,b:20};
 const path=(pts,X,Y)=>pts.map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1)).join('');
 const ticks=(m,n)=>{const o=[];for(let i=0;i<=n;i++)o.push(m*i/n);return o;};
+/* 개체군 차트 — 등급 합계와 종별을 오가고, 시간축을 확대할 수 있다.
+   300년을 한 화면에 밀어 넣으면 초기 20년의 요동이 한 픽셀로 뭉개진다. */
+let popMode='tier', popTiers=new Set(['T1','T2','T3','T4','T5']), tFrom=null, tTo=null;
+function popSpan(){
+  const s=W.samples;
+  if(!s.length) return [0,1];
+  const a=s[0].t, b=Math.max(s[s.length-1].t,a+0.01);
+  return [tFrom==null?a:clamp(tFrom,a,b), tTo==null?b:clamp(tTo,a,b)];
+}
+function popRangeLabel(){
+  const s=W.samples; if(!s.length) return;
+  const [a,b]=popSpan();
+  const full=tFrom==null&&tTo==null;
+  $('popRange').textContent=full?`전체 구간 (${(s[s.length-1].t-s[0].t).toFixed(0)}년)`
+    :`${a.toFixed(1)}~${b.toFixed(1)}년 (${(b-a).toFixed(1)}년)`;
+}
 function drawPop(){
-  const svg=$('chPop'),Wd=720,Ht=190,s=W.samples;
-  if(s.length<2){svg.innerHTML='';return;}
-  const t0=s[0].t,t1=Math.max(s[s.length-1].t,t0+.01);
-  const ser=POP.map(t=>({...t,pts:s.map(p=>[p.t,p[t.cap]/Math.max(W.cap[t.cap],1)*100])}));
+  const svg=$('chPop'),Wd=720,Ht=190,all=W.samples;
+  if(all.length<2){svg.innerHTML='';return;}
+  const [t0,t1]=popSpan();
+  const s=all.filter(p=>p.t>=t0&&p.t<=t1);
+  if(s.length<2){svg.innerHTML='';popRangeLabel();return;}
+  /* 계열을 만든다. 등급 모드는 합계를, 종별 모드는 종마다 자기 등급의
+     유도 부양력 몫(seedN)으로 나눈 값을 쓴다. 그래야 한 축에 놓인다. */
+  let ser;
+  if(popMode==='tier'){
+    ser=POP.filter(t=>popTiers.has(t.cap)).map(t=>({
+      name:t.lab, cap:t.cap, tag:t.cap,
+      pts:s.map(p=>[p.t,p[t.cap]/Math.max(W.cap[t.cap],1)*100])}));
+  } else {
+    ser=W.trackedSpec.map((id,k)=>({sp:W.species[id],k}))
+      .filter(o=>popTiers.has(o.sp.trophic))
+      .map(o=>({ name:o.sp.name, cap:o.sp.trophic, tag:o.sp.name,
+        ref:Math.max(o.sp.seedN||1,1),
+        pts:s.map(p=>[p.t,(p.per?p.per[o.k]:0)/Math.max(o.sp.seedN||1,1)*100])}));
+  }
   let max=100; for(const e of ser) for(const p of e.pts) if(p[1]>max) max=p[1];
   max=Math.ceil(max/25)*25;
-  const X=v=>PAD.l+(v-t0)/(t1-t0)*(Wd-PAD.l-PAD.r), Y=v=>Ht-PAD.b-clamp(v/max,0,1)*(Ht-PAD.t-PAD.b);
+  const X=v=>PAD.l+(v-t0)/Math.max(t1-t0,1e-6)*(Wd-PAD.l-PAD.r);
+  const Y=v=>Ht-PAD.b-clamp(v/max,0,1)*(Ht-PAD.t-PAD.b);
   svg.innerHTML=ticks(max,4).map(v=>
     `<line x1="${PAD.l}" x2="${Wd-PAD.r}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}" stroke="var(--grid)"/>
      <text x="${PAD.l-7}" y="${(Y(v)+3.5).toFixed(1)}" text-anchor="end" font-size="9.5" fill="var(--ink-3)">${v}%</text>`).join('')
    +`<line x1="${PAD.l}" x2="${Wd-PAD.r}" y1="${Y(100).toFixed(1)}" y2="${Y(100).toFixed(1)}" stroke="var(--ink-3)" stroke-dasharray="3 3" opacity=".7"/>`
-   +ser.map(e=>`<path d="${path(e.pts,X,Y)}" fill="none" stroke="var(${TIER_VAR[e.cap]})" stroke-width="2" stroke-linejoin="round"/>`).join('')
+   +ser.map(e=>`<path d="${path(e.pts,X,Y)}" fill="none" stroke="var(${TIER_VAR[e.cap]||'--ink-2'})" stroke-width="${popMode==='tier'?2:1.4}" stroke-linejoin="round" opacity="${popMode==='tier'?1:.85}"/>`).join('')
    +ser.map(e=>{const p=e.pts[e.pts.length-1];
-     return `<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="3" fill="var(${TIER_VAR[e.cap]})" stroke="var(--panel)" stroke-width="2"/>
-     <text x="${(X(p[0])+7).toFixed(1)}" y="${(Y(p[1])+3.5).toFixed(1)}" font-size="10" font-weight="600" fill="var(${TIER_VAR[e.cap]})">${e.cap}</text>`;}).join('')
-   +`<text x="${PAD.l}" y="${Ht-5}" font-size="9.5" fill="var(--ink-3)">${t0.toFixed(0)}년</text>
+     return `<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="2.6" fill="var(${TIER_VAR[e.cap]||'--ink-2'})" stroke="var(--panel)" stroke-width="2"/>
+     <text x="${(X(p[0])+6).toFixed(1)}" y="${(Y(p[1])+3.5).toFixed(1)}" font-size="9.5" font-weight="600" fill="var(${TIER_VAR[e.cap]||'--ink-2'})">${e.tag}</text>`;}).join('')
+   +`<text x="${PAD.l}" y="${Ht-5}" font-size="9.5" fill="var(--ink-3)">${t0.toFixed(1)}년</text>
      <text x="${Wd-PAD.r}" y="${Ht-5}" font-size="9.5" fill="var(--ink-3)" text-anchor="end">${t1.toFixed(1)}년</text>`;
-  $('legPop').innerHTML=POP.map(t=>`<span style="color:var(${TIER_VAR[t.cap]})"><i></i>${t.lab}</span>`).join('')
-    +`<span style="color:var(--ink-3)">┈ 100% = [I-4] 유도 부양력</span>`;
+  $('legPop').innerHTML=ser.map(e=>`<span style="color:var(${TIER_VAR[e.cap]||'--ink-2'})"><i></i>${e.name}</span>`).join('')
+    +`<span style="color:var(--ink-3)">┈ 100% = ${popMode==='tier'?'[I-4] 유도 부양력':'종별 유도 배분'}</span>`;
+  popRangeLabel();
 }
 function drawSpecChart(){
   const svg=$('chSpec'),Wd=350,Ht=150,s=W.samples;
@@ -383,6 +426,23 @@ function drawInd(){
     :`<tr><td colspan="${IND_COLS.length}" style="text-align:left;color:var(--ink-3)">해당 개체가 없습니다</td></tr>`;
 }
 const EV_LABEL={birth:'탄생',death:'사망',hunt:'사냥',breed:'번식',move:'이동',fire:'화재'};
+/* 해석 이전의 숫자. 사건이 왜 그 해에 났는지는 이 표에서 확인한다. */
+function yearlyTable(sp){
+  const Y=sp.yearly||[];
+  if(!Y.length) return '';
+  /* T2 는 밀도장이라 개체 단위 집계가 없다. 0으로 채운 표는 오해를 부른다. */
+  if(!Y.some(r=>r.born||r.died||r.eaten||r.cells))
+    return `<div class="lab" style="margin:6px 0 4px;color:var(--ink-3)">밀도장이라 개체 단위 집계가 없습니다 — 개체수만 남습니다</div>`;
+  const rows=Y.slice(-12).reverse();
+  return `<div class="lab" style="margin:6px 0 4px">해마다 (최근 ${rows.length}년)</div>
+    <div class="tw" style="max-height:150px"><table class="mini"><thead><tr>
+      <th>연차</th><th>개체수</th><th>출생</th><th>사망</th><th>피식</th>
+      <th>서식%</th><th>최대군집</th><th>평균나이</th></tr></thead><tbody>`
+    +rows.map(r=>`<tr><td>${r.year}</td><td>${fmt(r.n)}</td><td>${fmt(r.born)}</td>`
+      +`<td>${fmt(r.died)}</td><td>${fmt(r.eaten)}</td><td>${r.rangePct.toFixed(0)}</td>`
+      +`<td>${fmt(r.maxClump)}</td><td>${r.meanAge.toFixed(1)}</td></tr>`).join('')
+    +`</tbody></table></div>`;
+}
 /* 종의 발자취 — 고른 종이 지나온 사건을 연표로 편다 */
 function drawTrail(){
   const sp=W.species.find(s=>s.id===selSpec);
@@ -401,36 +461,94 @@ function drawTrail(){
       <dt>유도 배분</dt><dd>${fmt(sp.seedN)}마리</dd>
       <dt>지금</dt><dd>${fmt(sp.n)}마리</dd>
     </dl>
-    <div><div class="lab" style="margin-bottom:4px">발자취 ${sp.milestones.length}건</div>
+    ${yearlyTable(sp)}
+    <div><div class="lab" style="margin:6px 0 4px">발자취 ${sp.milestones.length}건</div>
       <div id="tl">${sp.milestones.slice().reverse().map(e=>
         `<div><time>${e.year}년</time><span class="pip ${e.kind}"></span>
          <span><b>${SPEC_EVENTS[e.kind]?SPEC_EVENTS[e.kind].label:e.kind}</b> · ${e.msg}</span></div>`).join('')}</div></div>`;
 }
+/* 생애 화면 — 지형 위의 동선과 계보.
+   예전에는 빈 바탕에 선만 그려 어디를 다녔는지 알 수 없었다. 지도와 같은
+   지형 위에 얹고, 확대 · 이동이 되게 했다. */
+let lifeZoom=1, lifeVx=0, lifeVy=0, lifeFor=null;
+function lifeView(){
+  const cvL=$('lifeMap'), vw=W.g.W/lifeZoom, vh=vw*cvL.height/cvL.width;
+  return {cvL,vw,vh};
+}
+function fitLife(i){
+  const {cvL}=lifeView();
+  const pts=i.track.length?i.track.map(p=>[p[1],p[2]]):[[i.x,i.y]];
+  pts.push([i.x,i.y]);
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  for(const [x,y] of pts){ if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y; }
+  const pad=Math.max(3,(Math.max(x1-x0,y1-y0))*0.25);
+  const bw=(x1-x0)+2*pad, bh=(y1-y0)+2*pad;
+  const need=Math.max(bw, bh*cvL.width/cvL.height);
+  lifeZoom=clamp(W.g.W/Math.max(need,2),1,40);
+  const {vw,vh}=lifeView();
+  lifeVx=(x0+x1)/2-vw/2; lifeVy=(y0+y1)/2-vh/2;
+  clampLife();
+}
+function clampLife(){
+  const {vw,vh}=lifeView();
+  lifeVx=clamp(lifeVx,-vw*0.1,W.g.W-vw*0.9);
+  lifeVy=clamp(lifeVy,-vh*0.1,W.g.H-vh*0.9);
+}
+function paintLifeMap(i){
+  const {cvL,vw,vh}=lifeView();
+  const c=cvL.getContext('2d');
+  renderTerrain();                       // 지도를 접어 둬도 지형은 준비한다
+  c.imageSmoothingEnabled=false;
+  c.drawImage(off,lifeVx,lifeVy,vw,vh,0,0,cvL.width,cvL.height);
+  const sx=x=>(x-lifeVx)/vw*cvL.width, sy=y=>(y-lifeVy)/vh*cvL.height;
+  const tr=i.track;
+  if(tr.length>1){
+    c.strokeStyle='rgba(255,255,255,.9)'; c.lineWidth=1.6; c.lineJoin='round';
+    c.beginPath();
+    tr.forEach((p,k)=>k?c.lineTo(sx(p[1]),sy(p[2])):c.moveTo(sx(p[1]),sy(p[2])));
+    c.stroke();
+    c.fillStyle=cssVar('--good');
+    c.beginPath(); c.arc(sx(tr[0][1]),sy(tr[0][2]),3,0,6.2832); c.fill();
+  }
+  c.fillStyle=i.deathDay==null?cssVar('--crit'):cssVar('--ink-3');
+  c.beginPath(); c.arc(sx(i.x),sy(i.y),4,0,6.2832); c.fill();
+  c.strokeStyle='rgba(255,255,255,.9)'; c.lineWidth=1.4;
+  c.beginPath(); c.arc(sx(i.x),sy(i.y),7,0,6.2832); c.stroke();
+  const km=vw*W.cellKm;
+  $('lifeMapMeta').textContent=`${tr.length}점 · 화면폭 ${km.toFixed(1)}km · ${lifeZoom.toFixed(1)}×`;
+}
+/* 계보 : 부모 · 짝 · 자식. 눌러서 그 개체로 건너뛴다. */
+function kinChips(i){
+  const one=uid=>{
+    const k=findInd(uid); if(!k) return '';
+    const sp=W.species[k.sp];
+    return `<button class="kin" data-uid="${uid}" title="${sp.name}">`
+      +`${k.name}${k.deathDay!=null?' †':''}</button>`;
+  };
+  const rows=[];
+  const par=[i.parent,i.parent2].filter(u=>u!=null&&findInd(u)).map(one).join('');
+  if(par) rows.push(`<dt>부모</dt><dd class="kinbox">${par}</dd>`);
+  const mates=i.mates.map(one).filter(Boolean);
+  if(mates.length) rows.push(`<dt>짝 ${mates.length}</dt><dd class="kinbox">${mates.join('')}</dd>`);
+  const kids=i.children.map(one).filter(Boolean);
+  if(kids.length) rows.push(`<dt>자식 ${i.offspring}</dt><dd class="kinbox">${kids.join('')}`
+    +(i.offspring>kids.length?`<span style="color:var(--ink-3);font-size:10px">외 ${i.offspring-kids.length}</span>`:'')+`</dd>`);
+  if(!rows.length) return `<dl class="meta"><dt>계보</dt><dd style="color:var(--ink-3)">기록된 혈연이 없습니다</dd></dl>`;
+  return `<dl class="meta">${rows.join('')}</dl>`;
+}
 function drawLife(){
   const i=findInd(selUid);
-  if(!i){$('life').innerHTML='<p style="color:var(--ink-3);font-size:11px;margin:0">왼쪽에서 개체를 고르면 생애가 표시됩니다.</p>';return;}
-  const sp=W.species[i.sp], age=indAge(W,i);
-  const tr=i.track;
-  let trackSvg='';
-  if(tr.length>1){
-    const xs=tr.map(p=>p[1]),ys=tr.map(p=>p[2]);
-    const x0=Math.min(...xs),x1=Math.max(...xs),y0=Math.min(...ys),y1=Math.max(...ys);
-    const pad=Math.max(2,(Math.max(x1-x0,y1-y0))*0.15);
-    const sx=v=>((v-x0+pad)/((x1-x0)+2*pad))*140, sy=v=>((v-y0+pad)/((y1-y0)+2*pad))*100;
-    const km=(x1-x0)*W.cellKm, kmY=(y1-y0)*W.cellKm;
-    trackSvg=`<div><div class="lab" style="margin-bottom:4px">동선 · 최근 ${tr.length}점 (${Math.max(km,kmY).toFixed(1)} km 범위)</div>
-      <svg id="trackSvg" viewBox="0 0 140 100" role="img" aria-label="개체 동선">
-        <path d="${tr.map((p,k)=>(k?'L':'M')+sx(p[1]).toFixed(1)+' '+sy(p[2]).toFixed(1)).join('')}"
-          fill="none" stroke="var(${TIER_VAR[sp.trophic]||'--ink-2'})" stroke-width="1.4" stroke-linejoin="round" opacity=".85"/>
-        <circle cx="${sx(tr[0][1]).toFixed(1)}" cy="${sy(tr[0][2]).toFixed(1)}" r="2.4" fill="var(--good)"/>
-        <circle cx="${sx(tr[tr.length-1][1]).toFixed(1)}" cy="${sy(tr[tr.length-1][2]).toFixed(1)}" r="2.4" fill="var(--crit)"/>
-      </svg></div>`;
+  if(!i){
+    $('lifeHead').innerHTML='<p style="color:var(--ink-3);font-size:11px;margin:0">왼쪽에서 개체를 고르면 생애가 표시됩니다.</p>';
+    $('lifeMapWrap').hidden=true; $('lifeKin').innerHTML=''; $('lifeTl').innerHTML='';
+    lifeFor=null; return;
   }
-  $('life').innerHTML=`
+  const sp=W.species[i.sp], age=indAge(W,i);
+  if(lifeFor!==i.uid){ lifeFor=i.uid; fitLife(i); }
+  $('lifeHead').innerHTML=`
     <div class="hd"><b>${i.name}</b>
       <span class="chip" style="border-color:var(${TIER_VAR[sp.trophic]});color:var(${TIER_VAR[sp.trophic]})">${sp.trophic} ${sp.name}</span>
-      ${i.deathDay==null?'<span class="chip ok">생존</span>'
-        :`<span class="chip ${i.fate==='merge'?'':'no'}">${i.cause}</span>`}</div>
+      ${i.deathDay==null?'<span class="chip ok">생존</span>':`<span class="chip no">${i.cause}</span>`}</div>
     <dl class="meta">
       <dt>성별</dt><dd>${i.sex==='M'?'수':'암'}</dd>
       <dt>나이</dt><dd>${age.toFixed(1)}년 / 수명 ${sp.lifespanYr.toFixed(0)}년</dd>
@@ -438,17 +556,17 @@ function drawLife(){
         :`${(i.bornDay/365).toFixed(1)}년차`}</dd>
       ${i.deathDay!=null?`<dt>사망</dt><dd>${(i.deathDay/365).toFixed(1)}년차 · ${i.cause}</dd>`:''}
       <dt>체중</dt><dd>${sp.massKg.toFixed(1)} kg</dd>
-      <dt>내건성</dt><dd>${sp.droughtTol.toFixed(2)}</dd>
-      <dt>식이</dt><dd>${sp.diet.map(d=>W.species[d].name).join(' · ')}</dd>
+      <dt>에너지</dt><dd>${i.e.toFixed(2)} · 수분 ${i.hyd.toFixed(2)}</dd>
       ${i.kills>=1?`<dt>사냥</dt><dd>${fmt(i.kills)}마리</dd>`:''}
       ${i.peakHerd>=1?`<dt>최대 무리</dt><dd>${fmt(i.peakHerd)}마리</dd>`:''}
-      <dt>자손</dt><dd>${i.offspring}</dd>
-    </dl>
-    ${trackSvg}
-    <div><div class="lab" style="margin-bottom:4px">생애 사건 ${i.ev.length}건</div>
+    </dl>`;
+  $('lifeMapWrap').hidden=false;
+  paintLifeMap(i);
+  $('lifeKin').innerHTML=kinChips(i);
+  $('lifeTl').innerHTML=`<div class="lab" style="margin:6px 0 4px">생애 사건 ${i.ev.length}건</div>
       <div id="tl">${i.ev.slice().reverse().map(e=>
         `<div><time>${(e[0]/365).toFixed(1)}년</time><span class="pip ${e[1]}"></span>
-         <span>${EV_LABEL[e[1]]||''} · ${e[2]}</span></div>`).join('')}</div></div>`;
+         <span>${EV_LABEL[e[1]]||''} · ${e[2]}</span></div>`).join('')}</div>`;
 }
 function drawTiles(st){
   const p=W.peaks,t=W.totals;
@@ -524,6 +642,48 @@ $('btnMap').onclick=e=>{const c=$('mapCard'),open=c.dataset.open!=='true';
   $('vCursor').textContent=open?'셀 위로 이동':'지도를 펼치세요';fitMap();};
 const regen=()=>newWorld((Math.random()*1e9)|0,$('selTier').value,$('selClimate').value);
 $('btnReset').onclick=regen; $('selTier').onchange=regen; $('selClimate').onchange=regen;
+/* 개체군 차트 : 보기 전환 · 등급 필터 · 시간축 확대 */
+$('popTier').innerHTML=['T1','T2','T3','T4','T5'].map(t=>
+  `<button data-pt="${t}" aria-pressed="true">${t}</button>`).join('');
+$('popMode').onclick=e=>{const b=e.target.closest('[data-pm]');if(!b)return;
+  popMode=b.dataset.pm;
+  $('popMode').querySelectorAll('button').forEach(o=>o.setAttribute('aria-pressed',o===b));
+  drawPop();};
+$('popTier').onclick=e=>{const b=e.target.closest('[data-pt]');if(!b)return;
+  const t=b.dataset.pt;
+  if(popTiers.has(t)) popTiers.delete(t); else popTiers.add(t);
+  if(!popTiers.size) popTiers.add(t);
+  b.setAttribute('aria-pressed',popTiers.has(t)); drawPop();};
+$('popReset').onclick=()=>{tFrom=tTo=null; drawPop();};
+{
+  const svg=$('chPop');
+  const tAt=ev=>{ const r=svg.getBoundingClientRect(), [a,b]=popSpan();
+    const f=clamp(((ev.clientX-r.left)/r.width*720-PAD.l)/(720-PAD.l-PAD.r),0,1);
+    return a+(b-a)*f; };
+  svg.addEventListener('wheel',ev=>{ev.preventDefault();
+    const all=W.samples; if(all.length<2) return;
+    const lo=all[0].t, hi=all[all.length-1].t;
+    let [a,b]=popSpan();
+    const at=tAt(ev), f=ev.deltaY<0?0.75:1/0.75;
+    let na=at-(at-a)*f, nb=at+(b-at)*f;
+    if(nb-na<0.5){ na=at-0.25; nb=at+0.25; }
+    tFrom=Math.max(lo,na); tTo=Math.min(hi,nb);
+    if(tFrom<=lo&&tTo>=hi){ tFrom=tTo=null; }
+    drawPop();},{passive:false});
+  let pdrag=null;
+  svg.addEventListener('mousedown',ev=>{pdrag={x:ev.clientX,span:popSpan()};svg.style.cursor='grabbing';});
+  addEventListener('mouseup',()=>{if(pdrag){pdrag=null;svg.style.cursor='';}});
+  svg.addEventListener('mousemove',ev=>{
+    if(!pdrag) return;
+    const all=W.samples; if(all.length<2) return;
+    const r=svg.getBoundingClientRect(), [a,b]=pdrag.span;
+    const d=-(ev.clientX-pdrag.x)/r.width*(b-a);
+    const lo=all[0].t, hi=all[all.length-1].t;
+    const w0=b-a;
+    tFrom=clamp(a+d,lo,hi-w0); tTo=tFrom+w0;
+    drawPop();});
+  svg.addEventListener('dblclick',()=>{tFrom=tTo=null;drawPop();});
+}
 $('specFilter').onclick=e=>{const b=e.target.closest('[data-st]');if(!b)return;specTier=b.dataset.st;
   $('specFilter').querySelectorAll('button').forEach(o=>o.setAttribute('aria-pressed',o===b));drawSpec();};
 $('tSpec').tHead.addEventListener('click',e=>{const th=e.target.closest('[data-k]');if(!th)return;
@@ -537,6 +697,34 @@ $('tInd').tBodies[0].addEventListener('click',e=>{const tr=e.target.closest('[da
   selUid=+tr.dataset.uid; drawInd(); drawLife();});
 $('tInd').tHead.addEventListener('click',e=>{const th=e.target.closest('[data-k]');if(!th)return;
   const k=th.dataset.k; indSort=indSort.k===k?{k,dir:-indSort.dir}:{k,dir:-1}; drawInd();});
+/* 계보를 눌러 그 개체로 건너뛴다 — 부모에서 자식으로, 짝에게로. */
+$('lifeKin').addEventListener('click',e=>{const b=e.target.closest('[data-uid]');if(!b)return;
+  selUid=+b.dataset.uid; drawInd(); drawLife();});
+/* 생애 지도의 확대 · 이동 */
+{
+  const lm=$('lifeMap');
+  let ldrag=null;
+  lm.addEventListener('wheel',ev=>{ev.preventDefault();
+    const i=findInd(selUid); if(!i) return;
+    const r=lm.getBoundingClientRect(), {vw,vh}=lifeView();
+    const ax=lifeVx+(ev.clientX-r.left)/r.width*vw, ay=lifeVy+(ev.clientY-r.top)/r.height*vh;
+    const z0=lifeZoom;
+    lifeZoom=clamp(lifeZoom*(ev.deltaY<0?1.25:0.8),1,40);
+    const f=z0/lifeZoom;
+    lifeVx=ax-(ax-lifeVx)*f; lifeVy=ay-(ay-lifeVy)*f;
+    clampLife(); paintLifeMap(i);},{passive:false});
+  lm.addEventListener('mousedown',ev=>{ldrag={x:ev.clientX,y:ev.clientY,vx:lifeVx,vy:lifeVy};
+    lm.style.cursor='grabbing';});
+  addEventListener('mouseup',()=>{if(ldrag){ldrag=null;lm.style.cursor='';}});
+  lm.addEventListener('mousemove',ev=>{
+    if(!ldrag) return;
+    const i=findInd(selUid); if(!i) return;
+    const r=lm.getBoundingClientRect(), {vw,vh}=lifeView();
+    lifeVx=ldrag.vx-(ev.clientX-ldrag.x)/r.width*vw;
+    lifeVy=ldrag.vy-(ev.clientY-ldrag.y)/r.height*vh;
+    clampLife(); paintLifeMap(i);});
+  lm.addEventListener('dblclick',()=>{const i=findInd(selUid); if(i){ fitLife(i); paintLifeMap(i);} });
+}
 function toggle(btn,key,on,off,fx){btn.onclick=()=>{W[key]=!W[key];btn.setAttribute('aria-pressed',W[key]);
   logChron(W,'act',W[key]?on:off);if(W[key]&&fx)fx();};}
 toggle($('iFire'),'supp','화재 전면 진압 시작 — 목본 침입 관측','화재 진압 해제');

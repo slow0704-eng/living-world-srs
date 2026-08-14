@@ -24,7 +24,9 @@ export function buildRoster(tierKey, climateKey, cap, rand){
     for(let i=0;i<n;i++){
       const id=species.length;
       const sp={ id, name:names[i], trophic:tier, share:shares[i],
-                 kind: tier==='T0'?'PLANT':'ANIMAL', status:'VIABLE', n:0, extinctYear:null };
+                 kind: tier==='T0'?'PLANT':'ANIMAL', status:'VIABLE', n:0, extinctYear:null,
+                 /* 그 해의 종별 집계. 연 마감에 발자취로 접히고 0으로 돌아간다. */
+                 bornYr:0, diedYr:0, eatenYr:0, ageSum:0, ageN:0 };
       if(tier==='T0'){
         sp.woody = i >= Math.round(n*C.grassSpeciesFrac);
         sp.droughtTol = clamp(C.droughtToleranceMin+rand()*(1-C.droughtToleranceMin),0,1);

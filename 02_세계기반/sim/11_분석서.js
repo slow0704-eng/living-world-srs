@@ -24,7 +24,9 @@ const RPT_TIERS = ['T2', 'T3', 'T4', 'T5'];
 const RPT_TIER_LAB = { T2: 'T2 소형초식', T3: 'T3 대형초식', T4: 'T4 소형육식', T5: 'T5 대형육식' };
 const RPT_KIND_LAB = { fire:'화재', loss:'손실', gain:'회복', act:'개입', spec:'종' };
 const RPT_SPEC_LAB = { seed:'정착', peak:'최대', boom:'폭증', crash:'급감',
-                       trough:'최저', brink:'위기', recover:'회복', extinct:'절멸' };
+                       trough:'최저', brink:'위기', recover:'회복', extinct:'절멸',
+                       range:'확산', shrink:'위축', crowd:'밀집', aging:'고령',
+                       young:'세대', predation:'피식', decline:'감소', rebound:'반등' };
 /* 무리 병합은 죽음이 아니다. 옛 json 에는 fate 가 없으므로 이름으로도 거른다. */
 const rptIsMerge = i => (i.fate === 'merge') || i.cause === '무리 흡수';
 
@@ -73,7 +75,9 @@ export function buildReport(j) {
     push(`  T3 진폭 ${rptN(Math.min(...t3))}~${rptN(Math.max(...t3))}`
        + ` (${(Math.max(...t3) / Math.max(Math.min(...t3), 1)).toFixed(1)}배)`
        + ` · 유도 대비 ${rptPct(rptMean(tail, 'T3'), m.derived.T3)}`);
-    push('  유도 대비 ' + RPT_TIERS.map(t => `${t} ${rptPct(rptMean(tail, t), m.derived[t])}`).join(' · '));
+    push('  유도 대비 ' + RPT_TIERS.map(t => `${t} ${rptPct(rptMean(tail, t), m.derived[t])}`).join(' · ')
+       + (Y[0].T1 != null && m.derived.T1
+          ? ` · T1 ${rptPct(rptMean(tail, 'T1'), m.derived.T1)}(분해자 · 실측 순생산 기준이라 낮게 나온다)` : ''));
     const w0 = Y[0].woodyPct, wN = Y[Y.length - 1].woodyPct;
     push(wN - w0 > 20
       ? `  목본 임관 ${w0.toFixed(0)}% → ${wN.toFixed(0)}% — 초지가 관목림으로 천이 중 [C-4.6]`
@@ -103,9 +107,26 @@ export function buildReport(j) {
     push('');
     for (const s of trailed) {
       push(`  ${s.trophic} ${s.name} — 최대 ${rptN(s.peakN)}(${s.peakYear}년)`
-         + ` · 최저 ${rptN(s.minN)}(${s.minYear}년) · 유도 배분 ${rptN(s.seedN)}`);
+         + ` · 최저 ${rptN(s.minN)}(${s.minYear}년) · 유도 배분 ${rptN(s.seedN)}`
+         + (s.peakCells ? ` · 최대 서식 ${rptN(s.peakCells)}셀 · 최대 군집 ${rptN(s.peakClump)}` : ''));
       for (const e of s.milestones)
         push(`     ${rptPad(e.year, 5)}년 [${RPT_SPEC_LAB[e.kind] || e.kind}] ${e.msg}`);
+      /* 해석 이전의 숫자. 사건이 왜 그 해에 났는지는 여기서 확인한다. */
+      const Yr = s.yearly || [];
+      /* T2 는 밀도장이라 개체 단위 집계가 없다. 0으로 채운 표를 내놓으면
+         "아무 일도 없었다"로 읽히므로 아예 붙이지 않는다. */
+      const detailed = Yr.some(r => r.born || r.died || r.eaten || r.cells);
+      if (Yr.length && !detailed) push('      (밀도장이라 개체 단위 집계가 없다 — 개체수만 남는다)');
+      if (Yr.length && detailed) {
+        const st = Math.max(1, Math.round(Yr.length / 18));
+        push('      연차   개체수    출생    사망    피식   서식셀 서식%  최대군집 평균나이');
+        for (let k = 0; k < Yr.length; k += st) {
+          const r = Yr[k];
+          push(`     ${rptPad(r.year, 5)} ${rptPad(rptN(r.n), 8)} ${rptPad(rptN(r.born), 7)}`
+             + ` ${rptPad(rptN(r.died), 7)} ${rptPad(rptN(r.eaten), 7)} ${rptPad(rptN(r.cells), 8)}`
+             + ` ${rptPad(r.rangePct.toFixed(0), 4)} ${rptPad(rptN(r.maxClump), 8)} ${rptPad(r.meanAge.toFixed(1), 8)}`);
+        }
+      }
       push('');
     }
   }

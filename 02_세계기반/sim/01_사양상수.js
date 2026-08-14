@@ -35,6 +35,7 @@ export const ISLAND_TIERS = {
 };
 export const ECO = { sustainableOfftake:0.10, dailyIntakeFrac:0.03, predatorBiomassFrac:0.005,
               splitT4:0.40, splitT5:0.60,
+              bodyMassT1Kg:0.002, detritusShare:0.55,   // T1 분해자 (문서 근거 없음 · [I-4] 형식만 따름)
               bodyMassT2Kg:2, bodyMassT4Kg:8, bodyMassT5Kg:40,
               mvpShort:50, mvpLong:500, dwarfFactor:0.6,
               richnessBase:60, richnessExp:0.30 };
