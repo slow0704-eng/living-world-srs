@@ -1,3 +1,25 @@
+<div id="startWrap" class="modal" hidden>
+  <div class="dlg">
+    <header><h2>세계 시작</h2>
+      <span class="lab" id="startMeta">–</span></header>
+    <div class="row">
+      <label>시드 <input id="startSeed" style="width:110px" inputmode="numeric"></label>
+      <button id="startRoll">무작위</button>
+      <select id="startTier" aria-label="규모 티어"></select>
+      <select id="startClimate" aria-label="기후대"></select>
+    </div>
+    <p class="cap">체크를 풀면 그 종이 <b>없는 세계</b>로 시작합니다. 지형과 기후는 그대로이고
+      종 구성만 달라집니다 — "이 포식자가 없었다면"을 시드를 바꾸지 않고 물어볼 수 있습니다.
+      결번(부양력 미달)은 처음부터 성립하지 않는 종이라 고를 수 없습니다.</p>
+    <div id="startList"></div>
+    <div class="row end">
+      <button id="startAll">전체 선택</button>
+      <button id="startNone">전부 해제</button>
+      <button id="startGo" class="primary">이 구성으로 시작</button>
+    </div>
+  </div>
+</div>
+
 <nav>
   <div class="strip">
     <div class="brand"><b>섬 생태 시뮬레이터</b><span id="brandSub">–</span></div>

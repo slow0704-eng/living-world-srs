@@ -28,7 +28,7 @@ export function phaseEnvironment(w){
   const s=seasonOf(w), N=g.N, nP=pm.n, nT2=tm.n, K=TUNE.t2UpdateEvery;
   const nppDay=C.nppTonPerKm2Yr*w.cellKm2/365;
   const day=w.day, invWoodyCap=1/w.woodyCap;
-  let sumSoil=0,burning=0,prod=0,sumG=0,sumW=0;
+  let sumSoil=0,burning=0,prod=0,sumG=0,sumW=0,capG=0;
   /* 셀 한 번 훑기 안에서 물 · 식물 · T2를 모두 처리한다.
      종을 나눈 뒤 패스를 여러 번 돌면 비용이 종 수만큼 곱해진다. */
   for(let i=0;i<N;i++){
@@ -66,7 +66,7 @@ export function phaseEnvironment(w){
         }
         if(plantB[o]>capC) plantB[o]=capC;
       }
-      if(pm.woody[k]) wi+=plantB[o]; else gi+=plantB[o];
+      if(pm.woody[k]) wi+=plantB[o]; else { gi+=plantB[o]; capG+=capC; }
     }
     grass[i]=gi; woody[i]=wi; sumG+=gi; sumW+=wi;
 
@@ -100,6 +100,10 @@ export function phaseEnvironment(w){
   }
   Object.assign(w.env,{tempC:s.tempC,rainMm:s.rainMm,soilMm:sumSoil/w.landCount,
     grassT:sumG,woodyT:sumW,woodyFrac:sumW/(w.landCount*w.woodyCap),
+    /* 초본이 '지금 자랄 수 있는 최대'까지 얼마나 찼는가.
+       현존량만 보면 부양력이 목본에 눌려 줄어든 것인지, 뜯기고 탄 것인지
+       구분할 수 없다. T3가 왜 주는지는 이 둘을 나눠 봐야 나온다. */
+    grassCapT:capG, grassFill:capG>0?sumG/capG:0,
     burning,wet:s.wet,dryProgress:s.dryProgress,
     prodEMA:w.env.prodEMA?w.env.prodEMA*0.996+prod*365*0.004:prod*365});
 }

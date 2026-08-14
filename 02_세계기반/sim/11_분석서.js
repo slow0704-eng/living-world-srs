@@ -56,11 +56,12 @@ export function buildReport(j) {
   /* ── 연도별 ──────────────────────────────────────────────────────── */
   const step = Math.max(1, Math.round(Y.length / 30));
   push(`─ 연도별 (${step}년 간격) ${'─'.repeat(Math.max(0, 50 - String(step).length))}`);
-  push('    연차       T2       T3     T4    T5   초본천t 목본%  화재%  발화  종');
+  push('    연차       T2       T3     T4    T5   초본천t 충전% 목본%  화재%  발화  종');
   for (let i = 0; i < Y.length; i += step) {
     const r = Y[i];
     push(`  ${rptPad(r.year, 6)} ${rptPad(rptN(r.T2), 8)} ${rptPad(rptN(r.T3), 8)} ${rptPad(r.T4, 6)} ${rptPad(r.T5, 5)}`
-       + ` ${rptPad(rptN(r.grassKt), 9)} ${rptPad(r.woodyPct.toFixed(0), 5)} ${rptPad(r.burnPct.toFixed(0), 6)}`
+       + ` ${rptPad(rptN(r.grassKt), 9)} ${rptPad(r.grassFill != null ? r.grassFill.toFixed(0) : '-', 5)}`
+       + ` ${rptPad(r.woodyPct.toFixed(0), 5)} ${rptPad(r.burnPct.toFixed(0), 6)}`
        + ` ${rptPad(r.fires, 5)} ${rptPad(r.species, 3)}`);
   }
   push('');
@@ -82,6 +83,9 @@ export function buildReport(j) {
     push(wN - w0 > 20
       ? `  목본 임관 ${w0.toFixed(0)}% → ${wN.toFixed(0)}% — 초지가 관목림으로 천이 중 [C-4.6]`
       : `  목본 임관 ${w0.toFixed(0)}% → ${wN.toFixed(0)}% — 체제 전환 없음`);
+    if (Y[0].grassFill != null)
+      push(`  초본 충전율 ${rptMean(head, 'grassFill').toFixed(0)}% → ${rptMean(tail, 'grassFill').toFixed(0)}%`
+         + ` — 부양력 대비 현존량. 낮으면 뜯기거나 탄 것이고, 부양력 자체가 준 것은 목본 쪽을 본다`);
     const b0 = rptMean(head, 'burnPct'), bN = rptMean(tail, 'burnPct');
     push(b0 > 0 && bN < b0 * 0.5
       ? `  화재 ${b0.toFixed(0)}% → ${bN.toFixed(0)}% — 연료 고갈로 화재 체제가 무너짐`

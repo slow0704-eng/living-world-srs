@@ -10,7 +10,10 @@ import { newInd } from './06_개체.js';
 import { newAnimal } from './08_하루.js';
 import { refreshSpeciesCounts, recordSample, logChron } from './09_통계이력.js';
 
-export function createWorld(seed, tierKey='XL', climateKey='SAVANNA'){
+/* opts.exclude : 이 이름의 동물 종을 처음부터 없는 것으로 친다(결번).
+   "이 포식자가 없었다면"을 시드를 바꾸지 않고 물어보기 위한 것이다 —
+   같은 지형 · 같은 기후에서 종 구성만 다른 세계를 세울 수 있다. */
+export function createWorld(seed, tierKey='XL', climateKey='SAVANNA', opts={}){
   const T=ISLAND_TIERS[tierKey], C=CLIMATE_PROFILES[climateKey];
   const cap=deriveCapacity(tierKey,climateKey);
   const cellKm=T.cellM/1000, cellKm2=cellKm**2, cellHa=cellKm2*100;
@@ -19,6 +22,11 @@ export function createWorld(seed, tierKey='XL', climateKey='SAVANNA'){
   const g=makeGrid(box,box), N=g.N;
   const rand=mulberry32(seed), noise=makeNoise(mulberry32(seed^0x9E3779B9));
   const R=buildRoster(tierKey,climateKey,cap,mulberry32(seed^0x1B873593));
+  if(opts.exclude&&opts.exclude.length){
+    const ex=new Set(opts.exclude);
+    for(const sp of R.species)
+      if(sp.kind==='ANIMAL'&&ex.has(sp.name)){ sp.status='ABSENT'; sp.seedN=0; sp.excluded=true; }
+  }
 
   const w={ seed, tierKey, climateKey, T, C, cap, g, cellKm, cellKm2, cellHa, targetLand,
     species:R.species, byTier:R.byTier, simPlants:R.simPlants, totalPlanned:R.totalPlanned,
@@ -52,7 +60,8 @@ export function createWorld(seed, tierKey='XL', climateKey='SAVANNA'){
     acc:{bYr:0,dYr:0,killYr:0,burnedYr:0,fireCount:0},
     last:{births:0,deaths:0,kills:0,burnFrac:0,fires:0},
     totals:{births:0,deaths:0,kills:0,burned:0,fires:0,extinct:0},
-    env:{tempC:C.tempMeanC,rainMm:0,soilMm:0,grassT:0,woodyT:0,woodyFrac:0,burning:0,wet:true,prodEMA:0,satiety:1},
+    env:{tempC:C.tempMeanC,rainMm:0,soilMm:0,grassT:0,woodyT:0,woodyFrac:0,burning:0,wet:true,
+         grassCapT:0,grassFill:0,prodEMA:0,satiety:1},
     samples:[], sampleEvery:10, sampleTick:0, years:[], chron:[], peaks:{}, flags:{},
   };
   const nP=w.simPlants.length, nT2=w.byTier.T2.length;

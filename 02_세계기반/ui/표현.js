@@ -1,8 +1,9 @@
 /* 섬 생태 시뮬레이터 — 표현 계층 — DOM은 여기서만 만진다
    소스는 이 모듈이고, 32_사바나XL_생태시뮬.html 은 `node 빌드.mjs` 산출물이다. */
 
-import { CLIMATE_PROFILES, ISLAND_TIERS, ECO, TUNE, clamp, lerp,
+import { CLIMATE_PROFILES, ISLAND_TIERS, ECO, TUNE, clamp, lerp, mulberry32,
          createWorld, stepDay, collectStats, viability, indAge,
+         deriveCapacity, buildRoster,
          hallOfFame, indBrief, buildReport, speciesTrail, SPEC_EVENTS, attachInd,
          logChron, chronDirty, setChronDirty } from '../sim/index.js';
 
@@ -21,6 +22,7 @@ const GA=[{id:'year',lab:'경과',unit:'년',get:s=>s.year},{id:'day',lab:'일�
   {id:'soil',lab:'토양수분',unit:'mm',get:s=>Math.round(s.soilMm)},
   {id:'wcell',lab:'가용 수원',unit:'셀',get:s=>fmt(s.waterCells)}];
 const GB=[{id:'grass',lab:'초본 현존량',unit:'천t',get:s=>fmt(s.grassT/1000)},
+  {id:'gfill',lab:'초본 충전율',unit:'%',get:s=>(s.grassFill*100).toFixed(0)},
   {id:'woody',lab:'목본 임관',unit:'%',get:s=>Math.round(s.woodyFrac*100)},
   {id:'fire',lab:'연소 중',unit:'셀',get:s=>s.burning},
   {id:'clump',lab:'군집 셀',get:s=>fmt(s.clumpCells)},
@@ -94,8 +96,8 @@ const cv=$('map'), ctx=cv.getContext('2d',{alpha:false});
 const off=document.createElement('canvas'); let octx,img,W=null;
 let selUid=null, specTier='ALL', indLive='all', indQuery='';
 
-function newWorld(seed,tier,climate){
-  W=createWorld(seed,tier,climate);
+function newWorld(seed,tier,climate,opts){
+  W=createWorld(seed,tier,climate,opts||{});
   off.width=W.g.W; off.height=W.g.H;
   octx=off.getContext('2d'); img=octx.createImageData(W.g.W,W.g.H);
   cv.width=cv.height=Math.min(900,W.g.W*9);
@@ -267,7 +269,7 @@ const path=(pts,X,Y)=>pts.map((p,i)=>(i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).
 const ticks=(m,n)=>{const o=[];for(let i=0;i<=n;i++)o.push(m*i/n);return o;};
 /* 개체군 차트 — 등급 합계와 종별을 오가고, 시간축을 확대할 수 있다.
    300년을 한 화면에 밀어 넣으면 초기 20년의 요동이 한 픽셀로 뭉개진다. */
-let popMode='tier', popTiers=new Set(['T1','T2','T3','T4','T5']), tFrom=null, tTo=null;
+let popMode='tier', popTiers=new Set(['T0','T1','T2','T3','T4','T5']), tFrom=null, tTo=null;
 function popSpan(){
   const s=W.samples;
   if(!s.length) return [0,1];
@@ -293,13 +295,22 @@ function drawPop(){
   if(popMode==='tier'){
     ser=POP.filter(t=>popTiers.has(t.cap)).map(t=>({
       name:t.lab, cap:t.cap, tag:t.cap,
-      pts:s.map(p=>[p.t,p[t.cap]/Math.max(W.cap[t.cap],1)*100])}));
+      pts:s.map(p=>[p.t,(Number.isFinite(p[t.cap])?p[t.cap]:0)/Math.max(W.cap[t.cap],1)*100])}));
   } else {
     ser=W.trackedSpec.map((id,k)=>({sp:W.species[id],k}))
       .filter(o=>popTiers.has(o.sp.trophic))
       .map(o=>({ name:o.sp.name, cap:o.sp.trophic, tag:o.sp.name,
         ref:Math.max(o.sp.seedN||1,1),
-        pts:s.map(p=>[p.t,(p.per?p.per[o.k]:0)/Math.max(o.sp.seedN||1,1)*100])}));
+        pts:s.map(p=>[p.t,(p.per&&Number.isFinite(p.per[o.k])?p.per[o.k]:0)/Math.max(o.sp.seedN||1,1)*100])}));
+  }
+  /* 식물은 개체수가 아니라 '지금 자랄 수 있는 최대까지 얼마나 찼는가'로 얹는다.
+     T3 가 왜 주는지는 먹이가 줄어서인지 뜯겨서인지를 갈라야 보인다. */
+  if(popTiers.has('T0')){
+    ser=ser.concat([
+      {name:'T0 초본 (부양력 대비)', cap:'T0', tag:'초본', dash:'4 3',
+       pts:s.map(p=>[p.t,Number.isFinite(p.grassFill)?p.grassFill:0])},
+      {name:'T0 목본 임관', cap:'T0', tag:'목본', dash:'1 3',
+       pts:s.map(p=>[p.t,Number.isFinite(p.woodyPct)?p.woodyPct:0])}]);
   }
   let max=100; for(const e of ser) for(const p of e.pts) if(p[1]>max) max=p[1];
   max=Math.ceil(max/25)*25;
@@ -309,7 +320,7 @@ function drawPop(){
     `<line x1="${PAD.l}" x2="${Wd-PAD.r}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}" stroke="var(--grid)"/>
      <text x="${PAD.l-7}" y="${(Y(v)+3.5).toFixed(1)}" text-anchor="end" font-size="9.5" fill="var(--ink-3)">${v}%</text>`).join('')
    +`<line x1="${PAD.l}" x2="${Wd-PAD.r}" y1="${Y(100).toFixed(1)}" y2="${Y(100).toFixed(1)}" stroke="var(--ink-3)" stroke-dasharray="3 3" opacity=".7"/>`
-   +ser.map(e=>`<path d="${path(e.pts,X,Y)}" fill="none" stroke="var(${TIER_VAR[e.cap]||'--ink-2'})" stroke-width="${popMode==='tier'?2:1.4}" stroke-linejoin="round" opacity="${popMode==='tier'?1:.85}"/>`).join('')
+   +ser.map(e=>`<path d="${path(e.pts,X,Y)}" fill="none" stroke="var(${TIER_VAR[e.cap]||'--ink-2'})" stroke-width="${popMode==='tier'?2:1.4}" ${e.dash?`stroke-dasharray="${e.dash}"`:''} stroke-linejoin="round" opacity="${popMode==='tier'?1:.85}"/>`).join('')
    +ser.map(e=>{const p=e.pts[e.pts.length-1];
      return `<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="2.6" fill="var(${TIER_VAR[e.cap]||'--ink-2'})" stroke="var(--panel)" stroke-width="2"/>
      <text x="${(X(p[0])+6).toFixed(1)}" y="${(Y(p[1])+3.5).toFixed(1)}" font-size="9.5" font-weight="600" fill="var(${TIER_VAR[e.cap]||'--ink-2'})">${e.tag}</text>`;}).join('')
@@ -640,10 +651,12 @@ $('layerSeg').onclick=e=>{const b=e.target.closest('[data-layer]');if(!b)return;
 $('btnMap').onclick=e=>{const c=$('mapCard'),open=c.dataset.open!=='true';
   c.dataset.open=open;e.target.setAttribute('aria-expanded',open);e.target.textContent=open?'접기':'펼치기';
   $('vCursor').textContent=open?'셀 위로 이동':'지도를 펼치세요';fitMap();};
-const regen=()=>newWorld((Math.random()*1e9)|0,$('selTier').value,$('selClimate').value);
-$('btnReset').onclick=regen; $('selTier').onchange=regen; $('selClimate').onchange=regen;
+/* 새 세계는 시작 창을 거친다 — 어떤 종을 빼고 시작할지 고르는 자리다. */
+$('btnReset').onclick=()=>openStart();
+$('selTier').onchange=()=>openStart({tier:$('selTier').value});
+$('selClimate').onchange=()=>openStart({climate:$('selClimate').value});
 /* 개체군 차트 : 보기 전환 · 등급 필터 · 시간축 확대 */
-$('popTier').innerHTML=['T1','T2','T3','T4','T5'].map(t=>
+$('popTier').innerHTML=['T0','T1','T2','T3','T4','T5'].map(t=>
   `<button data-pt="${t}" aria-pressed="true">${t}</button>`).join('');
 $('popMode').onclick=e=>{const b=e.target.closest('[data-pm]');if(!b)return;
   popMode=b.dataset.pm;
@@ -818,6 +831,74 @@ $('btnFollow').onclick=()=>{
   if(!findInd(selUid)){ $('vCursor').textContent='먼저 개체를 고르세요 — 지도를 누르거나 표에서 선택'; return; }
   setFollow(!follow); if(follow){ followSel(); zoomMeta(); }};
 addEventListener('resize',fitMap);
+
+/* ── 시작 창 ────────────────────────────────────────────────────────
+   같은 시드 · 같은 지형에서 종 구성만 바꿔 세우기 위한 자리.
+   로스터는 시드에서 결정론적으로 나오므로, 세계를 만들기 전에 미리 뽑아
+   목록을 보여 줄 수 있다. */
+const TIER_ORDER=['T0','T1','T2','T3','T4','T5'];
+const TIER_NAME={T0:'T0 식물',T1:'T1 분해자',T2:'T2 소형초식',T3:'T3 대형초식',
+                 T4:'T4 소형육식',T5:'T5 대형육식'};
+let startRoster=null, startOff=new Set();
+$('startTier').innerHTML=$('selTier').innerHTML;
+$('startClimate').innerHTML=$('selClimate').innerHTML;
+function previewRoster(){
+  const seed=+$('startSeed').value||0, tier=$('startTier').value, climate=$('startClimate').value;
+  const cap=deriveCapacity(tier,climate);
+  startRoster=buildRoster(tier,climate,cap,mulberry32(seed^0x1B873593));
+  const R=startRoster;
+  $('startMeta').textContent=`시드 ${seed} · ${ISLAND_TIERS[tier].areaKm2.toLocaleString('ko-KR')}km²`
+    +` · 계획 ${R.totalPlanned}종 · 유도 T3 ${fmt(cap.T3)}`;
+  $('startList').innerHTML=TIER_ORDER.map(t=>{
+    const ids=R.byTier[t]||[];
+    if(!ids.length) return '';
+    return `<div class="tierBlock"><b style="color:var(${TIER_VAR[t]||'--ink-2'})">${TIER_NAME[t]}</b>
+      <div class="spList">`+ids.map(id=>{
+        const sp=R.species[id];
+        const plant=sp.kind==='PLANT', absent=sp.status==='ABSENT';
+        const lock=plant||sp.aggregate||absent;
+        const note=absent?'결번':plant?'식물':sp.aggregate?'집계'
+          :`${fmt(sp.seedN)}마리 · ${sp.massKg.toFixed(1)}kg`;
+        return `<label class="spItem${lock?' off':''}">
+          <input type="checkbox" data-sp="${sp.name}"${lock?' disabled':''}
+            ${lock||!startOff.has(sp.name)?' checked':''}>
+          <span>${sp.name}</span><small>${note}</small></label>`;
+      }).join('')+`</div></div>`;
+  }).join('');
+}
+function openStart(pre){
+  if(pre&&pre.tier) $('startTier').value=pre.tier;
+  if(pre&&pre.climate) $('startClimate').value=pre.climate;
+  if(!$('startSeed').value) $('startSeed').value=String((Math.random()*1e9)|0);
+  startOff.clear();
+  previewRoster();
+  $('startWrap').hidden=false;
+}
+$('startSeed').oninput=previewRoster;
+$('startTier').onchange=previewRoster;
+$('startClimate').onchange=previewRoster;
+$('startRoll').onclick=()=>{$('startSeed').value=String((Math.random()*1e9)|0);previewRoster();};
+$('startList').addEventListener('change',e=>{
+  const b=e.target.closest('[data-sp]'); if(!b) return;
+  if(b.checked) startOff.delete(b.dataset.sp); else startOff.add(b.dataset.sp);
+});
+const setAll=on=>{
+  startOff.clear();
+  $('startList').querySelectorAll('[data-sp]:not([disabled])').forEach(b=>{
+    b.checked=on; if(!on) startOff.add(b.dataset.sp);
+  });
+};
+$('startAll').onclick=()=>setAll(true);
+$('startNone').onclick=()=>setAll(false);
+$('startGo').onclick=()=>{
+  const seed=+$('startSeed').value||0, tier=$('startTier').value, climate=$('startClimate').value;
+  $('selTier').value=tier; $('selClimate').value=climate;
+  $('startWrap').hidden=true;
+  newWorld(seed,tier,climate,{exclude:[...startOff]});
+  if(startOff.size) logChron(W,'act',`시작 구성에서 ${startOff.size}종 제외 — ${[...startOff].slice(0,3).join(' · ')}${startOff.size>3?' 외':''}`);
+};
+
+$('startSeed').value='20260812';
 newWorld(20260812,'XL','SAVANNA');
 frame();
 }

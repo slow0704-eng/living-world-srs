@@ -49,6 +49,7 @@ export function collectStats(w){
   return { n1,n2,n3,n4,n5, year:w.year, day:w.day, wet:w.env.wet, tempC:w.env.tempC,
     rainMm:w.env.rainMm, soilMm:w.env.soilMm, grassT:w.env.grassT, woodyFrac:w.env.woodyFrac,
     burning:w.env.burning, waterCells:w.waterCells,
+    grassFill:w.env.grassFill, grassCapT:w.env.grassCapT,
     clumpCells, biggestClump:biggest,
     herdAvg:clumpCells?n3/clumpCells:0,
     energy:w.ani.length?w.ani.reduce((s,a)=>s+a.e,0)/w.ani.length:0,
@@ -63,7 +64,8 @@ export function recordSample(w){
      그래프에서 볼 수 없다. 종은 열 남짓이라 표본 하나가 크게 무겁지 않다. */
   const per=w.trackedSpec.map(id=>Math.round(w.species[id].n));
   w.samples.push({t, T1:w.n1, T2:tierCount(w,'T2'), T3:tierCount(w,'T3'), T4:w.p4.length, T5:w.p5.length,
-    per, grass:w.env.grassT, s2:aliveSpecies(w,'T2'), s3:aliveSpecies(w,'T3'),
+    per, grass:w.env.grassT, grassFill:w.env.grassFill*100, woodyPct:w.env.woodyFrac*100,
+    s2:aliveSpecies(w,'T2'), s3:aliveSpecies(w,'T3'),
     s4:aliveSpecies(w,'T4'), s5:aliveSpecies(w,'T5')});
   if(w.samples.length>600){ w.samples=w.samples.filter((_,i)=>i%2===0); w.sampleEvery*=2; }
   const last=w.samples[w.samples.length-1];
@@ -81,6 +83,7 @@ export function closeYear(w){
   w.years.push({year:w.year, T1:Math.round(w.n1), T2:Math.round(tierCount(w,'T2')), T3:Math.round(tierCount(w,'T3')),
     T4:w.p4.length, T5:w.p5.length, grassKt:w.env.grassT/1000, woodyPct:w.env.woodyFrac*100,
     burnPct:w.last.burnFrac*100, fires:a.fireCount, species:collectStats(w).specAlive,
+    grassFill:w.env.grassFill*100,
     births:Math.round(a.bYr), deaths:Math.round(a.dYr)});
   if(w.last.burnFrac>=TUNE.fireBigEventFrac)
     logChron(w,'fire',`${(w.last.burnFrac*100).toFixed(0)}% 소실 · 발화 ${a.fireCount}건`);
