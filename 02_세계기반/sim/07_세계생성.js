@@ -7,7 +7,7 @@ import { clamp, mulberry32, makeNoise, fbm, makeGrid } from './03_유틸.js';
 import { deriveCapacity } from './04_유도.js';
 import { buildRoster } from './05_종.js';
 import { newInd } from './06_개체.js';
-import { newAnimal } from './08_하루.js';
+import { newAnimal, makeAnimals, layoutAnimals } from './14_초식.js';
 import { refreshSpeciesCounts, recordSample, logChron } from './09_통계이력.js';
 
 /* opts.exclude : 이 이름의 동물 종을 처음부터 없는 것으로 친다(결번).
@@ -36,26 +36,34 @@ export function createWorld(seed, tierKey='XL', climateKey='SAVANNA', opts={}){
     burn:new Int16Array(N), fire:new Uint8Array(N), fireAge:new Uint8Array(N),
     press:new Float32Array(N),
     dens4:new Float32Array(N), dens5:new Float32Array(N),
-    plantB:null, plantCap:null, t2d:null,          // 종별 x 셀 (아래에서 할당)
+    plantB:null, plantCap:null, t2d:null, t1d:null,   // 종별 x 셀 (아래에서 할당)
+    /* 분해자의 밥은 그 칸의 식물 현존량(plantB)이 회전한 낙엽이다.
+       낙엽 종류가 분해자 종을 가른다 — [M-15.4]. */
     grass:new Float32Array(N), woody:new Float32Array(N),   // 기능군 합계(표현·화재용)
-    /* 대형 초식은 개체다. aniAt 은 셀 -> 그 셀의 개체들(포식이 쓴다),
-       dens 는 종별 셀 밀도(모이려는 성향이 읽는다), util 은 종별 이동 효용 필드다. */
-    /* 셀 버킷은 두 벌을 번갈아 쓴다(오늘 채우는 동안 어제 것을 읽어야 한다).
-       배열을 매일 새로 만들면 그 쓰레기 치우는 값이 시뮬레이션보다 비싸다. */
-    ani:[], aniA:new Array(N), aniB:new Array(N), cellsA:[], cellsB:[],
-    aniAt:null, aniCells:null, aniNext:null, nextCells:null,
-    aniKilled:false, trackedAlive:0,
+    /* 대형 초식은 개체다. A 는 그 상태를 필드별 형식화 배열로 눕힌 것이고,
+       개체 하나는 같은 첨자(슬롯)로만 존재한다. b 는 셀 -> 그 셀의 슬롯들
+       (포식이 쓴다), dens 는 종별 셀 밀도, util 은 종별 이동 효용 필드다. */
+    /* 셀 버킷은 두 벌을 번갈아 쓴다(오늘 채우는 동안 어제 것을 읽어야 한다). */
+    A:null, b:null, bNext:null,
+    ordSlot:new Int32Array(0), ordCell:new Int32Array(0),
+    /* deadQ : 그날 죽은 개체. 뒤처리를 sweepDead 와 같은 지점에서 한 번에 한다.
+       aniLive : 살아 있는 수. w.ani 는 하루 동안 죽은 것을 품고 있을 수 있다. */
+    deadQ:[], aniLive:0, trackedAlive:0,
     t3Cnt:null, t3Sat:null,
-    dens:null, densPrev:null, util:null, feedF:null, wpull:new Float32Array(N),
+    dens:null, densPrev:null, uf:null, wpull:new Float32Array(N),
     flowX:new Int8Array(N), flowY:new Int8Array(N),   // 셀마다 물로 가는 방향
     p4:[], p5:[],
     rng:mulberry32(seed^0x51ED270B), uid:1,
     inds:[], dead:[],                              // 추적 개체 · 사망 명부
+    /* uid -> 개체. 계보를 거슬러 올라갈 때 쓴다. w.inds 는 한 번 만든 것을
+       지우지 않으므로 이 색인은 항상 완전하고, 매번 다시 만들 이유가 없다. */
+    indByUid:new Map(),
     day:0, year:0, landCount:0, nearCells:0, waterCells:0,
     wetDays:Math.round(365*C.wetSeasonMonths/12),
     grassCapBase:C.standingTonPerHa*TUNE.grassShareOfStanding*cellHa,
     woodyCap:C.standingTonPerHa*(1-TUNE.grassShareOfStanding)*cellHa,
-    n1:0,                                          // T1 분해자 (수치 하나)
+    n1:0,          // T1 분해자 합계 (종별 밀도장 t1d 의 총합)
+    t1Ref:1,       // 분해자 레이어의 색 기준. 표현 계층이 실측에 맞춰 따라간다
     supp:false, noPred:false, dry:false, noImmig:true,
     acc:{bYr:0,dYr:0,killYr:0,burnedYr:0,fireCount:0},
     last:{births:0,deaths:0,kills:0,burnFrac:0,fires:0},
@@ -64,16 +72,25 @@ export function createWorld(seed, tierKey='XL', climateKey='SAVANNA', opts={}){
          grassCapT:0,grassFill:0,prodEMA:0,satiety:1},
     samples:[], sampleEvery:10, sampleTick:0, years:[], chron:[], peaks:{}, flags:{},
   };
-  const nP=w.simPlants.length, nT2=w.byTier.T2.length;
-  w.plantB=new Float32Array(nP*N); w.plantCap=new Float32Array(nP*N); w.t2d=new Float32Array(nT2*N);
+  const nP=w.simPlants.length, nT2=w.byTier.T2.length, nT1=Math.max(1,w.byTier.T1.length);
+  w.plantB=new Float32Array(nP*N); w.plantCap=new Float32Array(nP*N);
+  w.t2d=new Float32Array(nT2*N); w.t1d=new Float32Array(nT1*N);
   w.plantIdx=new Map(w.simPlants.map((id,k)=>[id,k]));
   w.t2Idx=new Map(w.byTier.T2.map((id,k)=>[id,k]));
+  w.t1Idx=new Map(w.byTier.T1.map((id,k)=>[id,k]));
   w.t3Idx=new Map(w.byTier.T3.map((id,k)=>[id,k]));
   const nT3=Math.max(1,w.byTier.T3.length);
   w.dens=new Float32Array(nT3*N); w.densPrev=new Float32Array(nT3*N);
-  w.util=new Float32Array(nT3*N); w.feedF=new Float32Array(nT3*N);
+  /* 이동 효용과 먹이 항을 한 배열에 번갈아 담는다(캐시 라인 절약) */
+  w.uf=new Float32Array(nT3*N*2);
   w.t3Cnt=new Int32Array(nT3); w.t3Sat=new Float32Array(nT3);
-  w.aniAt=w.aniA; w.aniCells=w.cellsA; w.aniNext=w.aniB; w.nextCells=w.cellsB;
+  /* 슬롯 저장소와 셀 버킷. 초기 용량은 유도 부양력에서 잡고 모자라면 늘린다. */
+  w.A=makeAnimals(Math.max(1024,Math.round(cap.T3*1.6)));
+  /* 눕히는 자리(치환 대상). 두 벌을 번갈아 쓴다. */
+  w.A2=makeAnimals(w.A.cap);
+  const mkB=()=>({ start:new Int32Array(N), cnt:new Int32Array(N), cur:new Int32Array(N),
+                   cells:new Int32Array(N), cellsN:0, slot:new Int32Array(1024) });
+  w.b=mkB(); w.bNext=mkB();
 
   /* 그래프에서 종별로 볼 대상. 식물과 집계 종은 뺀다. */
   w.trackedSpec=w.species.filter(s=>s.kind==='ANIMAL'&&s.status!=='ABSENT').map(s=>s.id);
@@ -81,8 +98,18 @@ export function createWorld(seed, tierKey='XL', climateKey='SAVANNA', opts={}){
   genCoastline(w,noise); genElevation(w,noise); genRainfall(w);
   genHydrology(w); genSoil(w,noise,rand);
   buildDietMeta(w);
+  /* 거리는 km 로 정의하고 격자에 맞춰 여기서 환산한다 [M-10.6]. */
+  w.fireMaxAge=Math.max(1,Math.round(TUNE.fireMaxRunKm/cellKm));
+  w.mateRadiusHerb=Math.max(1,Math.round(TUNE.mateRadiusHerbKm/cellKm));
+  w.t2WaterRange=Math.max(1,TUNE.t2WaterRangeKm/cellKm);
+  /* [T-12] 번식 예산. 육지 셀이 정해진 뒤라야 셀 기준을 셀 수 있다.
+     작은 섬은 셀 기준에, 큰 섬은 유도 기준에 걸린다. */
+  w.aniBudget=Math.max(w.landCount*TUNE.maxAniPerCell,
+                       Math.round(w.cap.T3*TUNE.aniBudgetMul));
+  buildRegions(w);
   computeWaterDist(w); seedFauna(w,mulberry32(seed^0x2545F491));
   w.n1=w.cap.T1*0.6;                              // 분해자는 부양력의 절반쯤에서 시작한다
+  w.aniLive=w.A.top;
   syncPools(w); refreshSpeciesCounts(w); recordSample(w);
   const alive=w.species.filter(s=>s.status!=='ABSENT'&&s.kind==='ANIMAL'&&!s.aggregate).length;
   logChron(w,'act',`섬 생성 · ${T.name} ${T.areaKm2.toLocaleString('ko-KR')}km² · ${C.name} · 육지 ${w.landCount.toLocaleString('ko-KR')}셀 · 동물 ${alive}종`);
@@ -96,6 +123,8 @@ export function buildSpeciesMeta(w){
   const P=w.simPlants, T2=w.byTier.T2;
   w.pm={ n:P.length, woody:P.map(id=>w.species[id].woody),
          share:Float64Array.from(P,id=>w.species[id].simShare),
+         /* 종마다 최적 기온이 다르다 — 고도가 오르면 우세종이 바뀐다 */
+         tempOpt:Float64Array.from(P,id=>w.species[id].tempOpt),
          drought:Float64Array.from(P,id=>{
            const dmin=w.C.droughtToleranceMin;
            return 0.7+0.6*(w.species[id].droughtTol-dmin)/Math.max(1-dmin,1e-6);
@@ -113,6 +142,20 @@ export function buildSpeciesMeta(w){
          mul:T2.map(id=>w.species[id].diet
                .filter(d=>w.plantIdx.get(d)!==undefined)
                .map(d=>w.species[d].woody?TUNE.woodyBrowseFrac:1)) };
+  /* 분해자 메타. T2 와 같은 꼴이되 먹이가 '그 칸의 생산량'이라 식이가 없다. */
+  const T1=w.byTier.T1;
+  w.t1m={ n:T1.length, on:T1.map(id=>w.species[id].status!=='ABSENT'),
+          share:Float64Array.from(T1,id=>w.species[id].share),
+          soilOpt:Float64Array.from(T1,id=>w.species[id].soilOpt),
+          /* 낙엽 식이 : 자기 낙엽 하나뿐이다.
+             목본 낙엽은 리그닌이라 느리게 분해되므로 깎는다. */
+          diet:T1.map(id=>(w.species[id].diet||[]).map(d=>w.plantIdx.get(d))
+                 .filter(v=>v!==undefined)),
+          mul:T1.map(id=>(w.species[id].diet||[])
+                 .filter(d=>w.plantIdx.get(d)!==undefined)
+                 .map(d=>w.species[d].woody?TUNE.t1WoodyLitter:1)),
+          rate:Float64Array.from(T1,()=>TUNE.t1GrowthPerYr/365*TUNE.t1UpdateEvery),
+          intake:Float64Array.from(T1,id=>w.species[id].massKg*ECO.dailyIntakeFrac*365/1000) };
 }
 
 export function genCoastline(w,noise){
@@ -257,6 +300,61 @@ export function syncPools(w){
   });
 }
 
+/* ── 아홉 구역 ──────────────────────────────────────────────────────────
+   "얼룩말 #10772" 가 어디에 있었는지를 좌표 (61, 44) 로 읽을 수 있는 사람은
+   없다. 판을 기계적으로 3x3 으로 갈라 이름을 붙인다 — 정확한 위치가 아니라
+   '어느 쪽이었나'를 말하기 위한 것이다.
+
+   가르는 것은 격자 전체가 아니라 육지의 외접 상자다. 섬이 판 한쪽으로
+   치우쳐 앉으면(해안선 생성이 그렇게 만든다) 격자를 삼등분한 '북서'가
+   통째로 바다가 되어, 아무도 살지 않는 구역이 생긴다.
+
+   세로는 화면 좌표라 y 가 클수록 남쪽이다. */
+export const REGION_NAMES=['북서','북','북동','서','중앙','동','남서','남','남동'];
+export function buildRegions(w){
+  const g=w.g, land=w.land;
+  let x0=g.W, y0=g.H, x1=-1, y1=-1;
+  for(let i=0;i<g.N;i++){
+    if(!land[i]) continue;
+    const x=g.xOf(i), y=g.yOf(i);
+    if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y;
+  }
+  if(x1<x0){ x0=0; y0=0; x1=g.W-1; y1=g.H-1; }        // 육지가 없는 판(있을 수 없지만)
+  w.regionBox={x0,y0,w:x1-x0+1,h:y1-y0+1};
+  /* 구역마다 육지가 몇 셀인지 세어 둔다 — '남서는 대부분 바다'를 말할 수 있어야
+     "왜 아무도 없나"가 의문이 아니라 지리가 된다. */
+  const cells=new Array(9).fill(0);
+  for(let i=0;i<g.N;i++) if(land[i]) cells[regionOf(w,g.xOf(i),g.yOf(i))]++;
+  w.regionCells=cells;
+}
+/* 좌표 -> 구역 번호(0~8). 판 밖으로 나간 좌표도 가장자리 구역으로 몰아넣는다. */
+export function regionOf(w,x,y){
+  const b=w.regionBox; if(!b) return 4;
+  const cx=Math.min(2,Math.max(0,Math.floor((x-b.x0)*3/b.w)));
+  const cy=Math.min(2,Math.max(0,Math.floor((y-b.y0)*3/b.h)));
+  return cy*3+cx;
+}
+/* 한 개체의 '주 서식지' — 동선에서 가장 오래 머문 구역.
+   죽은 개체의 동선은 성기게 남지만(killInd 가 12점으로 솎는다) 어느 쪽에
+   살았는지는 그대로 읽힌다. 한 구역에 쏠린 정도(share)도 같이 돌려준다 —
+   0.4 인 개체를 '남동에 살았다'고 말하면 거짓말이 된다. */
+export function homeRegion(w,ind){
+  const t=ind.track;
+  if(!t||!t.length) return null;
+  /* 개체 표는 초에 다섯 번 다시 그려지고 판에는 수만 마리가 있다. 동선을
+     그때마다 훑으면 그것만으로 프레임을 다 쓴다. 점이 늘거나(20일마다)
+     죽으면서 솎일 때만 다시 센다 — 90점에서 밀려나는 경우가 있어
+     길이만으로는 모자라고 마지막 점의 날짜도 같이 본다. */
+  const last=t[t.length-1][0];
+  if(ind._home&&ind._homeN===t.length&&ind._homeD===last) return ind._home;
+  const cnt=new Array(9).fill(0);
+  for(const p of t) cnt[regionOf(w,p[1],p[2])]++;
+  let best=0;
+  for(let k=1;k<9;k++) if(cnt[k]>cnt[best]) best=k;
+  ind._homeN=t.length; ind._homeD=last;
+  return ind._home={ region:best, name:REGION_NAMES[best], share:cnt[best]/t.length,
+                     moved:cnt.filter(n=>n>0).length };
+}
 export function computeWaterDist(w){
   const {g,land,water,wdist,soil}=w, q=[];
   wdist.fill(999); w.nearCells=0;
@@ -301,6 +399,12 @@ export function seedFauna(w,rand){
   const {g,land,gcap,species,byTier}=w, idx=[], wgt=[]; let tot=0;
   for(let i=0;i<g.N;i++) if(land[i]){ idx.push(i); wgt.push(gcap[i]); tot+=gcap[i]; }
   const pick=()=>{let r=rand()*tot; for(let k=0;k<idx.length;k++){r-=wgt[k]; if(r<=0)return idx[k];} return idx[0];};
+  // T1 분해자 : 종별 밀도장. 초기값은 부양력 몫을 지력 가중으로 뿌린다
+  byTier.T1.forEach(id=>{
+    const sp=species[id]; if(sp.status==='ABSENT') return;
+    const k=w.t1Idx.get(id), off=k*g.N;
+    for(let m=0;m<idx.length;m++) w.t1d[off+idx[m]]=sp.seedN*wgt[m]/tot;
+  });
   // T2 : 종별 밀도장
   byTier.T2.forEach(id=>{
     const sp=species[id]; if(sp.status==='ABSENT') return;
@@ -317,11 +421,10 @@ export function seedFauna(w,rand){
       const i=pick(), cx=g.xOf(i), cy=g.yOf(i);
       const size=Math.min(left,TUNE.seedClumpSize); left-=size;
       for(let n=0;n<size;n++){
-        const a=newAnimal(w,id,cx+rand(),cy+rand(),0);
+        const i=newAnimal(w,id,cx+rand(),cy+rand(),0);
         // 나이를 흩는다. 전부 0살로 두면 한 세대가 통째로 같이 늙어 죽는다.
-        a.bornDay=-Math.floor(rand()*sp.lifespanYr*365*0.6);
-        if(a.ind) a.ind.bornDay=a.bornDay;
-        w.ani.push(a);
+        w.A.bornDay[i]=-Math.floor(rand()*sp.lifespanYr*365*0.6);
+        if(w.A.ind[i]) w.A.ind[i].bornDay=w.A.bornDay[i];
       }
     }
   }
@@ -330,13 +433,15 @@ export function seedFauna(w,rand){
      개체 수도 여기서 세어 둔다 — T3 의 sp.n 은 초식 위상이 채우는데,
      첫 판정이 그보다 먼저 와서 멀쩡한 종이 0년차에 절멸로 찍혔다. */
   for(const id of byTier.T3) species[id].n=0;
-  for(const a of w.ani){
-    species[a.sp].n++;
-    const ci=g.idx(clamp(a.x|0,0,g.W-1),clamp(a.y|0,0,g.H-1));
-    let l=w.aniAt[ci];
-    if(!l) l=w.aniAt[ci]=[];
-    if(!l.length) w.aniCells.push(ci);
-    l.push(a);
+  {
+    const A=w.A, n=A.top;
+    w.ordSlot=new Int32Array(Math.max(n,A.cap)); w.ordCell=new Int32Array(w.ordSlot.length);
+    for(let i=0;i<n;i++){
+      species[A.sp[i]].n++;
+      w.ordSlot[i]=i;
+      w.ordCell[i]=g.idx(clamp(A.x[i]|0,0,g.W-1),clamp(A.y[i]|0,0,g.H-1));
+    }
+    layoutAnimals(w,n);
   }
   // T4 · T5 : 전부 개체
   for(const [tier,arr] of [['T4',w.p4],['T5',w.p5]])

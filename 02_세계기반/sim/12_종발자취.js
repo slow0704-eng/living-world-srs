@@ -82,12 +82,15 @@ export function trackSpecies(w){
     const {cells,maxClump}=spread(w,sp);
     const meanAge=sp.ageN?sp.ageSum/sp.ageN:0;
     const born=sp.bornYr, died=sp.diedYr, eaten=sp.eatenYr;
+    const starved=sp.starvedYr, thirst=sp.thirstYr, aged=sp.agedYr;
     const prev=sp.yearly.length?sp.yearly[sp.yearly.length-1].n:n;
     /* 그 해의 숫자를 그대로 남긴다. 사건은 이 위에서 판정한다. */
     sp.yearly.push({ year:w.year, n:Math.round(n), born, died, eaten,
+      starved, thirst, aged,
       cells, maxClump, meanAge:+meanAge.toFixed(1),
       rangePct:+(cells/landCells*100).toFixed(1) });
-    sp.bornYr=0; sp.diedYr=0; sp.eatenYr=0; sp.ageSum=0; sp.ageN=0;
+    sp.bornYr=0; sp.diedYr=0; sp.eatenYr=0;
+    sp.starvedYr=0; sp.thirstYr=0; sp.agedYr=0; sp.ageSum=0; sp.ageN=0;
 
     if(sp.extinctYear!=null){
       if(!m.extinct){ m.extinct=true;

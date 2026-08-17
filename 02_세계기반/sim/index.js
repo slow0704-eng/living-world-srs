@@ -6,12 +6,17 @@ export { TUNE } from './02_튜닝상수.js';
 export * from './03_유틸.js';
 export { deriveCapacity, viability } from './04_유도.js';
 export { buildRoster } from './05_종.js';
-export { newInd, addEv, killInd, noteKill, indAge } from './06_개체.js';
+export { newInd, addEv, killInd, noteKill, indAge, refreshLineage } from './06_개체.js';
 export { HALL_CATS, hallOfFame, indBrief, indexByUid } from './10_기록.js';
 export { buildReport, traceDeaths } from './11_분석서.js';
 export { SPEC_EVENTS, trackSpecies, speciesTrail } from './12_종발자취.js';
-export { createWorld, computeWaterDist } from './07_세계생성.js';
-export { stepDay, DAY_PHASES, newAnimal, attachInd } from './08_하루.js';
+export { createWorld, computeWaterDist,
+         REGION_NAMES, regionOf, homeRegion } from './07_세계생성.js';
+export { stepDay, DAY_PHASES } from './08_하루.js';
+export { seasonOf, phaseEnvironment, phaseFire } from './13_환경과화재.js';
+export { phaseHerds, newAnimal, attachInd, moveBy, moveSlot, drainDead,
+         makeAnimals, layoutAnimals, CAUSE } from './14_초식.js';
+export { phasePredation, hunt, immigrate } from './15_포식.js';
 export { collectStats, refreshSpeciesCounts, tierCount, aliveSpecies,
          recordSample, closeYear, watchEvents, logChron,
          chronDirty, setChronDirty } from './09_통계이력.js';

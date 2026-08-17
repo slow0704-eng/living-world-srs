@@ -108,11 +108,24 @@ export function buildReport(j) {
   if (trailed.length) {
     push('─ 종의 발자취 ────────────────────────────────────────────────────────');
     push('  주요(폭증 · 급감 · 위기 · 회복 · 절멸)는 사건 기록에도 남는다.');
+    push('  사인은 죽는 순간의 상태로 가른다 — 에너지가 바닥이면 아사, 수분이면 갈증,');
+    push('  둘 다 남았으면 노쇠. 잡아먹힌 것은 피식으로 따로 센다.');
     push('');
     for (const s of trailed) {
       push(`  ${s.trophic} ${s.name} — 최대 ${rptN(s.peakN)}(${s.peakYear}년)`
          + ` · 최저 ${rptN(s.minN)}(${s.minYear}년) · 유도 배분 ${rptN(s.seedN)}`
          + (s.peakCells ? ` · 최대 서식 ${rptN(s.peakCells)}셀 · 최대 군집 ${rptN(s.peakClump)}` : ''));
+      /* 사인 누계. "이 종을 깎은 것이 무엇인가"는 마릿수 곡선보다 먼저 읽어야 한다.
+         옛 json 에는 내역이 없으므로 있을 때만 적는다. */
+      const yc = s.yearly || [];
+      if (yc.some(r => r.starved != null || r.aged != null)) {
+        const sum = k => yc.reduce((a, r) => a + (r[k] || 0), 0);
+        const sv = sum('starved'), th = sum('thirst'), ag = sum('aged'), ea = sum('eaten');
+        const tot = sv + th + ag + ea;
+        if (tot) push(`     사인 누계 ${rptN(tot)} — 아사 ${rptN(sv)}(${rptPct(sv, tot)})`
+          + ` · 갈증 ${rptN(th)}(${rptPct(th, tot)}) · 노쇠 ${rptN(ag)}(${rptPct(ag, tot)})`
+          + ` · 피식 ${rptN(ea)}(${rptPct(ea, tot)})`);
+      }
       for (const e of s.milestones)
         push(`     ${rptPad(e.year, 5)}년 [${RPT_SPEC_LAB[e.kind] || e.kind}] ${e.msg}`);
       /* 해석 이전의 숫자. 사건이 왜 그 해에 났는지는 여기서 확인한다. */
@@ -123,12 +136,21 @@ export function buildReport(j) {
       if (Yr.length && !detailed) push('      (밀도장이라 개체 단위 집계가 없다 — 개체수만 남는다)');
       if (Yr.length && detailed) {
         const st = Math.max(1, Math.round(Yr.length / 18));
-        push('      연차   개체수    출생    사망    피식   서식셀 서식%  최대군집 평균나이');
+        /* 옛 json 에는 사인 내역이 없다. 그때는 사망 한 칸짜리 옛 서식으로 되돌린다. */
+        const cz = Yr.some(r => r.starved != null || r.aged != null);
+        push(cz ? '      연차   개체수   출생   아사  갈증   노쇠    피식 서식%   군집   나이'
+                : '      연차   개체수    출생    사망    피식   서식셀 서식%  최대군집 평균나이');
         for (let k = 0; k < Yr.length; k += st) {
           const r = Yr[k];
-          push(`     ${rptPad(r.year, 5)} ${rptPad(rptN(r.n), 8)} ${rptPad(rptN(r.born), 7)}`
-             + ` ${rptPad(rptN(r.died), 7)} ${rptPad(rptN(r.eaten), 7)} ${rptPad(rptN(r.cells), 8)}`
-             + ` ${rptPad(r.rangePct.toFixed(0), 4)} ${rptPad(rptN(r.maxClump), 8)} ${rptPad(r.meanAge.toFixed(1), 8)}`);
+          push(cz
+            ? `     ${rptPad(r.year, 5)} ${rptPad(rptN(r.n), 8)} ${rptPad(rptN(r.born), 6)}`
+              + ` ${rptPad(rptN(r.starved || 0), 6)} ${rptPad(rptN(r.thirst || 0), 5)}`
+              + ` ${rptPad(rptN(r.aged || 0), 6)} ${rptPad(rptN(r.eaten), 7)}`
+              + ` ${rptPad(r.rangePct.toFixed(0), 5)} ${rptPad(rptN(r.maxClump), 6)}`
+              + ` ${rptPad(r.meanAge.toFixed(1), 6)}`
+            : `     ${rptPad(r.year, 5)} ${rptPad(rptN(r.n), 8)} ${rptPad(rptN(r.born), 7)}`
+              + ` ${rptPad(rptN(r.died), 7)} ${rptPad(rptN(r.eaten), 7)} ${rptPad(rptN(r.cells), 8)}`
+              + ` ${rptPad(r.rangePct.toFixed(0), 4)} ${rptPad(rptN(r.maxClump), 8)} ${rptPad(r.meanAge.toFixed(1), 8)}`);
         }
       }
       push('');
@@ -175,7 +197,7 @@ export function buildReport(j) {
     push(`  표본 ${I.length}마리 · 사망 ${dead.length} · 무리 흡수 ${merged.length}`
        + ` · 생존 ${I.filter(i => i.deathYear == null).length}`);
     push('');
-    push('  등급 종            표본   평균수명  최장    사냥  자손');
+    push('  등급 종            표본   평균수명  최장    사냥  자손  후손  위기  모면');
     const bySp = new Map();
     for (const i of I) { if (!bySp.has(i.sp)) bySp.set(i.sp, []); bySp.get(i.sp).push(i); }
     for (const [n, g] of bySp) {
@@ -184,7 +206,10 @@ export function buildReport(j) {
       push(`  ${rptPad(g[0].trophic, 4)} ${n.padEnd(12)} ${rptPad(g.length, 5)}`
          + ` ${rptPad(gd.length ? rptMean(gd, life).toFixed(1) : '-', 8)}`
          + ` ${rptPad(gd.length ? Math.max(...gd.map(life)).toFixed(1) : '-', 6)}`
-         + ` ${rptPad(rptMean(g, 'kills').toFixed(1), 7)} ${rptPad(rptMean(g, 'offspring').toFixed(1), 5)}`);
+         + ` ${rptPad(rptMean(g, 'kills').toFixed(1), 7)} ${rptPad(rptMean(g, 'offspring').toFixed(1), 5)}`
+         + ` ${rptPad(rptMean(g, i => i.descendants || 0).toFixed(1), 5)}`
+         + ` ${rptPad(rptMean(g, i => i.crises || 0).toFixed(1), 5)}`
+         + ` ${rptPad(rptMean(g, i => i.escapes || 0).toFixed(1), 5)}`);
     }
     const causes = new Map();
     for (const i of dead) causes.set(i.cause, (causes.get(i.cause) || 0) + 1);
@@ -210,7 +235,8 @@ export function buildReport(j) {
    같은 사건이 이어지면 한 줄로 묶고(×rptN), 자리가 모자라면 이동부터 버린다.
    탄생과 죽음, 사냥과 번식은 어떤 경우에도 남긴다 — 그게 이야기다. */
 function rptLifeLines(i, keep = 7) {
-  const K = { birth: '탄생', death: '사망', hunt: '사냥', breed: '번식', move: '이동', fire: '화재' };
+  const K = { birth: '탄생', death: '사망', hunt: '사냥', breed: '번식', move: '이동', fire: '화재',
+              crisis: '위기', escape: '모면', legacy: '가문' };
   const ev = [];
   for (const e of (i.events || [])) {
     const last = ev[ev.length - 1];
@@ -229,8 +255,15 @@ function rptLifeLines(i, keep = 7) {
   const out = pick.map(e => e[0] == null ? `      ${e[2]}`
     : `${rptPad(e[0].toFixed(1), 6)}년 ${(K[e[1]] || e[1]).padEnd(2)} ${e[2]}${e.n > 1 ? ` ×${e.n}` : ''}`);
   const tag = [];
+  /* 옛 json 에는 home 이 없다 — 판독기가 그것도 읽어야 한다. */
+  if (i.home) tag.push(`주 서식지 ${i.home.name}`
+    + ` ${Math.round(i.home.share * 100)}%`
+    + (i.home.spread <= 1 ? ' (벗어난 적 없음)' : ` (${i.home.spread}개 구역)`));
   if (i.kills > 0) tag.push(`사냥 ${rptN(i.kills)}마리`);
   if (i.offspring > 0) tag.push(`자손 ${i.offspring}`);
+  if (i.descendants > 0) tag.push(`후손 계 ${rptN(i.descendants)}`    + ` · 생존 ${rptN(i.descLive || 0)}`    + (i.descLive ? '' : ' (혈통 끊김)'));
+  if (i.crises > 0) tag.push(`굶주림 극복 ${i.crises}회`);
+  if (i.escapes > 0) tag.push(`포식 모면 ${i.escapes}회`);
   if (i.peakHerd > 0) tag.push(`최대 무리 ${rptN(i.peakHerd)}`);
   if (tag.length) out.push('      ' + tag.join(' · '));
   /* 계보 — 누구의 자식이고 누구와 짝을 이뤘고 누구와 함께 났는가.
@@ -240,11 +273,14 @@ function rptLifeLines(i, keep = 7) {
     const kin = [];
     if (k.parents && k.parents.length) kin.push(`부모 ${k.parents.join(' · ')}`);
     if (k.mates && k.mates.length) kin.push(`배우자 ${k.mates.join(' · ')}`);
-    if (k.siblings && (k.siblings.full || k.siblings.half))
-      kin.push(`형제 ${k.siblings.full + k.siblings.half}`
-        + (k.siblings.half ? `(반 ${k.siblings.half})` : '')
+    if (k.siblings && k.siblings.full)
+      kin.push(`친형제 ${k.siblings.full}`
         + (k.siblings.names.length ? ` — ${k.siblings.names.join(' · ')}` : ''));
-    if (k.children && k.children.length) kin.push(`자식 ${k.children.join(' · ')}`);
+    /* 자식은 누구와의 자식인지로 묶어 적는다 */
+    for (const g of (k.childrenByMate || []))
+      kin.push(`자식(${g.mate}) ${g.names.join(' · ')}`);
+    if (!k.childrenByMate && k.children && k.children.length)
+      kin.push(`자식 ${k.children.join(' · ')}`);          // 옛 json 하위호환
     for (const line of kin) out.push('      ' + line);
   }
   return out;

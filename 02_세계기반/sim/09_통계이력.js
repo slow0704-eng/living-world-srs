@@ -14,7 +14,9 @@ export function refreshSpeciesCounts(w){
   const N=w.g.N;
   /* T3 는 개체 위상에서 이미 세었다(sp.n). 여기서 다시 훑으면
      수만 마리를 공짜로 한 번 더 도는 셈이라 그대로 둔다. */
-  for(const sp of w.species) if(sp.kind==='ANIMAL'&&!sp.aggregate&&sp.trophic!=='T3') sp.n=0;
+  /* T3 는 개체 위상이, T1 은 환경 위상이 이미 세었다. 여기서 지우면 안 된다. */
+  for(const sp of w.species)
+    if(sp.kind==='ANIMAL'&&!sp.aggregate&&sp.trophic!=='T3'&&sp.trophic!=='T1') sp.n=0;
   for(const p of w.p4) w.species[p.sp].n++;
   for(const p of w.p5) w.species[p.sp].n++;
   for(const id of w.byTier.T2){
@@ -35,16 +37,21 @@ export const tierCount=(w,t)=>{let n=0; for(const id of w.byTier[t]) n+=w.specie
 export const aliveSpecies=(w,t)=>w.byTier[t].filter(id=>w.species[id].status!=='ABSENT'&&w.species[id].n>=0.5).length;
 
 export function collectStats(w){
-  const n1=w.n1, n2=tierCount(w,'T2'), n3=w.ani.length, n4=w.p4.length, n5=w.p5.length;
+  const n1=w.n1, n2=tierCount(w,'T2'), n3=w.aniLive, n4=w.p4.length, n5=w.p5.length;
   /* 수원 밀집도와 '가장 큰 무리'는 개체 분포에서 직접 센다.
      무리라는 객체가 없어졌으므로, 무리는 이제 한 셀에 몇이 모였는가로 읽는다. */
   let near=0, clumpCells=0, biggest=0;
-  for(const ci of w.aniCells){
-    const lst=w.aniAt[ci]; if(!lst.length) continue;
+  const B=w.b;
+  for(let c=0;c<B.cellsN;c++){
+    const ci=B.cells[c], n=B.cnt[ci]; if(!n) continue;
     clumpCells++;
-    if(lst.length>biggest) biggest=lst.length;
-    if(w.land[ci]&&w.wdist[ci]<=TUNE.drinkRadiusCells) near+=lst.length;
+    if(n>biggest) biggest=n;
+    if(w.land[ci]&&w.wdist[ci]<=TUNE.drinkRadiusCells) near+=n;
   }
+  /* 슬롯에는 죽은 것과 아직 돌려주지 않은 빈자리가 섞여 있다.
+     평균 에너지는 산 것만 센다. */
+  const A=w.A, aniE={s:0,n:0};
+  for(let i=0;i<A.top;i++) if(!A.dead[i]){ aniE.s+=A.e[i]; aniE.n++; }
   const dIsl=n3/w.landCount, dNear=near/Math.max(w.nearCells,1);
   return { n1,n2,n3,n4,n5, year:w.year, day:w.day, wet:w.env.wet, tempC:w.env.tempC,
     rainMm:w.env.rainMm, soilMm:w.env.soilMm, grassT:w.env.grassT, woodyFrac:w.env.woodyFrac,
@@ -52,7 +59,7 @@ export function collectStats(w){
     grassFill:w.env.grassFill, grassCapT:w.env.grassCapT,
     clumpCells, biggestClump:biggest,
     herdAvg:clumpCells?n3/clumpCells:0,
-    energy:w.ani.length?w.ani.reduce((s,a)=>s+a.e,0)/w.ani.length:0,
+    energy:aniE.n?aniE.s/aniE.n:0,
     pio:dIsl>0?clamp(dNear/dIsl,0,99):1,
     specAlive:['T2','T3','T4','T5'].reduce((s,t)=>s+aliveSpecies(w,t),0),
     specTotal:w.species.filter(s=>s.kind==='ANIMAL'&&!s.aggregate&&s.status!=='ABSENT').length,

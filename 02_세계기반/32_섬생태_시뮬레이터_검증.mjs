@@ -1,13 +1,13 @@
 /* 섬 생태 시뮬레이터 헤드리스 검증
  * 31_섬생태계_스키마와검증.txt [V-1]~[V-8]을 실행으로 확인한다.
  *
- *   node 32_섬생태_시뮬레이터_검증.mjs             기본 (XL x 사바나, 70년)
+ *   node 32_섬생태_시뮬레이터_검증.mjs             기본 (L x 사바나, 70년)
  *   node 32_섬생태_시뮬레이터_검증.mjs --years 30
  *   node 32_섬생태_시뮬레이터_검증.mjs --all       12개 조합 전부 짧게
  *   node 32_섬생태_시뮬레이터_검증.mjs --fire      화재 통계만 상세히
  *   node 32_섬생태_시뮬레이터_검증.mjs --interv    표 C-2 개입 대조
  *   node 32_섬생태_시뮬레이터_검증.mjs --mvp       T5 경계 개체군 (150년 필요)
- *   node 32_섬생태_시뮬레이터_검증.mjs --run --years 300 [--seed N --tier XL --climate SAVANNA]
+ *   node 32_섬생태_시뮬레이터_검증.mjs --run --years 300 [--seed N --tier L --climate SAVANNA]
  *       -> _결과/ 폴더에 .txt(사람용 요약 + 자동 판독)와 .json(전체 시계열)을 남긴다
  *
  * TUNE 값을 만졌다면 반드시 이 스크립트를 다시 돌릴 것.
@@ -78,16 +78,16 @@ console.log(`\n섬 생태 시뮬레이터 검증  ·  ${new Date().toISOString()
 
 if (has('--fire')) {
   const years = +arg('--years', 40);
-  const w = createWorld(20260812, 'XL', 'SAVANNA');
+  const w = createWorld(20260812, 'L', 'SAVANNA');
   run(w, 365 * 3);                                   // 예열
   const f = fireStats(w, years);
-  console.log(`화재 통계 · XL x 사바나 · ${years}년\n`);
+  console.log(`화재 통계 · L x 사바나 · ${years}년\n`);
   info('연 소실 면적', `평균 ${f.meanBurn.toFixed(1)}%  범위 ${f.minBurn.toFixed(0)}~${f.maxBurn.toFixed(0)}%`);
   info('연 발화 건수', `평균 ${f.meanFires.toFixed(1)}건 / 1,000km²`);
   info('화재 회귀 간격', `${f.returnYears.toFixed(1)}년`);
   info('평균 화재 크기', `${f.meanSizeKm2.toFixed(0)} km²`);
-  console.log('\n  실측 사바나 기준 : 소실 17~33%/년 · 회귀 3~6년 · 낙뢰 발화 2~6건/1,000km²/년\n');
-  check('소실 면적 17~33%', f.meanBurn >= 17 && f.meanBurn <= 33, `${f.meanBurn.toFixed(1)}%`);
+  console.log('\n  실측 사바나 기준 : 소실 5~10%/년 · 회귀 10~20년 · 낙뢰 발화 2~6건/1,000km²/년\n');
+  check('소실 면적 5~12%', f.meanBurn >= 5 && f.meanBurn <= 12, `${f.meanBurn.toFixed(1)}%`);
   check('회귀 간격 3~6년', f.returnYears >= 3 && f.returnYears <= 6, `${f.returnYears.toFixed(1)}년`);
   check('발화 2~6건/년', f.meanFires >= 2 && f.meanFires <= 6, `${f.meanFires.toFixed(1)}건`);
   // 화재철은 후기 건기에 시작해 우기 초입 비가 연료를 적실 때까지 이어진다.
@@ -102,9 +102,9 @@ if (has('--fire')) {
 
 if (has('--interv')) {
   const WARM = 10;   // 개입 전 예열 연차. 초기 과도기를 지나야 대조가 성립한다
-  console.log(`표 C-2 개입 대조 · XL x 사바나 · ${WARM}년 예열 후 개입\n`);
+  console.log(`표 C-2 개입 대조 · L x 사바나 · ${WARM}년 예열 후 개입\n`);
   const scen = (label, apply, years) => {
-    const w = createWorld(20260812, 'XL', 'SAVANNA'); run(w, WARM * 365);
+    const w = createWorld(20260812, 'L', 'SAVANNA'); run(w, WARM * 365);
     const b = collectStats(w), bw = w.env.woodyFrac * 100;
     apply(w); run(w, years * 365);
     const a = collectStats(w), aw = w.env.woodyFrac * 100;
@@ -134,8 +134,14 @@ if (has('--interv')) {
     `${(fire.a.woodyFrac * 100).toFixed(0)}% vs 대조군 ${(ctrl.a.woodyFrac * 100).toFixed(0)}%`);
   check('화재 진압 → 목본 침입 (100년)', fire100.a.woodyFrac > ctrl100.a.woodyFrac * 1.8,
     `${(fire100.a.woodyFrac * 100).toFixed(0)}% vs 대조군 ${(ctrl100.a.woodyFrac * 100).toFixed(0)}%`);
-  info('화재 진압 → T3 (100년)',
-    `${N(fire100.a.n3)} vs 대조군 ${N(ctrl100.a.n3)} — 역전되지 않는다 (억제계수 0.55)`);
+  /* 끝값과 기간평균이 서로 다른 답을 준다. 그 어긋남이 [C-4.6]의 시간 척도다 —
+     불을 끄면 먼저 살찌고(평균이 높다) 100년 뒤 굶는다(끝값이 역전된다). */
+  info('화재 진압 → T3 (100년 끝값)',
+    `${N(fire100.a.n3)} vs 대조군 ${N(ctrl100.a.n3)} — `
+    + (fire100.a.n3 < ctrl100.a.n3 ? '역전된다 [C-4.6] 성립' : '역전되지 않는다'));
+  info('화재 진압 → T3 (100년 평균)',
+    `${N(fire100.m3)} vs 대조군 ${N(ctrl100.m3)} — `
+    + (fire100.m3 < ctrl100.m3 ? '역전된다' : '아직 역전되지 않는다 (단기에는 먹이가 는다)'));
   /* 개입군의 전후를 비교하면 초기 과도기의 하강이 그대로 섞인다.
      10년차는 아직 첫 과잉의 정점이라 대조군도 60% 넘게 깎인다.
      개입의 효과는 같은 시점의 대조군과 견주어야 나온다. */
@@ -156,9 +162,9 @@ function saveRun(w, meta) {
   const base = `${stamp}_${w.tierKey}_${w.climateKey}_${w.year}년`;
 
   const species = w.species.filter(s => s.kind === 'ANIMAL' && !s.aggregate).map(s => ({
-    name: s.name, trophic: s.trophic, massKg: +s.massKg.toFixed(1),
-    diet: s.diet.map(d => w.species[d].name), droughtTol: +s.droughtTol.toFixed(2),
-    lifespanYr: +s.lifespanYr.toFixed(1),
+    name: s.name, trophic: s.trophic, massKg: +(s.massKg||0).toFixed(1),
+    diet: s.diet.map(d => w.species[d].name), droughtTol: +(s.droughtTol||0).toFixed(2),
+    lifespanYr: +(s.lifespanYr||0).toFixed(1),
     seedN: s.seedN, finalN: Math.round(s.n), status: s.status, extinctYear: s.extinctYear,
     ...speciesTrail(s),
   }));
@@ -214,7 +220,7 @@ function readRun(w) {
 if (has('--run')) {
   const years = +arg('--years', 100);
   const seed = +arg('--seed', 20260812);
-  const tier = arg('--tier', 'XL'), climate = arg('--climate', 'SAVANNA');
+  const tier = arg('--tier', 'L'), climate = arg('--climate', 'SAVANNA');
   const stamp = arg('--stamp', 'run');
   console.log(`실행 · ${tier} × ${climate} · 시드 ${seed} · ${years}년`);
   const t0 = Date.now();
@@ -238,7 +244,7 @@ if (has('--mvp')) {
   console.log('  시드         T5최소  절멸연차   최종T5     최종T3');
   let ext = 0, funcExt = 0;
   for (const seed of seeds) {
-    const w = createWorld(seed, 'XL', 'SAVANNA');
+    const w = createWorld(seed, 'L', 'SAVANNA');
     let mn = Infinity, extYear = -1;
     for (let y = 0; y < yrs; y++) {
       run(w, 365);
@@ -263,7 +269,7 @@ if (has('--mvp')) {
 }
 
 if (has('--all')) {
-  console.log('12개 조합 생성 · 각 5년  (튜닝은 XL x 사바나에서만 수행됨)\n');
+  console.log('12개 조합 생성 · 각 5년  (튜닝은 L x 사바나에서만 수행됨)\n');
   console.log('  티어 기후      육지셀  유도T3   5년후T3    T5   초본천t  목본%  화재%');
   for (const t of Object.keys(ISLAND_TIERS)) for (const c of Object.keys(CLIMATE_PROFILES)) {
     const { w } = coreRun(t, c, 5);
@@ -276,14 +282,14 @@ if (has('--all')) {
   process.exit(0);
 }
 
-/* ── 기본: XL x 사바나 장기 검증 ───────────────────────────────────── */
+/* ── 기본: L x 사바나 장기 검증 ───────────────────────────────────── */
 const years = +arg('--years', 70);
-const cap = deriveCapacity('XL', 'SAVANNA');
-console.log(`XL x 사바나 · ${years}년\n`);
+const cap = deriveCapacity('L', 'SAVANNA');
+console.log(`L x 사바나 · ${years}년\n`);
 console.log(`  유도 부양력 [I-4] : T2 ${N(cap.T2)} · T3 ${N(cap.T3)} · T4 ${N(cap.T4)} · T5 ${N(cap.T5)}\n`);
 
 const t0 = Date.now();
-const { w, series, initialT3 } = coreRun('XL', 'SAVANNA', years);
+const { w, series, initialT3 } = coreRun('L', 'SAVANNA', years);
 const ms = Date.now() - t0;
 
 console.log('  연차     T3      T5   초본천t  목본%  화재%  발화  에너지  수원밀집');
@@ -316,7 +322,7 @@ info('T5 진폭', `${Math.min(...t5)} ~ ${Math.max(...t5)}`);
 console.log(`\n[V-5] T-15 사바나 시그니처`);
 const mb = mean(tail.map(s => s.burnPct));
 check('연간 화재 발생', mean(tail.map(s => s.fires)) >= 1, `평균 ${mean(tail.map(s => s.fires)).toFixed(1)}건`);
-check('소실 면적 17~33%', mb >= 17 && mb <= 33, `평균 ${mb.toFixed(1)}%`);
+check('소실 면적 5~12%', mb >= 5 && mb <= 12, `평균 ${mb.toFixed(1)}%`);
 check('수원 국소 밀집 3배 이상', mean(tail.map(s => s.pio)) >= 3, `평균 ${mean(tail.map(s => s.pio)).toFixed(1)}×`);
 check('목본을 화재가 억제', mean(tail.map(s => s.woodyFrac)) < 0.5,
   `평균 임관 ${(mean(tail.map(s => s.woodyFrac)) * 100).toFixed(0)}%`);

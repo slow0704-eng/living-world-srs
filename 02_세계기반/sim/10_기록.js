@@ -8,7 +8,8 @@
    w.inds 는 한 번 만든 개체를 지우지 않는다(사망 명부 w.dead 만 상한이 있다).
    그래서 판 전체를 훑어야 기록이 사망 명부에서 밀려나도 살아남는다. */
 
-import { indAge } from './06_개체.js';
+import { indAge, refreshLineage } from './06_개체.js';
+import { homeRegion } from './07_세계생성.js';
 
 /* 등급마다 자랑거리가 다르다. 무리 대표에게 사냥 수는 의미가 없고,
    포식자에게 무리 규모는 존재하지 않는다. */
@@ -17,12 +18,21 @@ export const HALL_CATS = [
   { key:'breeder', lab:'최다번식', unit:'마리', fix:0, tiers:['T3','T4','T5'], val:(w,i)=>i.offspring },
   { key:'hunter',  lab:'최다사냥', unit:'마리', fix:0, tiers:['T4','T5'],      val:(w,i)=>i.kills },
   { key:'herd',    lab:'최대무리', unit:'마리', fix:0, tiers:['T3'],           val:(w,i)=>i.peakHerd },
+  /* 죽은 것만 세면 판이 반쪽이다. 아래 셋은 '살아남은 쪽'의 기록이다. */
+  { key:'dynasty', lab:'최다후손', unit:'마리', fix:0, tiers:['T3','T4','T5'], val:(w,i)=>i.descendants },
+  /* 남긴 수보다 '남아 있는 수'가 혈통을 말한다 */
+  { key:'lineage', lab:'최대혈통', unit:'마리', fix:0, tiers:['T3','T4','T5'], val:(w,i)=>i.descLive },
+  { key:'gritty',  lab:'최다위기극복', unit:'회', fix:0, tiers:['T3','T4','T5'], val:(w,i)=>i.crises },
+  { key:'escaper', lab:'최다생환', unit:'회', fix:0, tiers:['T3'],           val:(w,i)=>i.escapes },
 ];
 
 /* 개체 한 마리를 기록용으로 굳힌다. 참조를 들고 있으면 되살아난 듯 값이
    변하므로, 뽑는 순간의 상태를 복사해 둔다. */
-/* uid -> 개체. 계보를 이름으로 풀려면 필요하다. 저장할 때 한 번만 만든다. */
+/* uid -> 개체. 계보를 이름으로 풀려면 필요하다.
+   세계가 개체를 만들 때마다 채워 두므로(newInd) 여기서 다시 만들지 않는다.
+   옛 세계 객체에는 없을 수 있어 그때만 만든다. */
 export function indexByUid(w){
+  if(w.indByUid) return w.indByUid;
   const m=new Map();
   for(const i of w.inds) m.set(i.uid,i);
   return m;
@@ -33,21 +43,31 @@ function kinOf(w,i,byUid){
   const nameOf=u=>{ const k=byUid.get(u); return k?k.name:null; };
   const lists=[i.parent,i.parent2].map(u=>{ const p=byUid.get(u); return p?p.children:null; })
     .filter(Boolean);
-  const full=new Set(), half=new Set();
-  for(const kids of lists) for(const u of kids){
-    if(u===i.uid) continue;
-    if(lists.length===2&&lists.every(k=>k.includes(u))) full.add(u); else half.add(u);
+  /* 부모를 둘 다 공유하는 친형제만 센다. 반형제까지 넣으면 아비가 다른
+     새끼들이 한 줄에 섞여 누가 한배인지 알 수 없다. */
+  const full=new Set();
+  if(lists.length===2) for(const u of lists[0]){
+    if(u!==i.uid&&lists[1].includes(u)) full.add(u);
   }
-  for(const u of full) half.delete(u);
+  /* 자식은 '누구와의 자식인가'로 묶는다. 배우자가 여럿이면 한 줄로는
+     누구 소생인지 알 수 없다. */
+  const byMate=new Map();
+  for(const u of i.children){
+    const c=byUid.get(u); if(!c) continue;
+    const other = c.parent===i.uid ? c.parent2 : (c.parent2===i.uid ? c.parent : null);
+    const key = nameOf(other) || '상대 미상';
+    if(!byMate.has(key)) byMate.set(key,[]);
+    if(byMate.get(key).length<8) byMate.get(key).push(c.name);
+  }
   return {
     parents:[i.parent,i.parent2].map(nameOf).filter(Boolean),
     mates:i.mates.map(nameOf).filter(Boolean).slice(0,8),
-    siblings:{ full:full.size, half:half.size,
-               names:[...full,...half].map(nameOf).filter(Boolean).slice(0,8) },
-    children:i.children.map(nameOf).filter(Boolean).slice(0,8),
+    siblings:{ full:full.size, names:[...full].map(nameOf).filter(Boolean).slice(0,8) },
+    childrenByMate:[...byMate.entries()].slice(0,6).map(([mate,names])=>({mate,names})),
   };
 }
 export function indBrief(w,i,byUid){
+  refreshLineage(w);            // 후손 · 혈통은 여기서 세어 굳힌다
   const kin=kinOf(w,i,byUid);
   return {
     ...(kin?{kin}:{}),
@@ -56,6 +76,11 @@ export function indBrief(w,i,byUid){
     deathYear:i.deathDay==null?null:+(i.deathDay/365).toFixed(1),
     ageYr:+indAge(w,i).toFixed(1), cause:i.cause, fate:i.deathDay==null?'alive':(i.fate||'death'),
     kills:+i.kills.toFixed(1), offspring:i.offspring, peakHerd:Math.round(i.peakHerd||0),
+    descendants:i.descendants||0, descLive:i.descLive||0,
+    /* 어디에서 살았는가. 좌표를 적어도 읽는 사람에게는 뜻이 없다. */
+    home:(()=>{ const h=homeRegion(w,i);
+      return h?{ name:h.name, share:+h.share.toFixed(2), spread:h.moved }:null; })(),
+    crises:i.crises||0, escapes:i.escapes||0,
     events:i.ev.map(e=>[+(e[0]/365).toFixed(1),e[1],e[2]]),
   };
 }
@@ -64,6 +89,7 @@ export function indBrief(w,i,byUid){
    수명 통계는 fate==='death' 인 개체만 쓴다. '무리 흡수'는 죽음이 아니라
    대표 자리를 잃은 것이라, 섞으면 평균 수명이 무리 병합 주기로 내려앉는다. */
 export function hallOfFame(w){
+  refreshLineage(w);            // 최다후손 · 최대혈통은 이 값으로 뽑는다
   const byUid=indexByUid(w);
   const bySp=new Map();
   for(const i of w.inds){

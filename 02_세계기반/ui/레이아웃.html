@@ -62,6 +62,12 @@
           <button data-z="reset">전체</button>
         </div>
         <button id="btnFollow" aria-pressed="false">개체 추적</button>
+        <button id="btnContour" aria-pressed="true">등고선</button>
+        <button id="btnRegion" aria-pressed="false">구역</button>
+        <div class="seg" role="group" aria-label="점 색" id="dotSeg">
+          <button data-dot="tier" aria-pressed="true">등급색</button>
+          <button data-dot="species">종별색</button>
+        </div>
         <div class="seg" role="group" aria-label="레이어" id="layerSeg"></div>
         <button id="btnMap" aria-expanded="false">펼치기</button>
       </div>
@@ -101,6 +107,17 @@
           <button data-live="alive">생존</button>
           <button data-live="dead">사망</button>
         </div>
+        <div class="seg" role="group" aria-label="성별 필터" id="indSex">
+          <button data-sex="all" aria-pressed="true">암수</button>
+          <button data-sex="F">암</button>
+          <button data-sex="M">수</button>
+        </div>
+        <div class="seg" role="group" aria-label="혈통 필터" id="indLine">
+          <button data-line="all" aria-pressed="true">혈통 전체</button>
+          <button data-line="on">이어짐</button>
+          <button data-line="off">끊김</button>
+        </div>
+        <div class="seg" role="group" aria-label="종 필터" id="indSpec"></div>
       </div>
     </header>
     <div class="body split">
@@ -113,6 +130,7 @@
           <div class="lab" style="margin-top:3px;color:var(--ink-3)">휠 확대 · 끌어 이동 · 더블클릭 전체</div>
         </div>
         <div id="lifeKin"></div>
+        <div id="lifeTree"></div>
         <div id="lifeTl"></div>
       </div>
     </div>

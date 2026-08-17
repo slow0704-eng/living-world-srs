@@ -70,7 +70,10 @@ button[aria-pressed="true"]{background:var(--accent); border-color:var(--accent)
 .seg button:first-child{border-radius:2px 0 0 2px; margin-left:0}
 .seg button:last-child{border-radius:0 2px 2px 0}
 
-main{overflow-y:auto; overflow-x:hidden; padding:14px 16px 28px; display:flex; flex-direction:column; gap:14px}
+/* scrollbar-gutter : 세로 스크롤바가 떴다 사라지며 본문 폭이 바뀌면,
+   가운데 정렬된 지도가 그때마다 좌우로 흔들린다. 자리를 늘 비워 둔다. */
+main{overflow-y:auto; overflow-x:hidden; scrollbar-gutter:stable;
+  padding:14px 16px 28px; display:flex; flex-direction:column; gap:14px}
 .card{background:var(--panel); border:1px solid var(--rule); border-radius:4px; box-shadow:var(--shadow)}
 .card>header{display:flex; align-items:center; gap:12px; padding:9px 13px; border-bottom:1px solid var(--rule); flex-wrap:wrap}
 .card>header h2{margin:0; font-size:11px; letter-spacing:.11em; text-transform:uppercase; color:var(--ink-3); font-weight:600}
@@ -179,9 +182,22 @@ table.mini{font-size:10px} table.mini th,table.mini td{padding:2px 6px}
 button.kin{font-size:10.5px; padding:1px 6px; border-radius:9px; border:1px solid var(--line);
   background:var(--panel-2); color:var(--ink-2); cursor:pointer; line-height:1.6}
 button.kin:hover{border-color:var(--accent); color:var(--ink-1)}
+/* 하위 계보도 — 계보 단추가 '한 칸 옆'이라면 이쪽은 '아래로 몇 대'다 */
+#lifeTree{font-size:10.5px; max-height:240px; overflow-y:auto}
+#lifeTree .hd{display:flex; align-items:center; gap:6px; margin:6px 0 3px}
+.tnrow{display:flex; align-items:center; gap:4px; padding:1px 0; flex-wrap:wrap}
+.tnrow small{color:var(--ink-3); font-size:9.5px}
+/* .tw 는 이미 표 래퍼가 쓰고 있다. 접기 단추는 .twg 로 둔다. */
+.twg{width:13px; height:15px; padding:0; line-height:1; border:none; background:none;
+    color:var(--ink-3); cursor:pointer; flex:0 0 auto; font-size:9px; text-align:center}
+.twg:hover{color:var(--accent-ink)}
+.tkid{border-left:1px solid var(--rule); margin-left:6px; padding-left:6px}
 #tl .pip{width:7px; height:7px; border-radius:50%; margin-top:4px; background:var(--ink-3)}
 #tl .pip.birth{background:var(--good)} #tl .pip.death{background:var(--crit)}
 #tl .pip.hunt{background:var(--t5)} #tl .pip.breed{background:var(--t3)}
 #tl .pip.move{background:var(--t2)} #tl .pip.fire{background:var(--warn)}
+/* 살아남은 쪽의 기록 — 위기 극복 · 포식 모면 · 후손 */
+#tl .pip.crisis{background:var(--warn)} #tl .pip.escape{background:var(--good)}
+#tl .pip.legacy{background:var(--t3)}
 #trackSvg{width:100%; height:auto; background:var(--sunk); border:1px solid var(--rule); border-radius:3px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
